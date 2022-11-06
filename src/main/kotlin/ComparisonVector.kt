@@ -1,35 +1,52 @@
-class VectorContainer() {
-    val vectors = mutableMapOf<Entity, ComparisonVector>()
-    var maxDim = 0
+class VectorContainer<T : Entity> {
+    private val vectors = mutableMapOf<T, ComparisonVector>()
+    private var maxDim = 0
 
-    fun getNewVector(): ComparisonVector {
+    fun addNewVector(entity: T) {
         maxDim += 1
-        return ComparisonVector(mutableMapOf(maxDim to 1f))
+        vectors[entity] = ComparisonVector(mutableMapOf(maxDim to 1f)) // TODO `0 to 0f` is important?
     }
 }
 
-class ComparisonVector(val value: MutableMap<Int, Float>) {
+class ComparisonVector(private val value: MutableMap<Int, Float>) {
     /**
      * -1 for this smaller than other
+     *
      * 0 for this equal to other
+     *
      * 1 for this bigger than other
+     *
      * 2 for this incomparable than other
      */
     fun compare(other: ComparisonVector): Int {
-        var res = mutableSetOf<Int>()
-        for (i in value.keys) {
-            if (i in other.value.keys) {
-                res.add(if (value[i]!! == other.value[i]!!) 0 else)
-            } else res.add(1)
+        val res = mutableMapOf(1 to false, -1 to false, 0 to false)
+        value.keys.forEach {
+            if (other.value[it] == null)
+                res[1] = true
+            else
+                res[value[it]!!.compareTo(other.value[it]!!)] = true
         }
-        return res
+        if (res.values.count { it } >= 2)
+            return 2
+        for ((key, value) in res)
+            if (value)
+                return key
+        return 0
     }
 
-    fun plus(other: ComparisonVector) {
-        val res = ComparisonVector(mutableMapOf())
-        for (i in value) {
-        }
+    /**
+     * Merge current vectors by addition or subtraction
+     */
+    fun merge(other: ComparisonVector, operation: (Float, Float) -> Float): ComparisonVector {
+        return ComparisonVector((value.keys + other.value.keys)
+            .associateWith { operation(value[it] ?: 0f, other.value[it] ?: 0f) }
+            .toMutableMap())
     }
 
-    fun multiply(other: Int) {}
+    /**
+     * Multiply or divide current vector by [other]
+     */
+    fun transform(other: Float, operation: (Float, Float) -> Float): ComparisonVector {
+        return ComparisonVector(value.mapValues { operation(it.value, other) }.toMutableMap())
+    }
 }
