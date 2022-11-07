@@ -1,3 +1,5 @@
+import entity.Entity
+
 class VectorContainer<T : Entity> {
     private val vectors = mutableMapOf<T, ComparisonVector>()
     private var maxDim = 0
