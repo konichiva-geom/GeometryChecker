@@ -13,10 +13,12 @@ open class SymbolTable {
      * Make point distinct from all others
      */
     fun newPoint(name: String): Point {
-        if (points[name] != null)
-            throw Exception("Point already defined")
-        points[name] = Point(points.keys.toMutableSet())
-        return points[name]!!
+        println(name)
+        return Point()
+        // if (points[name] != null)
+        //     throw Exception("Point ${name} already defined")
+        // points[name] = Point(points.keys.toMutableSet())
+        // return points[name]!!
     }
 
     fun getLine(up1: String, up2: String): Line {
