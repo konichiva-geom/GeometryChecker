@@ -1,10 +1,23 @@
 object Utils {
-    fun sortLine(p1:String, p2:String): Pair<String, String> {
-        if(p1==p2) throw Exception("Line consists of distinct points")
-        return if(p1 < p2) Pair(p1, p2) else Pair(p2, p1)
+    fun sortLine(notation: Point2Notation): Point2Notation {
+        if (notation.p1 == notation.p2) throw Exception("Line consists of distinct points")
+        if (notation.p1 > notation.p2)
+            notation.p1 = notation.p2.also { notation.p2 = notation.p1 }
+        return notation
     }
 
-    fun sortAngle(p1:String, p2:String, p3:String): Triple<String, String, String> {
-        return if(p1 < p3) Triple(p1, p2, p3) else Triple(p3, p2, p1)
+    fun sortAngle(notation: Point3Notation): Point3Notation {
+        if (notation.p1 > notation.p3)
+            notation.p1 = notation.p3.also { notation.p3 = notation.p1 }
+        return notation
+    }
+
+    fun <T> MutableMap<T, Float>.mergeWithOperation(
+        other: MutableMap<T, Float>,
+        operation: (Float, Float) -> Float
+    ): MutableMap<T, Float> {
+        return (keys + other.keys)
+            .associateWith { operation(this[it] ?: 0f, other[it] ?: 0f) }
+            .toMutableMap()
     }
 }

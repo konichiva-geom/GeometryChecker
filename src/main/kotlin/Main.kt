@@ -1,14 +1,5 @@
-import com.github.h0tk3y.betterParse.combinators.and
-import com.github.h0tk3y.betterParse.combinators.asJust
-import com.github.h0tk3y.betterParse.combinators.leftAssociative
-import com.github.h0tk3y.betterParse.combinators.map
-import com.github.h0tk3y.betterParse.combinators.optional
-import com.github.h0tk3y.betterParse.combinators.or
-import com.github.h0tk3y.betterParse.combinators.separatedTerms
-import com.github.h0tk3y.betterParse.combinators.times
-import com.github.h0tk3y.betterParse.combinators.unaryMinus
-import com.github.h0tk3y.betterParse.combinators.use
-import com.github.h0tk3y.betterParse.combinators.zeroOrMore
+import Utils.mergeWithOperation
+import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.grammar.parser
@@ -23,14 +14,22 @@ import entity.Segment
 
 // TODO check wolfram alpha paid how can he check geom, geogebra
 class Relation
-interface GeomTerm
 //class Relation : Term // A in CD, AC intersects DB, new A
 
 class Procedure
-data class Eq(val left: GeomTerm, val right: GeomTerm) : GeomTerm
-data class TheoremDefinition(val name: String, val args: List<GeomTerm>, val body: List<Procedure>)
+data class TheoremDefinition(val name: String, val args: List<Procedure>, val body: List<Procedure>)
+data class Point3Notation(var p1: String, var p2: String, var p3: String)
+data class Point2Notation(var p1: String, var p2: String)
 
 val symbolTable = SymbolTable()
+
+interface Expr {
+    fun flatten(): MutableMap<Any, Float>
+}
+
+class BinaryExpr(val left: Expr, val right: Expr, val op: (Float, Float) -> Float) : Expr {
+    override fun flatten(): MutableMap<Any, Float> = left.flatten().mergeWithOperation(right.flatten(), op)
+}
 
 object GeomGrammar : Grammar<Entity>() {
     // region entity prefix tokens
@@ -53,7 +52,7 @@ object GeomGrammar : Grammar<Entity>() {
     private val shortPerpendicularToken by literalToken("⊥")
     private val inToken by literalToken("in")
     private val relationToken by intersectsToken or shortIntersectsToken or
-        inToken or perpendicularToken or shortPerpendicularToken
+            inToken or perpendicularToken or shortPerpendicularToken
     //endregion
 
     //region comparison tokens
@@ -81,23 +80,28 @@ object GeomGrammar : Grammar<Entity>() {
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
     private val optionalLineBreak by regexToken("(\\n[\\t ]*)*")
 
-    private val entity: Parser<Entity> by (segment and line map { Segment() }) or
-        (ray and line map { Point() }) or (angle map {
-        symbolTable.getAngle(
-            it[0].text, it[1].text, it[2].text
-        )
-    }) or (line map { symbolTable.getLine(it[0].text, it[1].text) }) or (point map {
+    private val entity by (segment and line map { Segment() }) or
+            (ray and line map { Point() }) or (angle map {
+        val res = Point3Notation(it[0].text, it[1].text, it[2].text)
+        symbolTable.getAngle(res)
+        res
+    }) or (line map { symbolTable.getLine(Point2Notation(it[0].text, it[1].text)) }) or (point map {
         println("In entity")
         symbolTable.newPoint(it.text)
+        it.text
     }) or (number map {
         ConstNumber(
             it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number")
         )
     }) or identToken map { Point() }
 
-    private val divMulChain: Parser<Entity> by leftAssociative(entity, div or mul use { type }) { a, op, b -> a }
+    private val term by entity or (-lpar and parser(::arithmeticExpression) and -rpar)
 
-    private val arithmeticExpression by leftAssociative(divMulChain, plus or minus use { type }) { a, op, b -> b }
+    private val divMulChain: Parser<Any> by leftAssociative(term, div or mul use { type }) { a, op, b -> Point() }
+
+    private val arithmeticExpression: Parser<Any> by leftAssociative(
+        divMulChain,
+        plus or minus use { type }) { a, op, b -> b }
 
     private val comparison by arithmeticExpression and compToken and arithmeticExpression map { it.t1 }
     private val relation: Parser<Entity> by entity and relationToken and entity map { it.t1 }
@@ -113,7 +117,7 @@ object GeomGrammar : Grammar<Entity>() {
     private val theoremParser by zeroArgsOrMoreInvocation and -inferToken and (mul or args) map { it.t2 }
 
     private val inference by (comparison and -inferToken and comparison map { it.t1 }) or
-        (comparison and -comma and comparison and -inferToken and comparison map { it.t1 })
+            (comparison and -comma and comparison and -inferToken and comparison map { it.t1 })
 
     private val block by -zeroOrMore(lineBreak) and separatedTerms(
         theoremParser or inference or binaryStatement, lineBreak
@@ -130,15 +134,11 @@ object GeomGrammar : Grammar<Entity>() {
     override val rootParser: Parser<Entity> by program map { Point() }//block map { it.first() }
 }
 
-// fun main(args: Array<String>) {
-//     val expr = "A + R * (B - V^C) - D^E^F * (G + H)"
-//     val result = ArithmeticsEvaluator().parseToEnd(expr)
-//     println(result)
-// }
 
 fun main() {
     val a = """ident1:
-        D==3, R==4+42 => F==3
+        R==2*(3*4+(42-R))+A
+        D==3, R==2*(3*4+(42-R))+A => F==3
         //
         ident2:
         

@@ -1,3 +1,4 @@
+import Utils.mergeWithOperation
 import entity.Entity
 
 class VectorContainer<T : Entity> {
@@ -53,9 +54,7 @@ class ComparisonVector(
      * Merge current vectors by addition or subtraction
      */
     fun merge(other: ComparisonVector, operation: (Float, Float) -> Float): ComparisonVector {
-        return ComparisonVector((value.keys + other.value.keys)
-            .associateWith { operation(value[it] ?: 0f, other.value[it] ?: 0f) }
-            .toMutableMap())
+        return ComparisonVector(value.mergeWithOperation(other.value, operation))
     }
 
     /**

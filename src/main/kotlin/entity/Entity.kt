@@ -1,5 +1,6 @@
 package entity
 
-import GeomTerm
+import Expr
 
-interface Entity : GeomTerm // A, |>ABC, BC, AOB
+
+abstract class Entity : Expr // A, |>ABC, BC, AOB

@@ -6,8 +6,8 @@ import entity.Point
 
 open class SymbolTable {
     private val points = mutableMapOf<String, Point>()
-    private val lines = mutableMapOf<Pair<String, String>, Line>()
-    private val angles = mutableMapOf<Triple<String, String, String>, Angle>()
+    private val lines = mutableMapOf<Point2Notation, Line>()
+    private val angles = mutableMapOf<Point3Notation, Angle>()
 
     /**
      * Make point distinct from all others
@@ -21,26 +21,24 @@ open class SymbolTable {
         // return points[name]!!
     }
 
-    fun getLine(up1: String, up2: String): Line {
-        val (p1, p2) = sortLine(up1, up2)
-        if (points[p1] == null || points[p2] == null)
-            throw Exception("Point ${if (points[p1] == null) p1 else p2} not found")
-        val ident = Pair(p1, p2)
-        if (lines[ident] != null)
-            return lines[ident]!!
-        lines[ident] = Line()
-        return lines[ident]!!
+    fun getLine(notation: Point2Notation): Line {
+        sortLine(notation)
+        if (points[notation.p1] == null || points[notation.p2] == null)
+            throw Exception("Point ${if (points[notation.p1] == null) notation.p1 else notation.p2} not found")
+        if (lines[notation] != null)
+            return lines[notation]!!
+        lines[notation] = Line()
+        return lines[notation]!!
     }
 
-    fun getAngle(up1: String, up2: String, up3: String): Angle {
-        val (p1, p2, p3) = sortAngle(up1, up2, up3)
-        if (points[p1] == null || points[p2] == null || points[p3] == null)
-            throw Exception("Point ${if (points[p1] == null) p1 else if (points[p2] == null) p2 else p3} not found")
-        val ident = Triple(p1, p2, p3)
-        if (angles[ident] != null)
-            return angles[ident]!!
-        angles[ident] = Angle()
-        return angles[ident]!!
+    fun getAngle(notation: Point3Notation): Angle {
+        sortAngle(notation)
+        if (points[notation.p1] == null || points[notation.p2] == null || points[notation.p3] == null)
+            throw Exception("Point ${if (points[notation.p1] == null) notation.p1 else if (points[notation.p2] == null) notation.p2 else notation.p3} not found")
+        if (angles[notation] != null)
+            return angles[notation]!!
+        angles[notation] = Angle()
+        return angles[notation]!!
     }
 
     open fun handleRelation() {}
@@ -49,6 +47,7 @@ open class SymbolTable {
 class DescriptionTable() : SymbolTable() {
 
 }
+
 class SolutionTable() : SymbolTable() {
 
 }
