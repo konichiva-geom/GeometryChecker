@@ -1,0 +1,3 @@
+object TheoremParser {
+    fun parseTheorem() {}
+}

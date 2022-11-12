@@ -10,7 +10,20 @@ class VectorContainer<T : Entity> {
     }
 }
 
-class ComparisonVector(private val value: MutableMap<Int, Float>) {
+enum class ComparisonType {
+    EQUALS,
+    GREATER_THAN,
+    GREATER_OR_EQUALS
+}
+
+data class SegmentRelation(var intersects: Entity?) {}
+
+class ComparisonVector(
+    private val value: MutableMap<Int, Float>,
+    private val type: ComparisonType = ComparisonType.EQUALS,
+    private val left: MutableMap<Any, Float> = mutableMapOf(), // {"ABC": -2, 90: 1} is 90 - 2 * ABC
+    private val right: MutableMap<Any, Float> = mutableMapOf()
+) {
     /**
      * -1 for this smaller than other
      *

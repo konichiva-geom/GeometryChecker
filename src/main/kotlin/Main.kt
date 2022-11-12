@@ -1,10 +1,12 @@
 import com.github.h0tk3y.betterParse.combinators.and
+import com.github.h0tk3y.betterParse.combinators.asJust
 import com.github.h0tk3y.betterParse.combinators.leftAssociative
 import com.github.h0tk3y.betterParse.combinators.map
 import com.github.h0tk3y.betterParse.combinators.optional
 import com.github.h0tk3y.betterParse.combinators.or
 import com.github.h0tk3y.betterParse.combinators.separatedTerms
 import com.github.h0tk3y.betterParse.combinators.times
+import com.github.h0tk3y.betterParse.combinators.unaryMinus
 import com.github.h0tk3y.betterParse.combinators.use
 import com.github.h0tk3y.betterParse.combinators.zeroOrMore
 import com.github.h0tk3y.betterParse.grammar.Grammar
@@ -13,18 +15,20 @@ import com.github.h0tk3y.betterParse.grammar.parser
 import com.github.h0tk3y.betterParse.lexer.literalToken
 import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
+import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
 import entity.ConstNumber
 import entity.Entity
 import entity.Point
+import entity.Segment
 
 // TODO check wolfram alpha paid how can he check geom, geogebra
-
+class Relation
 interface GeomTerm
 //class Relation : Term // A in CD, AC intersects DB, new A
 
 class Procedure
 data class Eq(val left: GeomTerm, val right: GeomTerm) : GeomTerm
-data class TheoremDefinition(val name: String, val args: List<GeomTerm>, val body: Procedure)
+data class TheoremDefinition(val name: String, val args: List<GeomTerm>, val body: List<Procedure>)
 
 val symbolTable = SymbolTable()
 
@@ -48,7 +52,8 @@ object GeomGrammar : Grammar<Entity>() {
     private val perpendicularToken by literalToken("perpendicular")
     private val shortPerpendicularToken by literalToken("⊥")
     private val inToken by literalToken("in")
-    private val relationToken by intersectsToken or shortIntersectsToken or inToken or perpendicularToken or shortPerpendicularToken
+    private val relationToken by intersectsToken or shortIntersectsToken or
+        inToken or perpendicularToken or shortPerpendicularToken
     //endregion
 
     //region comparison tokens
@@ -76,7 +81,8 @@ object GeomGrammar : Grammar<Entity>() {
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
     private val optionalLineBreak by regexToken("(\\n[\\t ]*)*")
 
-    private val entity: Parser<Entity> by (segment and line map { Point() }) or (ray and line map { Point() }) or (angle map {
+    private val entity: Parser<Entity> by (segment and line map { Segment() }) or
+        (ray and line map { Point() }) or (angle map {
         symbolTable.getAngle(
             it[0].text, it[1].text, it[2].text
         )
@@ -93,7 +99,7 @@ object GeomGrammar : Grammar<Entity>() {
 
     private val arithmeticExpression by leftAssociative(divMulChain, plus or minus use { type }) { a, op, b -> b }
 
-    private val comparison by arithmeticExpression and compToken and GeomGrammar.arithmeticExpression map { it.t1 }
+    private val comparison by arithmeticExpression and compToken and arithmeticExpression map { it.t1 }
     private val relation: Parser<Entity> by entity and relationToken and entity map { it.t1 }
     private val binaryStatement by relation or comparison
 
@@ -102,27 +108,25 @@ object GeomGrammar : Grammar<Entity>() {
     )//relation and zeroOrMore(comma and relation) map {it.t1}
     private val optionalArgs by optional(args) map { Point() }
 
-    private val invocation by identToken and lpar and args and rpar
-    private val zeroArgsOrMoreInvocation by identToken and lpar and optionalArgs and rpar
-    private val theoremParser by zeroArgsOrMoreInvocation and inferToken and (mul or args) map { it.t1.t3 }
+    private val invocation by identToken and -lpar and args and -rpar
+    private val zeroArgsOrMoreInvocation by identToken and -lpar and optionalArgs and -rpar
+    private val theoremParser by zeroArgsOrMoreInvocation and -inferToken and (mul or args) map { it.t2 }
 
-    private val inference by (comparison and inferToken and comparison map { it.t1 }) or (comparison and comma and comparison and inferToken and comparison map { it.t1 })
+    private val inference by (comparison and -inferToken and comparison map { it.t1 }) or
+        (comparison and -comma and comparison and -inferToken and comparison map { it.t1 })
 
-    private val block by zeroOrMore(lineBreak) and separatedTerms(
+    private val block by -zeroOrMore(lineBreak) and separatedTerms(
         theoremParser or inference or binaryStatement, lineBreak
-    ) and zeroOrMore(lineBreak) map { it.t2 }
+    ) and -zeroOrMore(lineBreak) map { it }
 
-    private val returnStatement by returnToken and args
+    private val returnStatement by -returnToken and args
     private val thStatement by relation or invocation or comparison
-    private val thBlock by zeroOrMore(lineBreak) and separatedTerms(
+    private val thBlock by -zeroOrMore(lineBreak) and separatedTerms(
         thStatement, lineBreak
-    ) and zeroOrMore(lineBreak) map { it.t2 }
-    private val thDef by thDefStart and zeroArgsOrMoreInvocation and colon and thBlock
+    ) and -zeroOrMore(lineBreak) map { it }
 
-    private val program by (2 times thDef) or (4 times (identToken and colon and lineBreak and block))
-
-    // val structureParser
-//val theoremDefinitionParser by
+    private val thDef by thDefStart and zeroArgsOrMoreInvocation and -colon and thBlock
+    private val program by (2 times thDef) or (4 times (identToken and -colon and -lineBreak and block))
     override val rootParser: Parser<Entity> by program map { Point() }//block map { it.first() }
 }
 
@@ -133,16 +137,16 @@ object GeomGrammar : Grammar<Entity>() {
 // }
 
 fun main() {
-    val a = """ident:
+    val a = """ident1:
         D==3, R==4+42 => F==3
         //
-        ident:
+        ident2:
         
         
         D==3, R==4+42 => F==3
         
         
-        ident:
+        ident3:
         D==3, R==4+42 => F==3
         ident:
         
@@ -157,10 +161,12 @@ fun main() {
         
         th def(D > 3* 2+4/T, F in E, D ): // re fewfw
         D in A
-        circke in A
+        circle in A
         check(W==W) // 
     //"""
+    val res = GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(a)
     GeomGrammar.parseToEnd(a)
     val result = GeomGrammar.parseToEnd(th)
+    GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(th)
     // println(result)
 }
