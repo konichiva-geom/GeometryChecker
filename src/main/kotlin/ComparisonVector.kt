@@ -19,6 +19,23 @@ enum class ComparisonType {
 
 data class SegmentRelation(var intersects: Entity?) {}
 
+class Vector<T>(
+    private val value: MutableMap<T, Float>
+) : MutableMap<T, Float> {
+    override val size: Int = value.size
+    override val entries: MutableSet<MutableMap.MutableEntry<T, Float>> = value.entries
+    override val keys: MutableSet<T> = value.keys
+    override val values: MutableCollection<Float> = value.values
+    override fun containsKey(key: T): Boolean = value.containsKey(key)
+    override fun containsValue(value: Float): Boolean = this.value.containsValue(value)
+    override fun get(key: T): Float? = value[key]
+    override fun clear() = value.clear()
+    override fun isEmpty(): Boolean = value.isEmpty()
+    override fun remove(key: T): Float? = value.remove(key)
+    override fun putAll(from: Map<out T, Float>) = value.putAll(from)
+    override fun put(key: T, value: Float): Float? = this.value.put(key, value)
+}
+
 class ComparisonVector(
     private val value: MutableMap<Int, Float>,
     private val type: ComparisonType = ComparisonType.EQUALS,
