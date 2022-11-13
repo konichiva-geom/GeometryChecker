@@ -16,8 +16,8 @@ th straight_angle(O, AB) // развернутый угол
     check(O in AB)
     return AOB == 180
 
-th bisector(new D, ABC) // makes a new point distinct from all currently placed
-    return ABD == CBD, ABD == ABC / 2
+th bisector(new D, ABC): // makes a new point distinct from all currently placed
+    return ABD == CBD, ABD == ABC / 2, D in AC
 
 th projection(new H, A, BC) // projection H of A on BC
     H in BC
