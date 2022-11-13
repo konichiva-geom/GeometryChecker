@@ -3,4 +3,4 @@ package entity
 import Expr
 
 
-abstract class Entity : Expr // A, |>ABC, BC, AOB
+abstract class Entity // A, |>ABC, BC, AOB

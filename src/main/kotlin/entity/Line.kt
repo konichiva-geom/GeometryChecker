@@ -1,5 +1,5 @@
 package entity
 
-class Line: Entity {
+class Line: Entity() {
 
 }

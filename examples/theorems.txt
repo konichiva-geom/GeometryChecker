@@ -1,4 +1,4 @@
-th equal_sided_triangles_i(AB == A1B1, BC == B1C1, ABC == A1B1C1)
+th equal_sided_triangles_i(AB == A1B1, BC == B1C1, ABC == A1B1C1):
     check(A != B)
     check(A != C)
     check(B != C)
@@ -8,30 +8,32 @@ th equal_sided_triangles_i(AB == A1B1, BC == B1C1, ABC == A1B1C1)
     return AC == A1C1, ACB == A1C1B1, BAC == C1A1B1
     // triangle ABC == triangle A1B1C1 // are triangles needed???
 
-th adjacent_angle(AOB, BOC)
-    check(O in AB)
-    return AOB + BOC == 180, AOC == 180, AOB + BOC == AOC
-
-th straight_angle(O, AB) // развернутый угол
+th straight_angle(O, AB): // развернутый угол
     check(O in AB)
     return AOB == 180
 
 th bisector(new D, ABC): // makes a new point distinct from all currently placed
     return ABD == CBD, ABD == ABC / 2, D in AC
+th adjacent_angle(AOB, BOC): // new in args cannot be - bad
+    check(O in AB)
+    return AOB + BOC == 180, AOC == 180, AOB + BOC == AOC
 
-th projection(new H, A, BC) // projection H of A on BC
+th bisector(new D, ABC): // makes a new point distinct from all currently placed
+    return ABD == CBD, ABD == ABC / 2
+
+th projection(new H, A, BC): // projection H of A on BC
     H in BC
     return HA ⊥ BC, BHA == 90, CHA == 90
 
-th mid_point(new M, AB)
+th mid_point(new M, AB):
     M in AB
 
-th merge_projections(AH, AH1, BC)
+th merge_projections(AH, AH1, BC):
     check(BHA == 90)
     check(BH1A == 90)
     return H == H1
 
-th merge_points_in_line(AP == AP1, BP == BP1)
+th merge_points_in_line(AP == AP1, BP == BP1):
     check(P in AB)
     check(P1 in AB)
     return P == P1
