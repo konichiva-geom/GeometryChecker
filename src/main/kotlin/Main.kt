@@ -1,25 +1,23 @@
 import TheoremParser.getTheorems
+import Utils.getOpByString
 import Utils.mergeWithOperation
 import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.grammar.parser
-import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.lexer.literalToken
 import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
-import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeParser
-import com.github.h0tk3y.betterParse.utils.Tuple2
-import com.github.h0tk3y.betterParse.utils.Tuple3
-import com.github.h0tk3y.betterParse.utils.components
 import entity.Point
 import entity.Segment
 import notation.IdentNotation
+import notation.NumNotation
 import notation.Point2Notation
 import notation.Point3Notation
 import notation.PointNotation
-import notation.RelatableNotation
+import notation.RayNotation
+import notation.SegmentNotation
 
 // TODO check wolfram alpha paid how can he check geom, geogebra
 
@@ -28,19 +26,42 @@ import notation.RelatableNotation
 //class Relation : Term // A in CD, AC intersects DB, new A
 
 class Procedure
-data class TheoremDefinition(val name: String, val args: List<Procedure>, val body: List<Procedure>)
+data class Theorem(val signature: Signature, val body: Any) {}
+data class Signature(val name: String, val args: Any)
 
 val symbolTable = SymbolTable()
 
 interface Expr : Comparable<Expr> {
     fun flatten(): MutableMap<Any, Float> = mutableMapOf(this to 1f)
+
+    fun getChildren(): List<Expr>
 }
 
-class BinaryExpr(val left: Expr, val right: Expr, val op: (Float, Float) -> Float) : Expr {
-    override fun flatten(): MutableMap<Any, Float> = left.flatten().mergeWithOperation(right.flatten(), op)
+class MockExpr() : Expr {
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
+
+    override fun getChildren(): List<Expr> {
+        TODO("Not yet implemented")
+    }
+}
+
+open class BinaryExpr(val left: Expr, val right: Expr) : Expr {
+    override fun getChildren(): List<Expr> = listOf(left, right)
+
+    override fun compareTo(other: Expr): Int {
+        TODO("Not yet implemented")
+    }
+}
+
+class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right)
+class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right)
+class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right)
+class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right)
+
+class ArithmeticBinaryExpr(left: Expr, right: Expr, val op: (Float, Float) -> Float) : BinaryExpr(left, right) {
+    override fun flatten(): MutableMap<Any, Float> = left.flatten().mergeWithOperation(right.flatten(), op)
 
     override fun toString(): String {
         return "$left${
@@ -68,7 +89,7 @@ object GeomGrammar : Grammar<Any>() {
     private val returnToken by literalToken("return")
     private val number by regexToken("((\\d+\\.)?\\d*)|(\\d*)?\\.\\d+")
     private val angle by 3 times parser(this::point)
-    private val line by 2 times parser(this::point)
+    private val line by 2 times parser(this::point) map { Pair(it[0].text, it[1].text) }
     private val point by regexToken("[A-Z][0-9]*")
 
     //region relation tokens
@@ -92,7 +113,11 @@ object GeomGrammar : Grammar<Any>() {
     // endregion
 
     //region creation tokens
-    private val pointCreation by newToken and point
+    private val pointCreation by -newToken and point map {
+        val res = PointNotation(it.text)
+        symbolTable.newPoint(res)
+        res
+    }
     //endregion
 
     private val mul by literalToken("*")
@@ -111,34 +136,49 @@ object GeomGrammar : Grammar<Any>() {
     private val optionalLineBreak by regexToken("(\\n[\\t ]*)*")
 
     private val relatableNotation by (line map {
-        val res = Point2Notation(it[0].text, it[1].text)
+        val res = Point2Notation(it.first, it.second)
         symbolTable.getLine(res)
         res
     }) or (point map {
-        val res = PointNotation(it.text)
-        symbolTable.newPoint(res)
-        res
+        MockExpr()
     }) or (identToken map { IdentNotation(it.text) })
 
     // segment AB, A, ray DF
-    private val notation by (segment and line map { Segment() }) or
-        (ray and line map { Point() }) or (angle map {
+    private val notation by (-segment and line map { SegmentNotation(it.first, it.second) }) or
+        (-ray and line map { RayNotation(it.first, it.second) }) or (angle map {
         val res = Point3Notation(it[0].text, it[1].text, it[2].text)
         symbolTable.getAngle(res)
         res
     }) or relatableNotation or (number map {
-        it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number")
+        NumNotation(it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number"))
     })
 
-    private val term by notation or (-lpar and parser(::arithmeticExpression) and -rpar)
+    private val term by notation or (-lpar and parser(::arithmeticExpression) and -rpar) map {
+        it as Expr
+    }
 
-    private val divMulChain: Parser<Any> by leftAssociative(term, div or mul use { type }) { a, op, b -> Point() }
+    private val divMulChain: Parser<Any> by leftAssociative(term, div or mul) { a, op, b ->
+        ArithmeticBinaryExpr(
+            MockExpr(),
+            MockExpr(),
+            getOpByString(op.text)
+        )
+    }
 
     private val arithmeticExpression: Parser<Any> by leftAssociative(
         divMulChain,
-        plus or minus use { type }) { a, op, b -> b }
+        plus or minus
+    ) { a, op, b ->
+        ArithmeticBinaryExpr(MockExpr(), MockExpr(), getOpByString(op.text))
+    }
 
-    private val comparison by arithmeticExpression and compToken and arithmeticExpression map { it.t1 }
+    private val comparison by arithmeticExpression and compToken and arithmeticExpression map {
+        // when(it.t2.text) {
+        //     "==" -> BinaryEquals(it.t1, it.t3)
+        //     else -> BinaryGEQ(it.t1, it.t3)
+        // }
+        it
+    }
     private val relation: Parser<Any> by relatableNotation and relationToken and relatableNotation or
         (negationToken and parser(::relation)) map {
         // if (it is Tuple2<*, *>)
@@ -150,27 +190,32 @@ object GeomGrammar : Grammar<Any>() {
     private val binaryStatement by pointCreation or comparison or relation map { it }
 
     private val args by separatedTerms(binaryStatement or notation, comma)
-    private val optionalArgs by optional(args) map { Point() }
+    private val optionalArgs by optional(args) map { it ?: emptyList() }
 
-    private val invocation by identToken and -lpar and args and -rpar
-    private val zeroArgsOrMoreInvocation by identToken and -lpar and optionalArgs and -rpar map { it.components }
-    private val theoremParser by (zeroArgsOrMoreInvocation and -inferToken and (mul or args))//.liftToSyntaxTreeParser()
+    private val invocation by identToken and -lpar and args and -rpar map { Signature(it.t1.text, it.t2) }
+    private val zeroArgsOrMoreInvocation by identToken and -lpar and optionalArgs and -rpar map {
+        Signature(
+            it.t1.text,
+            it.t2
+        )
+    }
+    private val theoremUsage by (zeroArgsOrMoreInvocation and -inferToken and (mul or args))//.liftToSyntaxTreeParser()
 
     // private val inference by (comparison and -inferToken and comparison map { it }) or
     //     (comparison and -comma and comparison and -inferToken and comparison map { it })
 
     private val block by -zeroOrMore(lineBreak) and separatedTerms(
-        theoremParser or /*inference or*/ binaryStatement, lineBreak
-    ) and -zeroOrMore(lineBreak) map { it}
+        theoremUsage or /*inference or*/ binaryStatement, lineBreak
+    ) and -zeroOrMore(lineBreak) map { it }
 
     private val returnStatement by -returnToken and args
-    private val thStatement by theoremParser or relation or invocation or comparison
+    private val thStatement by theoremUsage or relation or invocation or comparison
     private val thBlock by -zeroOrMore(lineBreak) and (separatedTerms(
         thStatement, lineBreak,
     ) and optional(lineBreak and returnStatement) or returnStatement) and
         -zeroOrMore(lineBreak) map { it }
 
-    private val thDef by thDefStart and zeroArgsOrMoreInvocation and -colon and thBlock
+    private val thDef by -thDefStart and zeroArgsOrMoreInvocation and -colon and thBlock map { Theorem(it.t1, it.t2) }
     private val program by oneOrMore(thDef) or (4 times (identToken and -colon and -lineBreak and block))
     override val rootParser: Parser<Any> by program map { it }//block map { it.first() }
 }
@@ -208,11 +253,11 @@ fun main() {
         circle in A
         check(W==W) // 
     //"""
-   // val test = GeomGrammar.parseToEnd("tUse(T == A) => *")
+    // val test = GeomGrammar.parseToEnd("tUse(T == A) => *")
     val res = GeomGrammar.parseToEnd(a)
     GeomGrammar.parseToEnd(a)
     val result = GeomGrammar.parseToEnd(th)
-    GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(th)
+    val t = GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(th)
+    t
     val theorems = getTheorems()
-
 }

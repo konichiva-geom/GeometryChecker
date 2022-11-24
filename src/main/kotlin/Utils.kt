@@ -23,4 +23,14 @@ object Utils {
             .associateWith { operation(this[it] ?: 0f, other[it] ?: 0f) }
             .toMutableMap()
     }
+
+    fun getOpByString(text:String): (Float, Float) -> Float {
+        return when(text) {
+           "+" -> { a: Float, b: Float -> a + b }
+           "-" -> { a: Float, b: Float -> a - b }
+           "*" -> { a: Float, b: Float -> a * b }
+           "/" -> { a: Float, b: Float -> a / b }
+            else -> throw Exception("Unexpected op")
+        }
+    }
 }

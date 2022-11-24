@@ -10,6 +10,10 @@ abstract class Notation : Expr, Comparable<Expr> {
         return null
     }
 
+    override fun getChildren(): List<Expr> {
+        TODO("Not yet implemented")
+    }
+
     override fun equals(other: Any?): Boolean = toString() == other.toString()
     override fun hashCode(): Int = toString().hashCode()
 }
@@ -93,7 +97,7 @@ class IdentNotation(val text:String) : RelatableNotation() {
     override fun toString(): String = text
 }
 
-class NumNotation : Notation() {
+class NumNotation(val number:Number) : Notation() {
     override fun getOrder(): Int = -1
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")

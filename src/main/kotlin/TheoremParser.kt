@@ -7,4 +7,6 @@ object TheoremParser {
         return GeomGrammar.parseToEnd(File(path).readText())
     }
     fun parseTheorem() {}
+
+    //fun traverseSignature(call, definition) {}
 }
