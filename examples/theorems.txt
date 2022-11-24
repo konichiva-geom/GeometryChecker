@@ -14,6 +14,7 @@ th straight_angle(O, AB): // развернутый угол
 
 th bisector(new D, ABC): // makes a new point distinct from all currently placed
     return ABD == CBD, ABD == ABC / 2, D in AC
+
 th adjacent_angle(AOB, BOC): // new in args cannot be - bad
     check(O in AB)
     return AOB + BOC == 180, AOC == 180, AOB + BOC == AOC
@@ -33,26 +34,26 @@ th merge_projections(AH, AH1, BC):
     check(BH1A == 90)
     return H == H1
 
+// rwefiofjfwoifejfoiw */
 th merge_points_in_line(AP == AP1, BP == BP1):
     check(P in AB)
     check(P1 in AB)
     return P == P1
 
-/*
-Старое:
 
-    Line relations
+//Старое:
 
-    AB || l and AC || l => AB == AC
+//    Line relations
+//
+//    AB || l and AC || l => AB == AC
+//
+//    AB || l and CD || l => AB || CD // this is not true
+//    we can eventually find out that AB == CD, out second theorem is incorrect)
 
-    AB || l and CD || l => AB || CD // this is not true
-    we can eventually find out that AB == CD, out second theorem is incorrect)
+//    AB || l and CD || l => AB | CD // maybe like a symbol for collinearity?
 
-    AB || l and CD || l => AB | CD // maybe like a symbol for collinearity?
+//    Triangles
 
-    Triangles
+//    TriangleEquality1(AB == A1B1, AC == A1C1, BAC == B1A1C1) => * ABC == A1B1C1, ACB == A1C1B1, BC == B1C1
 
-    TriangleEquality1(AB == A1B1, AC == A1C1, BAC == B1A1C1) => * ABC == A1B1C1, ACB == A1C1B1, BC == B1C1
-
-    Trapezoid
-    */
+//    Trapezoid

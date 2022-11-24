@@ -3,7 +3,7 @@ import notation.Point3Notation
 
 object Utils {
     fun sortLine(notation: Point2Notation): Point2Notation {
-        if (notation.p1 == notation.p2) throw Exception("Line consists of distinct points")
+        if (notation.p1 == notation.p2) throw Exception("Line consists of same points")
         if (notation.p1 > notation.p2)
             notation.p1 = notation.p2.also { notation.p2 = notation.p1 }
         return notation

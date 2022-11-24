@@ -9,8 +9,10 @@ import com.github.h0tk3y.betterParse.lexer.literalToken
 import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
+import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeParser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
+import com.github.h0tk3y.betterParse.utils.components
 import entity.Point
 import entity.Segment
 import notation.IdentNotation
@@ -60,6 +62,7 @@ object GeomGrammar : Grammar<Any>() {
     //endregion
 
     private val negationToken by literalToken("not")
+    private val newToken by literalToken("new")
     private val comment by regexToken("//.*\n?", ignore = true)
     val thDefStart by literalToken("th")
     private val returnToken by literalToken("return")
@@ -88,6 +91,10 @@ object GeomGrammar : Grammar<Any>() {
     private val compToken by geq or leq or gt or lt or eqToken or neqToken
     // endregion
 
+    //region creation tokens
+    private val pointCreation by newToken and point
+    //endregion
+
     private val mul by literalToken("*")
     private val div by literalToken("/")
     private val minus by literalToken("-")
@@ -113,6 +120,7 @@ object GeomGrammar : Grammar<Any>() {
         res
     }) or (identToken map { IdentNotation(it.text) })
 
+    // segment AB, A, ray DF
     private val notation by (segment and line map { Segment() }) or
         (ray and line map { Point() }) or (angle map {
         val res = Point3Notation(it[0].text, it[1].text, it[2].text)
@@ -133,30 +141,30 @@ object GeomGrammar : Grammar<Any>() {
     private val comparison by arithmeticExpression and compToken and arithmeticExpression map { it.t1 }
     private val relation: Parser<Any> by relatableNotation and relationToken and relatableNotation or
         (negationToken and parser(::relation)) map {
-        if (it is Tuple2<*, *>)
-            createRelation(it.t2 as Tuple3<RelatableNotation, TokenMatch, RelatableNotation>, true)
-        else
-            createRelation(it as Tuple3<RelatableNotation, TokenMatch, RelatableNotation>)
+        // if (it is Tuple2<*, *>)
+        //     createRelation(it.t2 as Tuple3<RelatableNotation, TokenMatch, RelatableNotation>, true)
+        // else
+        //     createRelation(it as Tuple3<RelatableNotation, TokenMatch, RelatableNotation>)
         it
     }
-    private val binaryStatement by relation or comparison
+    private val binaryStatement by pointCreation or comparison or relation map { it }
 
-    private val args by separatedTerms(comparison or relation or notation, comma)
+    private val args by separatedTerms(binaryStatement or notation, comma)
     private val optionalArgs by optional(args) map { Point() }
 
     private val invocation by identToken and -lpar and args and -rpar
-    private val zeroArgsOrMoreInvocation by identToken and -lpar and optionalArgs and -rpar
-    private val theoremParser by zeroArgsOrMoreInvocation and -inferToken and (mul or args) map { it.t2 }
+    private val zeroArgsOrMoreInvocation by identToken and -lpar and optionalArgs and -rpar map { it.components }
+    private val theoremParser by (zeroArgsOrMoreInvocation and -inferToken and (mul or args))//.liftToSyntaxTreeParser()
 
-    private val inference by (comparison and -inferToken and comparison map { it.t1 }) or
-        (comparison and -comma and comparison and -inferToken and comparison map { it.t1 })
+    // private val inference by (comparison and -inferToken and comparison map { it }) or
+    //     (comparison and -comma and comparison and -inferToken and comparison map { it })
 
     private val block by -zeroOrMore(lineBreak) and separatedTerms(
-        theoremParser or inference or binaryStatement, lineBreak
-    ) and -zeroOrMore(lineBreak) map { it }
+        theoremParser or /*inference or*/ binaryStatement, lineBreak
+    ) and -zeroOrMore(lineBreak) map { it}
 
     private val returnStatement by -returnToken and args
-    private val thStatement by relation or invocation or comparison
+    private val thStatement by theoremParser or relation or invocation or comparison
     private val thBlock by -zeroOrMore(lineBreak) and (separatedTerms(
         thStatement, lineBreak,
     ) and optional(lineBreak and returnStatement) or returnStatement) and
@@ -164,26 +172,29 @@ object GeomGrammar : Grammar<Any>() {
 
     private val thDef by thDefStart and zeroArgsOrMoreInvocation and -colon and thBlock
     private val program by oneOrMore(thDef) or (4 times (identToken and -colon and -lineBreak and block))
-    override val rootParser: Parser<Any> by program map { Point() }//block map { it.first() }
+    override val rootParser: Parser<Any> by program map { it }//block map { it.first() }
 }
 
 fun main() {
     val a = """ident1:
-        R==2*(3*4+(42-R))+A
-        D==3, R==2*(3*4+(42-R))+A => F==3
+        //R==2*(3*4+(42-R))+A
+       // D==3, R==2*(3*4+(42-R))+A => F==3
+        tUse(T in A) => *
+        //tUse() => T in B
         //
         ident2:
         
-        
-        D==3, R==4+42 => F==3
+        tUse(T in A) => *
+       // D==3, R==4+42 => F==3
         
         
         ident3:
-        D==3, R==4+42 => F==3
+        tUse() => T in A, B == C
+       // D==3, R==4+42 => F==3
         ident:
         
         
-        D==3, R==4+42 => F==3
+      //  D==3, R==4+42 => F==3
         circle < 3
         """
 
@@ -197,9 +208,11 @@ fun main() {
         circle in A
         check(W==W) // 
     //"""
-    val res = GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(a)
+   // val test = GeomGrammar.parseToEnd("tUse(T == A) => *")
+    val res = GeomGrammar.parseToEnd(a)
     GeomGrammar.parseToEnd(a)
     val result = GeomGrammar.parseToEnd(th)
     GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(th)
     val theorems = getTheorems()
+
 }
