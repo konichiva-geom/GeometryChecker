@@ -1,6 +1,7 @@
 import Utils.sortAngle
 import Utils.sortLine
 import entity.Angle
+import entity.Entity
 import entity.Line
 import entity.Point
 import entity.Ray
@@ -20,6 +21,17 @@ open class SymbolTable {
     private val angles = mutableMapOf<Point3Notation, Angle>()
     private val mappings = mutableMapOf<Notation, Vector<Int>>()
     var addRelations = false
+
+    fun getByNotation(notation: Notation): Entity {
+        return when(notation) {
+            is PointNotation -> getPoint(notation)
+            is Point2Notation -> getLine(notation)
+            is Point3Notation -> getAngle(notation)
+            is RayNotation -> getRay(notation)
+            is SegmentNotation -> getSegment(notation)
+            else -> throw Exception("Cannot get $notation from symbol table")
+        }
+    }
 
     /**
      * Make point distinct from all others

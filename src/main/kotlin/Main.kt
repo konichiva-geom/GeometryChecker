@@ -20,7 +20,6 @@ import notation.Point3Notation
 import notation.PointNotation
 import notation.RayNotation
 import notation.SegmentNotation
-import relations.In
 import java.util.ArrayList
 
 val lambdas = mutableListOf<(Float, Float) -> Float>({ a: Float, b: Float -> a + b },
@@ -101,7 +100,7 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
             if (symbolTable.getPoint(right.p1) == pointEntity || symbolTable.getPoint(right.p2) == pointEntity)
                 return true
         }
-        return false
+        return symbolTable.getByNotation(left as Notation).isIn(right as Notation)
     }
 
     override fun toString(): String {
