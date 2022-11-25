@@ -3,16 +3,23 @@ import Utils.sortLine
 import entity.Angle
 import entity.Line
 import entity.Point
+import entity.Ray
+import entity.Segment
 import notation.Notation
 import notation.Point2Notation
 import notation.Point3Notation
 import notation.PointNotation
+import notation.RayNotation
+import notation.SegmentNotation
 
 open class SymbolTable {
     private val points = mutableMapOf<String, Point>()
     private val lines = mutableMapOf<Point2Notation, Line>()
+    private val rays = mutableMapOf<RayNotation, Ray>()
+    private val segments = mutableMapOf<SegmentNotation, Segment>()
     private val angles = mutableMapOf<Point3Notation, Angle>()
     private val mappings = mutableMapOf<Notation, Vector<Int>>()
+    var addRelations = false
 
     /**
      * Make point distinct from all others
@@ -26,6 +33,14 @@ open class SymbolTable {
         // return points[name]!!
     }
 
+    fun getPoint(name: String): Point {
+        return points[name] ?: throw Exception("Point $name is not instantiated")
+    }
+
+    fun getPoint(pointNotation: PointNotation): Point {
+        return getPoint(pointNotation.p)
+    }
+
     fun getLine(notation: Point2Notation): Line {
         sortLine(notation)
         // if (points[notation.p1] == null || points[notation.p2] == null)
@@ -34,6 +49,21 @@ open class SymbolTable {
             return lines[notation]!!
         lines[notation] = Line()
         return lines[notation]!!
+    }
+
+    fun getRay(notation: RayNotation): Ray {
+        if (rays[notation] != null)
+            return rays[notation]!!
+        rays[notation] = Ray()
+        return rays[notation]!!
+    }
+
+    fun getSegment(notation: SegmentNotation): Segment {
+        sortLine(notation)
+        if (segments[notation] != null)
+            return segments[notation]!!
+        segments[notation] = Segment()
+        return segments[notation]!!
     }
 
     fun getAngle(notation: Point3Notation): Angle {

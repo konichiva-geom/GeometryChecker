@@ -1,3 +1,6 @@
+import com.github.h0tk3y.betterParse.lexer.TokenMatch
+import com.github.h0tk3y.betterParse.utils.Tuple3
+import notation.Notation
 import notation.Point2Notation
 import notation.Point3Notation
 
@@ -31,6 +34,16 @@ object Utils {
            "*" -> { a: Float, b: Float -> a * b }
            "/" -> { a: Float, b: Float -> a / b }
             else -> throw Exception("Unexpected op")
+        }
+    }
+
+    fun getRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
+        return when(tuple.t2.text) {
+            "in" -> BinaryIn(tuple.t1, tuple.t3)
+            "intersects", "∩" -> BinaryIntersects(tuple.t1, tuple.t3)
+            "parallel", "||" -> BinaryParallel(tuple.t1, tuple.t3)
+            "perpendicular", "⊥" -> BinaryPerpendicular(tuple.t1, tuple.t3)
+            else -> throw Exception("Unknown comparison")
         }
     }
 }

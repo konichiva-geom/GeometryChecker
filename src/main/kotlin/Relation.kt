@@ -4,12 +4,9 @@ import com.github.h0tk3y.betterParse.utils.Tuple3
 import entity.Entity
 import notation.RelatableNotation
 
-class Relation(
-    val left: RelatableNotation,
-    val right: RelatableNotation,
-    val symbol: RelationType,
-    val isNot: Boolean = false
-)
+interface Relation {
+    fun check(): Boolean
+}
 
 enum class RelationType {
     IN,
@@ -26,9 +23,4 @@ enum class RelationType {
             }
         }
     }
-}
-
-fun createRelation(parsed: Tuple3<RelatableNotation, TokenMatch, RelatableNotation>, isNot: Boolean = false): Relation {
-    val relationType = RelationType.getRelationType(parsed.t2.text)
-    return Relation(parsed.t1, parsed.t3, relationType, isNot)
 }
