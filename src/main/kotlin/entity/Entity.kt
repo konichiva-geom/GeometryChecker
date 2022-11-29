@@ -1,6 +1,6 @@
 package entity
 
-import notation.Notation
+import expr.Notation
 
 abstract class Entity // A, |>ABC, BC, AOB
 {

@@ -1,6 +1,4 @@
-package notation
-
-import Expr
+package expr
 
 abstract class Notation : Expr, Comparable<Expr> {
     abstract fun getOrder(): Int
@@ -27,7 +25,7 @@ abstract class RelatableNotation : Notation()
 // class CoeffNotation(val coeff: Float, val notation: Notation) : Notation() {
 //     override fun getOrder(): Int = 4
 //
-//     override fun compareTo(other: Expr): Int {
+//     override fun compareTo(other: expr.Expr): Int {
 //         TODO("Not yet implemented")
 //     }
 //
@@ -37,7 +35,7 @@ abstract class RelatableNotation : Notation()
 // }
 
 // class MulNotation(private val elems: List<Notation>) : Notation() {
-//     override fun compareTo(other: Expr): Int {
+//     override fun compareTo(other: expr.Expr): Int {
 //         // return super.compareOrSame(other) ?: {
 //         // }
 //         TODO("")
@@ -53,7 +51,7 @@ abstract class RelatableNotation : Notation()
 //
 //     override fun toString(): String = "$top/$bottom"
 //
-//     override fun compareTo(other: Expr): Int {
+//     override fun compareTo(other: expr.Expr): Int {
 //         TODO("Not yet implemented")
 //     }
 // }
@@ -103,7 +101,7 @@ class PointNotation(val p: String) : RelatableNotation() {
 
 class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2)
 class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2)
-class IdentNotation(val text: String) : RelatableNotation() {
+class IdentNotation(private val text: String) : RelatableNotation() {
     override fun getOrder(): Int = 0
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")

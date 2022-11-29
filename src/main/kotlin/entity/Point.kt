@@ -1,11 +1,11 @@
 package entity
 
-import notation.Notation
-import notation.Point2Notation
+import expr.Notation
+import expr.Point2Notation
 import relations.In
 import symbolTable
 
-class Ray():Entity() {
+class Ray : Entity() {
     override fun isIn(other: Notation): Boolean {
         TODO("Not yet implemented")
     }
@@ -18,7 +18,8 @@ class Ray():Entity() {
         TODO("Not yet implemented")
     }
 }
-class Segment():Entity() {
+
+class Segment : Entity() {
     fun inRelation() {
     }
 
@@ -41,7 +42,7 @@ class Point(val distinctSet: MutableSet<String> = mutableSetOf()) : Entity() {
     val rays: MutableMap<String, Boolean> = mutableMapOf()
 
     fun isIn(name: Point2Notation): Boolean {
-               In.inMap[this]?.contains(symbolTable.getRay(name.toRayNotation()))
+        In.inMap[this]?.contains(symbolTable.getRay(name.toRayNotation()))
         return In.inMap[this]?.contains(symbolTable.getLine(name))!!
     }
 

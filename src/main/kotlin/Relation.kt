@@ -1,9 +1,3 @@
-import com.github.h0tk3y.betterParse.lexer.Token
-import com.github.h0tk3y.betterParse.lexer.TokenMatch
-import com.github.h0tk3y.betterParse.utils.Tuple3
-import entity.Entity
-import notation.RelatableNotation
-
 interface Relation {
     fun check(): Boolean
 }

@@ -1,9 +1,9 @@
 package entity
 
-import notation.Notation
+import expr.Notation
 
 //class entity.Angle(left:entity.Point, middle: entity.Point, right: entity.Point): Term
-class Angle: Entity() {
+class Angle : Entity() {
     override fun isIn(other: Notation): Boolean {
         TODO("Not yet implemented")
     }

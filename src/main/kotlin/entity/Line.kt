@@ -1,8 +1,8 @@
 package entity
 
-import notation.Notation
+import expr.Notation
 
-class Line: Entity() {
+class Line : Entity() {
     override fun isIn(other: Notation): Boolean {
         TODO("Not yet implemented")
     }

@@ -1,5 +1,6 @@
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
-import notation.Notation
+import expr.Expr
+import expr.Notation
 import java.io.File
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>?) {
@@ -92,7 +93,7 @@ object TheoremParser {
         if (mappings[key] == null)
             mappings[key] = value
         else {
-            val res = mappings[key]!!.intersect(value)
+            val res = mappings[key]!!.intersect(value.toSet())
             if (res.isEmpty())
                 throw Exception("Got empty intersection while resolving theorem")
             mappings[key] = res.toMutableList()

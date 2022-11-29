@@ -17,7 +17,7 @@ enum class ComparisonType {
     GREATER_OR_EQUALS
 }
 
-data class SegmentRelation(var intersects: Entity?) {}
+data class SegmentRelation(var intersects: Entity?)
 
 class Vector<T>(
     private val value: MutableMap<T, Float>

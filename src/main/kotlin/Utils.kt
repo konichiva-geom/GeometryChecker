@@ -1,12 +1,34 @@
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.utils.Tuple3
-import notation.Notation
-import notation.Point2Notation
-import notation.Point3Notation
+import expr.BinaryExpr
+import expr.BinaryIn
+import expr.BinaryIntersects
+import expr.BinaryParallel
+import expr.BinaryPerpendicular
+import expr.Notation
+import expr.Point2Notation
+import expr.Point3Notation
 
 object Utils {
+    private val lambdas = mutableListOf({ a: Float, b: Float -> a + b },
+        { a: Float, b: Float -> a - b },
+        { a: Float, b: Float -> a * b },
+        { a: Float, b: Float -> a / b })
+    val signToLambda = mutableMapOf(
+        "+" to lambdas[0],
+        "-" to lambdas[1],
+        "*" to lambdas[2],
+        "/" to lambdas[3]
+    )
+    val lambdaToSign = mutableMapOf(
+        lambdas[0] to "+",
+        lambdas[1] to "-",
+        lambdas[2] to "*",
+        lambdas[3] to "/"
+    )
+
     fun sortLine(notation: Point2Notation): Point2Notation {
-        if (notation.p1 == notation.p2) throw Exception("Line consists of same points")
+        if (notation.p1 == notation.p2) throw PosError("Line consists of same points")
         if (notation.p1 > notation.p2)
             notation.p1 = notation.p2.also { notation.p2 = notation.p1 }
         return notation
@@ -26,19 +48,8 @@ object Utils {
             .associateWith { operation(this[it] ?: 0f, other[it] ?: 0f) }
             .toMutableMap()
     }
-
-    fun getOpByString(text:String): (Float, Float) -> Float {
-        return when(text) {
-           "+" -> { a: Float, b: Float -> a + b }
-           "-" -> { a: Float, b: Float -> a - b }
-           "*" -> { a: Float, b: Float -> a * b }
-           "/" -> { a: Float, b: Float -> a / b }
-            else -> throw Exception("Unexpected op")
-        }
-    }
-
     fun getRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
-        return when(tuple.t2.text) {
+        return when (tuple.t2.text) {
             "in" -> BinaryIn(tuple.t1, tuple.t3)
             "intersects", "∩" -> BinaryIntersects(tuple.t1, tuple.t3)
             "parallel", "||" -> BinaryParallel(tuple.t1, tuple.t3)

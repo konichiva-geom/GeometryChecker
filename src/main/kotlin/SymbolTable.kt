@@ -6,12 +6,12 @@ import entity.Line
 import entity.Point
 import entity.Ray
 import entity.Segment
-import notation.Notation
-import notation.Point2Notation
-import notation.Point3Notation
-import notation.PointNotation
-import notation.RayNotation
-import notation.SegmentNotation
+import expr.Notation
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointNotation
+import expr.RayNotation
+import expr.SegmentNotation
 
 open class SymbolTable {
     private val points = mutableMapOf<String, Point>()
@@ -23,13 +23,13 @@ open class SymbolTable {
     var addRelations = false
 
     fun getByNotation(notation: Notation): Entity {
-        return when(notation) {
+        return when (notation) {
             is PointNotation -> getPoint(notation)
-            is Point2Notation -> getLine(notation)
-            is Point3Notation -> getAngle(notation)
             is RayNotation -> getRay(notation)
             is SegmentNotation -> getSegment(notation)
-            else -> throw Exception("Cannot get $notation from symbol table")
+            is Point2Notation -> getLine(notation)
+            is Point3Notation -> getAngle(notation)
+            else -> throw PosError("Cannot get %{} from symbol table", notation)
         }
     }
 
@@ -91,10 +91,6 @@ open class SymbolTable {
     open fun handleRelation() {}
 }
 
-class DescriptionTable() : SymbolTable() {
+class DescriptionTable : SymbolTable()
 
-}
-
-class SolutionTable() : SymbolTable() {
-
-}
+class SolutionTable : SymbolTable()
