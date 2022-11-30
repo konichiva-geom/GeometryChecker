@@ -27,7 +27,7 @@ th projection(new H, A, BC): // projection H of A on BC
     return HA ⊥ BC, BHA == 90, CHA == 90
 
 th mid_point(new M, AB):
-    M in AB
+    return M in AB
 
 th merge_projections(AH, AH1, BC):
     check(BHA == 90)

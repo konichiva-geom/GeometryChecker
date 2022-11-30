@@ -1,12 +1,18 @@
 package expr
 
 import Relation
+import SymbolTable
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
 import symbolTable
 
-interface Expr : Comparable<Expr> {
+interface Foldable {
     fun flatten(): MutableMap<Any, Float> = mutableMapOf(this to 1f)
+}
+
+interface Expr : Comparable<Expr> {
+    fun run(symbolTable: SymbolTable) {
+    }
 
     fun getChildren(): List<Expr>
 }
@@ -134,8 +140,10 @@ class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
     }
 }
 
-class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Float) -> Float) : BinaryExpr(left, right) {
-    override fun flatten(): MutableMap<Any, Float> = left.flatten().mergeWithOperation(right.flatten(), op)
+class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Float) -> Float) : BinaryExpr(left, right),
+    Foldable {
+    override fun flatten(): MutableMap<Any, Float> =
+        (left as Foldable).flatten().mergeWithOperation((right as Foldable).flatten(), op)
 
     override fun toString(): String {
         return "$left${lambdaToSign[op]}$right"

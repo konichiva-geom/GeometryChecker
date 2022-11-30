@@ -1,6 +1,6 @@
 package expr
 
-abstract class Notation : Expr, Comparable<Expr> {
+abstract class Notation : Expr, Comparable<Expr>, Foldable {
     abstract fun getOrder(): Int
     fun compareOrSame(other: Expr): Int? {
         if (other is Notation && other.getOrder() != this.getOrder())

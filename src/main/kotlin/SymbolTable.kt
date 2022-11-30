@@ -29,7 +29,7 @@ open class SymbolTable {
             is SegmentNotation -> getSegment(notation)
             is Point2Notation -> getLine(notation)
             is Point3Notation -> getAngle(notation)
-            else -> throw PosError("Cannot get %{} from symbol table", notation)
+            else -> throw SpoofError(notation.toString())
         }
     }
 

@@ -3,7 +3,7 @@ import expr.Expr
 import expr.Notation
 import java.io.File
 
-data class TheoremBody(val body: List<Expr>, val ret: List<Expr>?) {
+data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
     override fun toString(): String {
         return "$ret"
     }

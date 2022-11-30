@@ -37,11 +37,14 @@ object GeomGrammar : Grammar<Any>() {
     // region entity prefix tokens
     private val ray by literalToken("ray")
     private val segment by literalToken("segment")
+    private val arc by literalToken("arc")
+    private val circle by literalToken("circle")
     //endregion
 
     private val negationToken by literalToken("not")
     private val newToken by literalToken("new")
     private val comment by regexToken("//.*\n?", ignore = true)
+    private val multilineComment by regexToken("/\\*[.\n]*\\*/", ignore = true)
     private val thDefStart by literalToken("th")
     private val returnToken by literalToken("return")
     private val number by regexToken("((\\d+\\.)?\\d*)|(\\d*)?\\.\\d+")
@@ -54,9 +57,11 @@ object GeomGrammar : Grammar<Any>() {
     private val shortIntersectsToken by literalToken("∩")
     private val perpendicularToken by literalToken("perpendicular")
     private val shortPerpendicularToken by literalToken("⊥")
+    private val parallelToken by literalToken("parallel")
+    private val shortParallelToken by literalToken("||")
     private val inToken by literalToken("in")
-    private val relationToken by intersectsToken or shortIntersectsToken or
-        inToken or perpendicularToken or shortPerpendicularToken
+    private val relationToken by intersectsToken or shortIntersectsToken or inToken or
+        perpendicularToken or shortPerpendicularToken or parallelToken or shortParallelToken
     //endregion
 
     //region comparison tokens
@@ -69,14 +74,6 @@ object GeomGrammar : Grammar<Any>() {
     private val compToken by geq or leq or gt or lt or eqToken or neqToken
     // endregion
 
-    //region creation tokens
-    private val pointCreation by -newToken and point map {
-        val res = PointNotation(it.text)
-        symbolTable.newPoint(res)
-        res
-    }
-    //endregion
-
     private val mul by literalToken("*")
     private val div by literalToken("/")
     private val minus by literalToken("-")
@@ -88,9 +85,17 @@ object GeomGrammar : Grammar<Any>() {
     private val leftPar by literalToken("(")
     private val rightPar by literalToken(")")
     private val ws by regexToken("[\\t ]+", ignore = true)
-    private val identToken by regexToken("[a-zA-Z]+[\\w_]*")
+    private val ident by regexToken("[a-zA-Z]+[\\w_]*")
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
     private val optionalLineBreak by regexToken("(\\n[\\t ]*)*")
+
+    //region creation tokens
+    private val creation by -newToken and (point or ident) map {
+        val res = PointNotation(it.text)
+        symbolTable.newPoint(res)
+        res
+    }
+    //endregion
 
     private val relatableNotation by (line map {
         val res = Point2Notation(it.first, it.second)
@@ -98,7 +103,7 @@ object GeomGrammar : Grammar<Any>() {
         res
     }) or (point map {
         PointNotation(it.text)
-    }) or (identToken map { IdentNotation(it.text) })
+    }) or (-arc and line map{IdentNotation(it.first)}) or (ident map { IdentNotation(it.text) })
 
     // segment AB, A, ray DF
     private val notation by (-segment and line map { SegmentNotation(it.first, it.second) }) or
@@ -146,13 +151,13 @@ object GeomGrammar : Grammar<Any>() {
             PrefixNot(it.t2 as Expr)
         }
     }
-    private val binaryStatement by pointCreation or comparison or relation map { it }
+    private val binaryStatement by creation or comparison or relation map { it }
 
     private val args by separatedTerms(binaryStatement or notation, comma)
     private val optionalArgs by optional(args) map { it ?: emptyList() }
 
-    private val invocation by identToken and -leftPar and args and -rightPar map { Signature(it.t1.text, it.t2) }
-    private val zeroArgsOrMoreInvocation by identToken and -leftPar and optionalArgs and -rightPar map {
+    private val invocation by ident and -leftPar and args and -rightPar map { Signature(it.t1.text, it.t2) }
+    private val zeroArgsOrMoreInvocation by ident and -leftPar and optionalArgs and -rightPar map {
         Signature(
             it.t1.text,
             it.t2
@@ -163,28 +168,32 @@ object GeomGrammar : Grammar<Any>() {
     // private val inference by (comparison and -inferToken and comparison map { it }) or
     //     (comparison and -comma and comparison and -inferToken and comparison map { it })
 
-    private val block by -zeroOrMore(lineBreak) and separatedTerms(
+    private val blockContent by -zeroOrMore(lineBreak) and separatedTerms(
         theoremUsage or /*inference or*/ binaryStatement, lineBreak
     ) and -zeroOrMore(lineBreak) map { it }
+    private val block by ident and -colon and -lineBreak and blockContent map
+        { Tuple2(it.t1.text, it.t2) }
 
     private val returnStatement by -returnToken and args map { it }
     private val thStatement by theoremUsage or relation or invocation or comparison
+
+    //private val seq by
     private val thBlock by -zeroOrMore(lineBreak) and (separatedTerms(
-        thStatement, lineBreak,
+        thStatement, lineBreak
     ) and optional(-lineBreak and returnStatement) or returnStatement) and
         -zeroOrMore(lineBreak) map {
         // only return statement
         if (it is ArrayList<*>)
-            TheoremBody(listOf(), it as List<Expr>)
+            TheoremBody(emptyList(), it as List<Expr>)
         else {
             (it as Tuple2<*, *>)
-            TheoremBody(it.t1 as MutableList<Expr>, it.t2 as List<Expr>?)
+            TheoremBody(it.t1 as MutableList<Expr>, (it.t2 ?: emptyList<Expr>()) as List<Expr>)
         }
     }
 
     private val thDef by -thDefStart and zeroArgsOrMoreInvocation and -colon and thBlock map {
         Pair(it.t1, it.t2)
     }
-    private val program by oneOrMore(thDef) or (4 times (identToken and -colon and -lineBreak and block))
-    override val rootParser: Parser<Any> by program map { it }//block map { it.first() }
+    override val rootParser: Parser<Any> by oneOrMore(thDef) or
+        (3 times block map { it })
 }

@@ -28,7 +28,7 @@ object Utils {
     )
 
     fun sortLine(notation: Point2Notation): Point2Notation {
-        if (notation.p1 == notation.p2) throw PosError("Line consists of same points")
+        if (notation.p1 == notation.p2) throw SpoofError("Line consists of same points", notation)
         if (notation.p1 > notation.p2)
             notation.p1 = notation.p2.also { notation.p2 = notation.p1 }
         return notation
@@ -48,6 +48,7 @@ object Utils {
             .associateWith { operation(this[it] ?: 0f, other[it] ?: 0f) }
             .toMutableMap()
     }
+
     fun getRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
         return when (tuple.t2.text) {
             "in" -> BinaryIn(tuple.t1, tuple.t3)
