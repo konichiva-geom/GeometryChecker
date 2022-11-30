@@ -67,7 +67,7 @@ fun main() {
        // D==3, R==2*(3*4+(42-R))+A => F==3
         tUse(T in A) => *
         //tUse() => T in B
-        fdfds4
+        //fdfds4
         //
         prove:
         D == 3
@@ -80,7 +80,7 @@ fun main() {
         
         
       //  D==3, R==4+42 => F==3
-        circle < 3
+        arc AB < 3
         tUse() => T in A, B == C
         """
 

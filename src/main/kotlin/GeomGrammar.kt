@@ -17,6 +17,7 @@ import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
+import expr.ArcNotation
 import expr.ArithmeticBinaryExpr
 import expr.BinaryEquals
 import expr.BinaryGEQ
@@ -38,7 +39,6 @@ object GeomGrammar : Grammar<Any>() {
     private val ray by literalToken("ray")
     private val segment by literalToken("segment")
     private val arc by literalToken("arc")
-    private val circle by literalToken("circle")
     //endregion
 
     private val negationToken by literalToken("not")
@@ -103,7 +103,7 @@ object GeomGrammar : Grammar<Any>() {
         res
     }) or (point map {
         PointNotation(it.text)
-    }) or (-arc and line map{IdentNotation(it.first)}) or (ident map { IdentNotation(it.text) })
+    }) or (-arc and line map{ ArcNotation(it.first, it.second) }) or (ident map { IdentNotation(it.text) })
 
     // segment AB, A, ray DF
     private val notation by (-segment and line map { SegmentNotation(it.first, it.second) }) or
@@ -194,6 +194,5 @@ object GeomGrammar : Grammar<Any>() {
     private val thDef by -thDefStart and zeroArgsOrMoreInvocation and -colon and thBlock map {
         Pair(it.t1, it.t2)
     }
-    override val rootParser: Parser<Any> by oneOrMore(thDef) or
-        (3 times block map { it })
+    override val rootParser: Parser<Any> by oneOrMore(thDef) or (3 times block map { it })
 }

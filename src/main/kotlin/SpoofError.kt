@@ -34,7 +34,10 @@ open class SpoofError(var msg: String, private vararg val args: Any) : Exception
     }
 }
 
-class PosError(val range: IntRange, msg: String, vararg args: Any) : SpoofError(msg, *args)
+class PosError(val range: IntRange, msg: String, vararg args: Any) : SpoofError(msg, *args) {
+    override val message: String
+        get() = super.message + " at $range"
+}
 
 /**
  * This error means that there is some fatal flaw in the design.
@@ -113,7 +116,7 @@ fun chooseFurthestUnexpectedToken(errors: List<MismatchedToken>) {
     throw PosError(
         furthest.found.toRange(),
         "Expected %{}, got %{}",
-        fit.joinToString(separator = "or") { it.expected.toViewable() },
+        fit.map { it.expected.toViewable() }.distinct().sorted().joinToString(separator = " or "),
         if (Regex("\\s+").matches(furthest.found.text)) "`linebreak`" else furthest.found.text
     )
 }
@@ -121,7 +124,7 @@ fun chooseFurthestUnexpectedToken(errors: List<MismatchedToken>) {
 fun Token.toViewable(): String {
     return when (this) {
         is LiteralToken -> "'${this.text}'"
-        is CharToken -> "'${this.text.toString()}'"
+        is CharToken -> "'${this.text}'"
         else -> "${this.name!!}:Token"
     }
 }
