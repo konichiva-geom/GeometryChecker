@@ -5,6 +5,8 @@ import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.MismatchedToken
 import com.github.h0tk3y.betterParse.parser.NoMatchingToken
+import com.github.h0tk3y.betterParse.parser.UnexpectedEof
+import com.github.h0tk3y.betterParse.parser.UnparsedRemainder
 
 const val REPLACED = "%{}"
 val normalFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
@@ -32,7 +34,7 @@ open class SpoofError(var msg: String, private vararg val args: Any) : Exception
     }
 }
 
-class PosError(val range: IntRange, msg: String, vararg args: Any) : SpoofError(msg, args)
+class PosError(val range: IntRange, msg: String, vararg args: Any) : SpoofError(msg, *args)
 
 /**
  * This error means that there is some fatal flaw in the design.
@@ -43,6 +45,37 @@ class SystemFatalError(val msg: String) : Exception() {
         get() = "Something really bad happened X(. Sending message to devs.\n$msg"
 }
 
+fun getAllErrorTokens(error: AlternativesFailure): List<MismatchedToken> {
+    val res = mutableListOf<MismatchedToken>()
+    for (err in error.errors) {
+        when (err) {
+            is AlternativesFailure -> res.addAll(getAllErrorTokens(err))
+            is MismatchedToken -> res.add(err)
+            is UnexpectedEof -> throw SpoofError(
+                "Expected %{}, got end of program",
+                err.expected
+            )
+
+            is NoMatchingToken -> {
+                val realTokenEnd = err.tokenMismatch.text.indexOfAny(charArrayOf(' ', '\n', '\t', '\r'))
+                val realToken = if (realTokenEnd == -1) err.tokenMismatch.text
+                else err.tokenMismatch.text.substring(0, realTokenEnd)
+                throw PosError(
+                    err.tokenMismatch.offset..
+                        (err.tokenMismatch.offset + realToken.length),
+                    "Tokenization error. No token for %{}", realToken
+                )
+            }
+
+            is UnparsedRemainder -> throw PosError(
+                err.startsWith.toRange(),
+                "Parse Error. Couldn't parse remainder"
+            )
+        }
+    }
+    return res
+}
+
 /**
  * Trying to find problem token, with a hypothesis:
  * 1. any error has only one child of type AlternativesFailure
@@ -50,25 +83,39 @@ class SystemFatalError(val msg: String) : Exception() {
  *
  * This method throws user-readable exception
  */
-fun findProblemToken(error: AlternativesFailure) {
+tailrec fun findProblemToken(error: AlternativesFailure) {
     val tokenizationError = error.errors.filterIsInstance<NoMatchingToken>().firstOrNull()
     if (tokenizationError != null) {
         val thrown = PosError(tokenizationError.tokenMismatch.toRange(), "TokenizationError")
-        thrown.toString()
         throw thrown
     }
     val nextLevel = error.errors.filterIsInstance<AlternativesFailure>()
     if (nextLevel.isEmpty()) {
         val foundToken = (error.errors.last() as MismatchedToken).found
         val expectedTokens = (error.errors.map { (it as MismatchedToken).expected.toViewable() }.distinct())
-        throw PosError(IntRange(foundToken.offset, foundToken.length),
+        val th = PosError(
+            IntRange(foundToken.offset, foundToken.length),
+            "Expected %{}, got %{}",
             expectedTokens.joinToString(separator = " or "),
             if (Regex("\\s+").matches(foundToken.text)) "linebreak" else foundToken
         )
+        th.toString()
+        throw th
     }
     // if (nextLevel.size != 1)
     //     throw SystemFatalError("Hypothesis failed. Got ${nextLevel.size} alternatives, expected 1")
     findProblemToken(nextLevel.first())
+}
+
+fun chooseFurthestUnexpectedToken(errors: List<MismatchedToken>) {
+    val furthest = errors.maxBy { it.found.offset }
+    val fit = errors.filter { it.found.offset == furthest.found.offset }
+    throw PosError(
+        furthest.found.toRange(),
+        "Expected %{}, got %{}",
+        fit.joinToString(separator = "or") { it.expected.toViewable() },
+        if (Regex("\\s+").matches(furthest.found.text)) "`linebreak`" else furthest.found.text
+    )
 }
 
 fun Token.toViewable(): String {

@@ -57,12 +57,13 @@ fun checkHeaders(blocks: List<Tuple2<String, *>>, allMatch: TokenMatch) {
 
 open class A(vararg val args: Any)
 
-class B(val smth: String, vararg args: Any) : A(args)
+class B(val smth: String, vararg args: Any) : A(*args)
 
 fun main() {
-    val b = B("")
+    val b = B(smth = "smth")
+
     val a = """description:
-        #//R==2*(3*4+(42-R))+A
+        //R==2*(3*4+(42-R))+A
        // D==3, R==2*(3*4+(42-R))+A => F==3
         tUse(T in A) => *
         //tUse() => T in B
@@ -101,6 +102,8 @@ fun main() {
         val res = GeomGrammar.liftToSyntaxTreeGrammar(LiftToSyntaxTreeOptions(retainSeparators = false)).parseToEnd(a)
         parseProgram(res)
     } catch (e: ParseException) {
+        val tokens = getAllErrorTokens(e.errorResult as AlternativesFailure)
+        chooseFurthestUnexpectedToken(tokens)
         findProblemToken(e.errorResult as AlternativesFailure)
     }
     GeomGrammar.parseToEnd(a)
