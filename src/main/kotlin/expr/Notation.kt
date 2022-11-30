@@ -101,6 +101,7 @@ class PointNotation(val p: String) : RelatableNotation() {
 
 class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2)
 class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2)
+class ArcNotation(p1: String, p2: String) : Point2Notation(p1, p2)
 class IdentNotation(private val text: String) : RelatableNotation() {
     override fun getOrder(): Int = 0
     override fun compareTo(other: Expr): Int {

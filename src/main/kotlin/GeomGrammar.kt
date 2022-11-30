@@ -101,9 +101,9 @@ object GeomGrammar : Grammar<Any>() {
         val res = Point2Notation(it.first, it.second)
         symbolTable.getLine(res)
         res
-    }) or (point map {
-        PointNotation(it.text)
-    }) or (-arc and line map{ ArcNotation(it.first, it.second) }) or (ident map { IdentNotation(it.text) })
+    }) or (point map { PointNotation(it.text) }) or
+        (-arc and line map { ArcNotation(it.first, it.second) }) or
+        (ident map { IdentNotation(it.text) })
 
     // segment AB, A, ray DF
     private val notation by (-segment and line map { SegmentNotation(it.first, it.second) }) or
