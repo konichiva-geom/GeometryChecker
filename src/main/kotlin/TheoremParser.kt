@@ -45,12 +45,13 @@ class TheoremParser {
         */
     }
 
-    fun getSignature(call:Signature):Signature{
-        return  theorems.keys.find {it.hashCode() == call.hashCode()} ?: throw Exception("Signature not found")
+    fun getSignature(call: Signature): Signature {
+        return theorems.keys.find { it.hashCode() == call.hashCode() } ?: throw Exception("Signature not found")
     }
 
     fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody) {
         traverseSignature(call, theoremSignature)
+        println(mappings)
         symbolTable.addRelations = true
         for (statement in theoremBody.body) {
         }
@@ -99,7 +100,11 @@ class TheoremParser {
         else {
             val res = mappings[key]!!.intersect(value.toSet())
             if (res.isEmpty())
-                throw SpoofError("Got empty intersection while resolving theorem. %{} maps to nothing", key)
+                throw SpoofError(
+                    "Got empty intersection while resolving theorem " +
+                        "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
+                    "letter" to key
+                )
             mappings[key] = res.toMutableList()
             // if one mapping is unique, then it is removed from all other mappings
             if (res.size == 1)

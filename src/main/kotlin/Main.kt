@@ -48,9 +48,9 @@ fun checkHeaders(blocks: List<Tuple2<String, *>>, allMatch: TokenMatch) {
         || blocks[2].t1 != "solution"
     )
         throw SpoofError(
-            "Expected structure: %{}got: %{}",
-            "\ndescription:\n\t...\nprove:\n\t...\nsolution:\n\t...\n",
-            "\n${blocks[0].t1}:\n\t...\n${blocks[1].t1}:\n\t...\n${blocks[2].t1}:\n\t..."
+            "Expected structure: %{expected}got: %{got}",
+            "expected" to "\ndescription:\n\t...\nprove:\n\t...\nsolution:\n\t...\n",
+            "got" to "\n${blocks[0].t1}:\n\t...\n${blocks[1].t1}:\n\t...\n${blocks[2].t1}:\n\t..."
         )
 }
 
@@ -62,7 +62,7 @@ fun main() {
     val b = B(smth = "smth")
 
     val a = """description:
-        equal_sided_triangles_i(CD == D1C1, EC == C1E1, ECD == D1C1E1) => *
+        equal_sided_triangles_i(C1D == D1C1, EC == C1E1, ECD == D1C1E1) => *
         //R==2*(3*4+(42-R))+A
        // D==3, R==2*(3*4+(42-R))+A => F==3
         tUse(T in A) => *

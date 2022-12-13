@@ -14,12 +14,23 @@ val normalFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
 /**
  * msg %{} is changed to args
  */
-open class SpoofError(var msg: String, private vararg val args: Any) : Exception() {
+open class SpoofError(var msg: String, private vararg val args: Pair<String, Any>) : Exception() {
     override val message: String
-        get() = changeMessage()
+        get() = changeAllIndicesInOrder(msg)
+
+    fun changeAllIndicesInOrder(text: String): String {
+        val regex = Regex("%\\{\\w+}")
+        val sb = StringBuilder(text)
+        val mapOfArgs = args.toMap()
+        regex.findAll(text).sortedBy { -it.range.first }
+            .map { Triple(it.range.first, it.range.last, it.value.substring(2, it.value.length - 1)) }
+            .forEach { sb.replace(it.first, it.second + 1, (mapOfArgs[it.third] ?: "<NOT_FOUND>").toString()) }
+        return sb.toString()
+    }
 
     fun changeMessage(): String {
         val res = StringBuilder(msg)
+        //var i = msg.
         var index = msg.indexOf(REPLACED, 0)
         val ranges = mutableListOf<IntRange>()
         while (index != -1) {
@@ -34,7 +45,7 @@ open class SpoofError(var msg: String, private vararg val args: Any) : Exception
     }
 }
 
-class PosError(val range: IntRange, msg: String, vararg args: Any) : SpoofError(msg, *args) {
+class PosError(val range: IntRange, msg: String, vararg args: Pair<String, Any>) : SpoofError(msg, *args) {
     override val message: String
         get() = super.message + " at $range"
 }
@@ -55,8 +66,8 @@ fun getAllErrorTokens(error: AlternativesFailure): List<MismatchedToken> {
             is AlternativesFailure -> res.addAll(getAllErrorTokens(err))
             is MismatchedToken -> res.add(err)
             is UnexpectedEof -> throw SpoofError(
-                "Expected %{}, got end of program",
-                err.expected
+                "Expected %{token}, got end of program",
+                "token" to err.expected
             )
 
             is NoMatchingToken -> {
@@ -66,7 +77,7 @@ fun getAllErrorTokens(error: AlternativesFailure): List<MismatchedToken> {
                 throw PosError(
                     err.tokenMismatch.offset..
                         (err.tokenMismatch.offset + realToken.length),
-                    "Tokenization error. No token for %{}", realToken
+                    "Tokenization error. No token for %{token}", "token" to realToken
                 )
             }
 
@@ -98,9 +109,9 @@ tailrec fun findProblemToken(error: AlternativesFailure) {
         val expectedTokens = (error.errors.map { (it as MismatchedToken).expected.toViewable() }.distinct())
         val th = PosError(
             IntRange(foundToken.offset, foundToken.length),
-            "Expected %{}, got %{}",
-            expectedTokens.joinToString(separator = " or "),
-            if (Regex("\\s+").matches(foundToken.text)) "linebreak" else foundToken
+            "Expected %{expected}, got %{got}",
+            "expected" to expectedTokens.joinToString(separator = " or "),
+            "got" to if (Regex("\\s+").matches(foundToken.text)) "linebreak" else foundToken
         )
         th.toString()
         throw th
@@ -115,9 +126,9 @@ fun chooseFurthestUnexpectedToken(errors: List<MismatchedToken>) {
     val fit = errors.filter { it.found.offset == furthest.found.offset }
     throw PosError(
         furthest.found.toRange(),
-        "Expected %{}, got %{}",
-        fit.map { it.expected.toViewable() }.distinct().sorted().joinToString(separator = " or "),
-        if (Regex("\\s+").matches(furthest.found.text)) "`linebreak`" else furthest.found.text
+        "Expected %{expected}, got %{got}",
+        "expected" to fit.map { it.expected.toViewable() }.distinct().sorted().joinToString(separator = " or "),
+        "got" to if (Regex("\\s+").matches(furthest.found.text)) "`linebreak`" else furthest.found.text
     )
 }
 
