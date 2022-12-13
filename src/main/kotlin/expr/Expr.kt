@@ -48,7 +48,7 @@ class PrefixNot(private val expr: Expr) : Expr {
     }
 }
 
-class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
+class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right) {
     override fun check(): Boolean {
         // segment AB in segment AB
         if (left == right)
