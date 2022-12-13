@@ -27,8 +27,16 @@ object Utils {
         lambdas[3] to "/"
     )
 
+    fun catchWithArgs(block: () -> Any, vararg args: Pair<String, Any>): Any {
+        try {
+            return block()
+        } catch (e: Exception) {
+            throw SpoofError(e.message!!, *args)
+        }
+    }
+
     fun sortLine(notation: Point2Notation): Point2Notation {
-        if (notation.p1 == notation.p2) throw SpoofError("Line consists of same points", notation)
+        if (notation.p1 == notation.p2) throw SpoofError("Line %{line} consists of same points", "line" to notation)
         if (notation.p1 > notation.p2)
             notation.p1 = notation.p2.also { notation.p2 = notation.p1 }
         return notation

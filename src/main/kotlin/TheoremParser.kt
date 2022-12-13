@@ -31,7 +31,7 @@ data class Signature(val name: String, val args: List<Expr>) {
     }
 }
 
-object TheoremParser {
+class TheoremParser {
     val theorems = mutableMapOf<Signature, TheoremBody>()
     private val mappings = mutableMapOf<String, MutableList<String>>()
     fun addTheorems(path: String = "examples/theorems.txt") {
@@ -45,8 +45,13 @@ object TheoremParser {
         */
     }
 
+    fun getSignature(call: Signature): Signature {
+        return theorems.keys.find { it.hashCode() == call.hashCode() } ?: throw Exception("Signature not found")
+    }
+
     fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody) {
         traverseSignature(call, theoremSignature)
+        println(mappings)
         symbolTable.addRelations = true
         for (statement in theoremBody.body) {
         }
@@ -89,13 +94,17 @@ object TheoremParser {
             traverseExpr(child, defChildren[i])
     }
 
-    private fun mergeMapping(key: String, value: MutableList<String>) {
+    fun mergeMapping(key: String, value: List<String>) {
         if (mappings[key] == null)
-            mappings[key] = value
+            mappings[key] = value.toMutableList()
         else {
             val res = mappings[key]!!.intersect(value.toSet())
             if (res.isEmpty())
-                throw Exception("Got empty intersection while resolving theorem")
+                throw SpoofError(
+                    "Got empty intersection while resolving theorem " +
+                        "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
+                    "letter" to key
+                )
             mappings[key] = res.toMutableList()
             // if one mapping is unique, then it is removed from all other mappings
             if (res.size == 1)
