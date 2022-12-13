@@ -1,5 +1,7 @@
 package expr
 
+import TheoremParser
+
 abstract class Notation : Expr, Comparable<Expr>, Foldable {
     abstract fun getOrder(): Int
     fun compareOrSame(other: Expr): Int? {
@@ -8,11 +10,11 @@ abstract class Notation : Expr, Comparable<Expr>, Foldable {
         return null
     }
 
-    override fun getChildren(): List<Expr> {
-        TODO("Not yet implemented")
-    }
+    override fun getChildren(): List<Expr> = listOf()
 
     abstract fun getLetters(): MutableList<String>
+
+    abstract fun mergeMapping(tp: TheoremParser, other: Notation)
 
     override fun equals(other: Any?): Boolean = toString() == other.toString()
     override fun hashCode(): Int = toString().hashCode()
@@ -68,6 +70,12 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun toString(): String = "$p1$p2$p3"
 
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2, p3)
+    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+        other as Point3Notation
+        tp.mergeMapping(p1, listOf(other.p1, other.p3))
+        tp.mergeMapping(p3, listOf(other.p1, other.p3))
+        tp.mergeMapping(p2, listOf(other.p2))
+    }
 }
 
 open class Point2Notation(var p1: String, var p2: String) : RelatableNotation() {
@@ -83,6 +91,11 @@ open class Point2Notation(var p1: String, var p2: String) : RelatableNotation() 
 
     override fun toString(): String = "$p1$p2"
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2)
+    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+        other as Point2Notation
+        tp.mergeMapping(p1, other.getLetters())
+        tp.mergeMapping(p2, other.getLetters())
+    }
 
     fun toRayNotation() = RayNotation(p1, p2)
     fun toSegmentNotation() = SegmentNotation(p1, p2)
@@ -97,9 +110,20 @@ class PointNotation(val p: String) : RelatableNotation() {
 
     override fun toString(): String = p
     override fun getLetters(): MutableList<String> = mutableListOf(p)
+    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+        other as PointNotation
+        tp.mergeMapping(p, listOf(other.p))
+    }
 }
 
-class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2)
+class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
+    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+        other as RayNotation
+        tp.mergeMapping(p1, listOf(other.p1))
+        tp.mergeMapping(p2, listOf(other.p2))
+    }
+}
+
 class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2)
 class ArcNotation(p1: String, p2: String) : Point2Notation(p1, p2)
 class IdentNotation(private val text: String) : RelatableNotation() {
@@ -110,6 +134,9 @@ class IdentNotation(private val text: String) : RelatableNotation() {
 
     override fun toString(): String = text
     override fun getLetters(): MutableList<String> = mutableListOf(text)
+    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+        tp.mergeMapping(text, listOf((other as IdentNotation).text))
+    }
 }
 
 class NumNotation(val number: Number) : Notation() {
@@ -120,4 +147,8 @@ class NumNotation(val number: Number) : Notation() {
 
     override fun toString(): String = number.toString()
     override fun getLetters(): MutableList<String> = mutableListOf()
+
+    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+        // do nothing
+    }
 }

@@ -1,4 +1,3 @@
-import TheoremParser.addTheorems
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
@@ -63,6 +62,7 @@ fun main() {
     val b = B(smth = "smth")
 
     val a = """description:
+        equal_sided_triangles_i(CD == D1C1, EC == C1E1, ECD == D1C1E1) => *
         //R==2*(3*4+(42-R))+A
        // D==3, R==2*(3*4+(42-R))+A => F==3
         tUse(T in A) => *
@@ -106,9 +106,12 @@ fun main() {
         chooseFurthestUnexpectedToken(tokens)
         findProblemToken(e.errorResult as AlternativesFailure)
     }
-    GeomGrammar.parseToEnd(a)
+    val sig = GeomGrammar.parseToEnd(a)
     val result = GeomGrammar.parseToEnd(th)
     val t = GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(th)
-    t
-    val theorems = addTheorems()
+    val tp = TheoremParser()
+    val sg = ((sig as List<Tuple2<String, List<Any>>>).first().t2.first() as Tuple2<Signature, Any>).t1
+    val theorems = tp.addTheorems()
+    val body = tp.getTheoremBodyBySignature(sg)
+    tp.parseTheorem(sg, tp.getSignature(sg), body) // TODO get theorem signature from call signature
 }
