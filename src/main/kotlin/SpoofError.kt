@@ -27,22 +27,6 @@ open class SpoofError(var msg: String, private vararg val args: Pair<String, Any
             .forEach { sb.replace(it.first, it.second + 1, (mapOfArgs[it.third] ?: "<NOT_FOUND>").toString()) }
         return sb.toString()
     }
-
-    fun changeMessage(): String {
-        val res = StringBuilder(msg)
-        //var i = msg.
-        var index = msg.indexOf(REPLACED, 0)
-        val ranges = mutableListOf<IntRange>()
-        while (index != -1) {
-            ranges.add(IntRange(index, index + REPLACED.length))
-            index = msg.indexOf(REPLACED, index + 1)
-        }
-        if (ranges.size != args.size)
-            throw Exception("Expected ${ranges.size} args, got ${args.size}")
-        for (i in args.lastIndex downTo 0)
-            res.replace(ranges[i].first, ranges[i].last, args[i].toString())
-        return res.toString()
-    }
 }
 
 class PosError(val range: IntRange, msg: String, vararg args: Pair<String, Any>) : SpoofError(msg, *args) {

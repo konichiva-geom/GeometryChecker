@@ -1,11 +1,12 @@
 package entity
 
+import SymbolTable
 import expr.Notation
 import expr.Point2Notation
 import relations.In
 import symbolTable
 
-class Ray : Entity() {
+class RayRelations : LineRelations() {
     override fun isIn(other: Notation): Boolean {
         TODO("Not yet implemented")
     }
@@ -19,7 +20,7 @@ class Ray : Entity() {
     }
 }
 
-class Segment : Entity() {
+class SegmentRelations : LineRelations() {
     fun inRelation() {
     }
 
@@ -36,7 +37,7 @@ class Segment : Entity() {
     }
 }
 
-class Point(val distinctSet: MutableSet<String> = mutableSetOf()) : Entity() {
+class Point(val distinctSet: MutableSet<String> = mutableSetOf()) : EntityRelations() {
     val lines: MutableMap<String, Boolean> = mutableMapOf()
     val segments: MutableMap<String, Boolean> = mutableMapOf()
     val rays: MutableMap<String, Boolean> = mutableMapOf()
@@ -55,6 +56,10 @@ class Point(val distinctSet: MutableSet<String> = mutableSetOf()) : Entity() {
     }
 
     override fun isPerpendicular(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun merge(other: Notation, symbolTable: SymbolTable) {
         TODO("Not yet implemented")
     }
 }

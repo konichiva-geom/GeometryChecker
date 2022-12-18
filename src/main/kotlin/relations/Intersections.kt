@@ -1,12 +1,12 @@
 package relations
 
-import entity.Entity
+import entity.EntityRelations
 
 object Intersections {
-    val intersections = mutableMapOf<Entity, Entity>()
+    val intersections = mutableMapOf<EntityRelations, EntityRelations>()
 }
 
 object In {
     // key in value
-    val inMap = mutableMapOf<Entity, Set<Entity>>()
+    val inMap = mutableMapOf<EntityRelations, Set<EntityRelations>>()
 }

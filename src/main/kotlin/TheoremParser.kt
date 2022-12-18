@@ -1,6 +1,8 @@
+import Utils.THEOREMS_PATH
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import expr.Expr
 import expr.Notation
+import pipeline.GeomGrammar
 import java.io.File
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
@@ -32,9 +34,9 @@ data class Signature(val name: String, val args: List<Expr>) {
 }
 
 class TheoremParser {
-    val theorems = mutableMapOf<Signature, TheoremBody>()
+    private val theorems = mutableMapOf<Signature, TheoremBody>()
     private val mappings = mutableMapOf<String, MutableList<String>>()
-    fun addTheorems(path: String = "examples/theorems.txt") {
+    fun addTheorems(path: String = THEOREMS_PATH) {
         theorems.putAll((GeomGrammar.parseToEnd(File(path).readText()) as List<Pair<Signature, TheoremBody>>).toMap())
     }
 

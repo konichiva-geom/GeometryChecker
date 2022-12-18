@@ -1,3 +1,8 @@
+package pipeline
+
+import Signature
+import TheoremBody
+import Utils
 import Utils.signToLambda
 import com.github.h0tk3y.betterParse.combinators.and
 import com.github.h0tk3y.betterParse.combinators.leftAssociative
@@ -33,6 +38,8 @@ import expr.PointNotation
 import expr.PrefixNot
 import expr.RayNotation
 import expr.SegmentNotation
+import expr.TheoremUse
+import symbolTable
 
 object GeomGrammar : Grammar<Any>() {
     // region entity prefix tokens
@@ -115,7 +122,7 @@ object GeomGrammar : Grammar<Any>() {
         NumNotation(it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number"))
     })
 
-    private val term by notation or (-leftPar and parser(::arithmeticExpression) and -rightPar) map { it }
+    private val term by notation or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar) map { it }
 
     private val divMulChain: Parser<Expr> by leftAssociative(term, div or mul) { a, op, b ->
         ArithmeticBinaryExpr(
@@ -143,7 +150,7 @@ object GeomGrammar : Grammar<Any>() {
     }
 
     private val relation: Parser<Expr> by relatableNotation and relationToken and relatableNotation or
-        (negationToken and parser(::relation)) map {
+        (negationToken and parser(GeomGrammar::relation)) map {
         if (it is Tuple3<*, *, *>) {
             Utils.getRelationByString((it as Tuple3<Notation, TokenMatch, Notation>))
         } else {
@@ -163,7 +170,19 @@ object GeomGrammar : Grammar<Any>() {
             it.t2
         )
     }
-    private val theoremUsage by (zeroArgsOrMoreInvocation and -inferToken and (mul or args))//.liftToSyntaxTreeParser()
+    private val theoremUsage by (zeroArgsOrMoreInvocation and -inferToken and (mul or args)) or (invocation) map {
+        if (it is Signature) TheoremUse(
+            it,
+            emptyList()
+        ) else {
+            if ((it as Tuple2<Any, Any>).t2 is TokenMatch)
+                TheoremUse(it.t1 as Signature, emptyList())
+            else {
+                it as Tuple2<Signature, List<Expr>>
+                TheoremUse(it.t1, it.t2)
+            }
+        }
+    }
 
     // private val inference by (comparison and -inferToken and comparison map { it }) or
     //     (comparison and -comma and comparison and -inferToken and comparison map { it })
@@ -175,7 +194,7 @@ object GeomGrammar : Grammar<Any>() {
         { Tuple2(it.t1.text, it.t2) }
 
     private val returnStatement by -returnToken and args map { it }
-    private val thStatement by theoremUsage or relation or invocation or comparison
+    private val thStatement by theoremUsage or relation or comparison
 
     //private val seq by
     private val thBlock by -zeroOrMore(lineBreak) and (separatedTerms(

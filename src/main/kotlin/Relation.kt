@@ -1,5 +1,6 @@
 interface Relation {
-    fun check(): Boolean
+    fun check(symbolTable: SymbolTable): Boolean
+    fun make(symbolTable: SymbolTable)
 }
 
 enum class RelationType {

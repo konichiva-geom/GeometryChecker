@@ -10,6 +10,8 @@ import expr.Point2Notation
 import expr.Point3Notation
 
 object Utils {
+    const val THEOREMS_PATH = "examples/theorems.txt"
+
     private val lambdas = mutableListOf({ a: Float, b: Float -> a + b },
         { a: Float, b: Float -> a - b },
         { a: Float, b: Float -> a * b },

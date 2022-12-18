@@ -1,10 +1,10 @@
 package expr
 
 import Relation
+import Signature
 import SymbolTable
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
-import symbolTable
 
 interface Foldable {
     fun flatten(): MutableMap<Any, Float> = mutableMapOf(this to 1f)
@@ -15,6 +15,14 @@ interface Expr : Comparable<Expr> {
     }
 
     fun getChildren(): List<Expr>
+}
+
+class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
+    override fun getChildren(): List<Expr> = signature.args + output
+
+    override fun compareTo(other: Expr): Int {
+        TODO("Not yet implemented")
+    }
 }
 
 class MockExpr : Expr {
@@ -49,7 +57,7 @@ class PrefixNot(private val expr: Expr) : Expr {
 }
 
 class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
-    override fun check(): Boolean {
+    override fun check(symbolTable: SymbolTable): Boolean {
         // segment AB in segment AB
         if (left == right)
             return true
@@ -62,7 +70,11 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
             if (symbolTable.getPoint(right.p1) == pointEntity || symbolTable.getPoint(right.p2) == pointEntity)
                 return true
         }
-        return symbolTable.getByNotation(left as Notation).isIn(right as Notation)
+        return symbolTable.getRelationsByNotation(left as Notation).isIn(right as Notation)
+    }
+
+    override fun make(symbolTable: SymbolTable) {
+        TODO("Not yet implemented")
     }
 
     override fun toString(): String {
@@ -70,32 +82,47 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
     }
 }
 
-class BinaryIntersects(left: Expr, right: Expr) : BinaryExpr(left, right) {
+class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right) {
     override fun toString(): String {
         return "$left ∩ $right"
     }
 
-    override fun check(): Boolean {
-        TODO("Not yet implemented")
+    override fun check(symbolTable: SymbolTable): Boolean {
+        return if (left is Notation && right is Notation) {
+            symbolTable.getPointSetNotationByNotation(left)
+                .intersect(symbolTable.getPointSetNotationByNotation(right))
+                .isNotEmpty() && left.getOrder() < right.getOrder()
+        } else false
+    }
+
+    override fun make(symbolTable: SymbolTable) {
+        //symbolTable.
     }
 }
 
-class BinaryParallel(left: Expr, right: Expr) : BinaryExpr(left, right) {
+class BinaryParallel(left: Notation, right: Notation) : BinaryExpr(left, right) {
     override fun toString(): String {
         return "$left || $right"
     }
 
-    override fun check(): Boolean {
+    override fun check(symbolTable: SymbolTable): Boolean {
         TODO("Not yet implemented")
+    }
+
+    override fun make(symbolTable: SymbolTable) {
     }
 }
 
-class BinaryPerpendicular(left: Expr, right: Expr) : BinaryExpr(left, right) {
+class BinaryPerpendicular(left: Notation, right: Notation) : BinaryExpr(left, right) {
     override fun toString(): String {
         return "$left ⊥ $right"
     }
 
-    override fun check(): Boolean {
+    override fun check(symbolTable: SymbolTable): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun make(symbolTable: SymbolTable) {
         TODO("Not yet implemented")
     }
 }
@@ -105,8 +132,15 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         return "$left == $right"
     }
 
-    override fun check(): Boolean {
-        TODO("Not yet implemented")
+    override fun check(symbolTable: SymbolTable): Boolean {
+        return if (left::class == right::class && left is Notation && right is Notation)
+            symbolTable.getRelationsByNotation(left) == symbolTable.getRelationsByNotation(right)
+        else false
+    }
+
+    override fun make(symbolTable: SymbolTable) {
+        if (left is Notation && right is Notation)
+            symbolTable.getRelationsByNotation(left).merge(right, symbolTable)
     }
 }
 
@@ -115,7 +149,11 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         return "$left != $right"
     }
 
-    override fun check(): Boolean {
+    override fun check(symbolTable: SymbolTable): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun make(symbolTable: SymbolTable) {
         TODO("Not yet implemented")
     }
 }
@@ -125,7 +163,11 @@ class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
         return "$left > $right"
     }
 
-    override fun check(): Boolean {
+    override fun check(symbolTable: SymbolTable): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun make(symbolTable: SymbolTable) {
         TODO("Not yet implemented")
     }
 }
@@ -135,7 +177,11 @@ class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
         return "$left >= $right"
     }
 
-    override fun check(): Boolean {
+    override fun check(symbolTable: SymbolTable): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun make(symbolTable: SymbolTable) {
         TODO("Not yet implemented")
     }
 }
@@ -149,7 +195,11 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Floa
         return "$left${lambdaToSign[op]}$right"
     }
 
-    override fun check(): Boolean {
+    override fun check(symbolTable: SymbolTable): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun make(symbolTable: SymbolTable) {
         TODO("Not yet implemented")
     }
 }

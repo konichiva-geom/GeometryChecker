@@ -7,6 +7,9 @@ import com.github.h0tk3y.betterParse.st.LiftToSyntaxTreeOptions
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
 import com.github.h0tk3y.betterParse.utils.Tuple2
+import expr.Expr
+import pipeline.GeomGrammar
+import pipeline.Interpreter
 
 // TODO check wolfram alpha paid how can he check geom, geogebra
 
@@ -62,7 +65,7 @@ fun main() {
     val b = B(smth = "smth")
 
     val a = """description:
-        equal_sided_triangles_i(C1D == D1C1, EC == C1E1, ECD == D1C1E1) => *
+        equal_sided_triangles_i(CD == D1C1, EC == C1E1, ECD == D1C1E1) => *
         //R==2*(3*4+(42-R))+A
        // D==3, R==2*(3*4+(42-R))+A => F==3
         tUse(T in A) => *
@@ -97,7 +100,7 @@ fun main() {
         th defa(D > 3* 2+4/T, F in E, D ): // re fewfw
         return A
     //"""
-    // val test = GeomGrammar.parseToEnd("tUse(T == A) => *")
+    // val test = pipeline.GeomGrammar.parseToEnd("tUse(T == A) => *")
     try {
         val res = GeomGrammar.liftToSyntaxTreeGrammar(LiftToSyntaxTreeOptions(retainSeparators = false)).parseToEnd(a)
         parseProgram(res)
@@ -106,12 +109,14 @@ fun main() {
         chooseFurthestUnexpectedToken(tokens)
         findProblemToken(e.errorResult as AlternativesFailure)
     }
-    val sig = GeomGrammar.parseToEnd(a)
+    val sig = GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(a)
     val result = GeomGrammar.parseToEnd(th)
     val t = GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(th)
-    val tp = TheoremParser()
-    val sg = ((sig as List<Tuple2<String, List<Any>>>).first().t2.first() as Tuple2<Signature, Any>).t1
-    val theorems = tp.addTheorems()
-    val body = tp.getTheoremBodyBySignature(sg)
-    tp.parseTheorem(sg, tp.getSignature(sg), body) // TODO get theorem signature from call signature
+    val interpreter = Interpreter()
+    interpreter.interpret(sig as SyntaxTree<List<Tuple2<Any, List<Expr>>>>)
+    // val tp = TheoremParser()
+    // val sg = ((sig as List<Tuple2<String, List<Any>>>).first().t2.first() as Tuple2<Signature, Any>).t1
+    // val theorems = tp.addTheorems()
+    // val body = tp.getTheoremBodyBySignature(sg)
+    // tp.parseTheorem(sg, tp.getSignature(sg), body) // TODO get theorem signature from call signature
 }

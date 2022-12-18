@@ -1,7 +1,7 @@
 import Utils.mergeWithOperation
-import entity.Entity
+import entity.EntityRelations
 
-class VectorContainer<T : Entity> {
+class VectorContainer<T : EntityRelations> {
     private val vectors = mutableMapOf<T, ComparisonVector>()
     private var maxDim = 0
 
@@ -17,7 +17,7 @@ enum class ComparisonType {
     GREATER_OR_EQUALS
 }
 
-data class SegmentRelation(var intersects: Entity?)
+data class SegmentRelation(var intersects: EntityRelations?)
 
 class Vector<T>(
     private val value: MutableMap<T, Float>
