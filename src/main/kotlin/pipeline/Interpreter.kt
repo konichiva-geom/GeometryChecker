@@ -4,6 +4,7 @@ import SymbolTable
 import TheoremParser
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
+import expr.BinaryParallel
 import expr.Expr
 import expr.TheoremUse
 
@@ -22,6 +23,9 @@ class Interpreter {
                 is TheoremUse -> {
                     val body = theoremParser.getTheoremBodyBySignature(expr.signature)
                     theoremParser.parseTheorem(expr.signature, theoremParser.getSignature(expr.signature), body)
+                }
+                is BinaryParallel -> {
+                    expr.make(symbolTable)
                 }
                 else -> {
 

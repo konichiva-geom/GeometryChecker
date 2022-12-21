@@ -56,6 +56,7 @@ class TheoremParser {
         println(mappings)
         symbolTable.addRelations = true
         for (statement in theoremBody.body) {
+            println()
         }
         symbolTable.addRelations = false
     }

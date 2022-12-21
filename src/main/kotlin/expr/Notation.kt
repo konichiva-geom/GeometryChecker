@@ -1,8 +1,5 @@
 package expr
 
-import LinePointCollection
-import PointCollection
-import RayPointCollection
 import TheoremParser
 
 abstract class Notation : Expr, Comparable<Expr>, Foldable {
@@ -102,6 +99,7 @@ open class Point2Notation(var p1: String, var p2: String) : RelatableNotation() 
 
     fun toRayNotation() = RayNotation(p1, p2)
     fun toSegmentNotation() = SegmentNotation(p1, p2)
+    open fun toLine() = this
 }
 
 class PointNotation(val p: String) : RelatableNotation() {
@@ -129,15 +127,21 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun getOrder(): Int {
         return super.getOrder() + 1
     }
+
+    override fun toLine() = Point2Notation(p1, p2)
 }
 
 class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun getOrder(): Int {
         return super.getOrder() + 2
     }
+
+    override fun toLine() = Point2Notation(p1, p2)
 }
 
-class ArcNotation(p1: String, p2: String) : Point2Notation(p1, p2)
+class ArcNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
+    override fun toLine() = Point2Notation(p1, p2)
+}
 class IdentNotation(private val text: String) : RelatableNotation() {
     override fun getOrder(): Int = 0
     override fun compareTo(other: Expr): Int {

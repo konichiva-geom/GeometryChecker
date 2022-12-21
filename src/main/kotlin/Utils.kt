@@ -63,7 +63,7 @@ object Utils {
         return when (tuple.t2.text) {
             "in" -> BinaryIn(tuple.t1, tuple.t3)
             "intersects", "∩" -> BinaryIntersects(tuple.t1, tuple.t3)
-            "parallel", "||" -> BinaryParallel(tuple.t1, tuple.t3)
+            "parallel", "||" -> BinaryParallel(tuple.t1 as Point2Notation, tuple.t3 as Point2Notation)
             "perpendicular", "⊥" -> BinaryPerpendicular(tuple.t1, tuple.t3)
             else -> throw Exception("Unknown comparison")
         }

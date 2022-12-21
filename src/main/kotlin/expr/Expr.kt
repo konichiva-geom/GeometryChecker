@@ -5,6 +5,7 @@ import Signature
 import SymbolTable
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
+import entity.LineRelations
 
 interface Foldable {
     fun flatten(): MutableMap<Any, Float> = mutableMapOf(this to 1f)
@@ -100,16 +101,29 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
     }
 }
 
-class BinaryParallel(left: Notation, right: Notation) : BinaryExpr(left, right) {
+class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun toString(): String {
         return "$left || $right"
     }
 
+    /**
+     * Check all notations in [left] parallel set to see if one of them corresponds to the [right] [LineRelations]
+     */
     override fun check(symbolTable: SymbolTable): Boolean {
-        TODO("Not yet implemented")
+        val line1 = (left as Point2Notation).toLine()
+        val expectedNotation = (symbolTable.getRelationsByNotation((right as Point2Notation).toLine()) as LineRelations)
+        for (lineNotation in (symbolTable.getRelationsByNotation(line1) as LineRelations).parallel) {
+            if (symbolTable.getLine(lineNotation) == expectedNotation)
+                return true
+        }
+        return false
     }
 
     override fun make(symbolTable: SymbolTable) {
+        val line1 = (left as Point2Notation).toLine()
+        val line2 = (right as Point2Notation).toLine()
+        (symbolTable.getRelationsByNotation(line1) as LineRelations).parallel.add(line2)
+        (symbolTable.getRelationsByNotation(line2) as LineRelations).parallel.add(line1)
     }
 }
 
