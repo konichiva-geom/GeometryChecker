@@ -18,7 +18,7 @@ open class SpoofError(var msg: String, private vararg val args: Pair<String, Any
     override val message: String
         get() = changeAllIndicesInOrder(msg)
 
-    fun changeAllIndicesInOrder(text: String): String {
+    private fun changeAllIndicesInOrder(text: String): String {
         val regex = Regex("%\\{\\w+}")
         val sb = StringBuilder(text)
         val mapOfArgs = args.toMap()
@@ -29,7 +29,7 @@ open class SpoofError(var msg: String, private vararg val args: Pair<String, Any
     }
 }
 
-class PosError(val range: IntRange, msg: String, vararg args: Pair<String, Any>) : SpoofError(msg, *args) {
+class PosError(private val range: IntRange, msg: String, vararg args: Pair<String, Any>) : SpoofError(msg, *args) {
     override val message: String
         get() = super.message + " at $range"
 }

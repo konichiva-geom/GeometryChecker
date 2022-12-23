@@ -69,7 +69,7 @@ fun main() {
         equal_sided_triangles_i(CD == D1C1, EC == C1E1, ECD == D1C1E1) => *
         //R==2*(3*4+(42-R))+A
        // D==3, R==2*(3*4+(42-R))+A => F==3
-        tUse(T in A) => *
+        tUse(T in AC) => *
         //tUse() => T in B
         //fdfds4
         //
@@ -77,28 +77,23 @@ fun main() {
         D == 3
         R + 42 > 4
         //RD || CD
-        R in S
-        tUse(T in A) => *
+        tUse(T in AB) => *
        // D==3, R==4+42 => F==3
-         solution  :   
+         solution:   
         
         
       //  D==3, R==4+42 => F==3
         arc AB < 3
-        tUse() => T in A, B == C
+        tUse() => TB in BA, B == C
         """
 
     val th = """th name(): /**/
-        D in A
-        not D in A
         check(W==W)
         
-        th defa(D > 3* 2+4/T, F in E, D ): // re fewfw
-        D in A
-        circe in A
+        th defa(D > 3* 2+4/T, F in EB, D ): // re fewfw
         check(W==W) //
          
-        th defa(D > 3* 2+4/T, F in E, D ): // re fewfw
+        th defa(D > 3* 2+4/T, F in ED, D ): // re fewfw
         return A
     //"""
     // val test = pipeline.GeomGrammar.parseToEnd("tUse(T == A) => *")

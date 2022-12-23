@@ -1,6 +1,8 @@
 package expr
 
 import TheoremParser
+import Utils.max
+import Utils.min
 
 abstract class Notation : Expr, Comparable<Expr>, Foldable {
     abstract fun getOrder(): Int
@@ -78,7 +80,15 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     }
 }
 
-open class Point2Notation(var p1: String, var p2: String) : RelatableNotation() {
+open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
+    var p1: String
+    var p2: String
+
+    init {
+        this.p1 = min(p1, p2)
+        this.p2 = max(p1, p2)
+    }
+
     override fun getOrder(): Int = 2
 
     override fun flatten(): MutableMap<Any, Float> {
@@ -118,6 +128,10 @@ class PointNotation(val p: String) : RelatableNotation() {
 }
 
 class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
+    init {
+        this.p1 = p1
+        this.p2 = p2
+    }
     override fun mergeMapping(tp: TheoremParser, other: Notation) {
         other as RayNotation
         tp.mergeMapping(p1, listOf(other.p1))

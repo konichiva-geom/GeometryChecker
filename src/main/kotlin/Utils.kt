@@ -8,6 +8,7 @@ import expr.BinaryPerpendicular
 import expr.Notation
 import expr.Point2Notation
 import expr.Point3Notation
+import expr.PointNotation
 
 object Utils {
     const val THEOREMS_PATH = "examples/theorems.txt"
@@ -59,13 +60,57 @@ object Utils {
             .toMutableMap()
     }
 
-    fun getRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
-        return when (tuple.t2.text) {
-            "in" -> BinaryIn(tuple.t1, tuple.t3)
-            "intersects", "∩" -> BinaryIntersects(tuple.t1, tuple.t3)
-            "parallel", "||" -> BinaryParallel(tuple.t1 as Point2Notation, tuple.t3 as Point2Notation)
-            "perpendicular", "⊥" -> BinaryPerpendicular(tuple.t1, tuple.t3)
-            else -> throw Exception("Unknown comparison")
+    /**
+     * Create relation binary expression
+     */
+    fun getBinaryRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
+        try {
+            return when (tuple.t2.text) {
+                "in" ->  {
+                    checkNotPoint(tuple.t3, tuple.t2.text)
+                    BinaryIn(tuple.t1, tuple.t3)
+                }
+                "intersects", "∩" ->{
+                    checkNotPoint(tuple.t1, tuple.t2.text)
+                    checkNotPoint(tuple.t3, tuple.t2.text)
+                    BinaryIntersects(tuple.t1, tuple.t3)}
+                "parallel", "||" -> {
+                    checkLinear(tuple.t1, tuple.t3, tuple.t2.text)
+                    BinaryParallel(tuple.t1 as Point2Notation, tuple.t3 as Point2Notation)
+                }
+                "perpendicular", "⊥" -> {
+                    checkLinear(tuple.t1, tuple.t3, tuple.t2.text)
+                    BinaryPerpendicular(tuple.t1 as Point2Notation, tuple.t3 as Point2Notation)
+                }
+
+                else -> throw Exception("Unknown comparison")
+            }
+        } catch (spoof: SpoofError) {
+            throw PosError(tuple.t2.toRange(), spoof.msg)
         }
+    }
+
+    private fun checkNotPoint(notation: Notation, operator: String) {
+        if(notation is PointNotation)
+            throw SpoofError("`$notation` is point, `$operator` is not applicable to points in this position")
+    }
+
+    private fun checkLinear(first: Notation, second: Notation, operator: String) {
+        if (first !is Point2Notation || second !is Point2Notation)
+            throw SpoofError("`${if (first !is Point2Notation) first else second}` is not linear, `$operator` is not applicable")
+    }
+
+    fun <T : Comparable<T>?> max(t1: T, t2: T): T {
+        return if (t1!! > t2) t1 else t2
+    }
+
+    fun <T : Comparable<T>?> min(t1: T, t2: T): T {
+        return if (t1!! < t2) t1 else t2
+    }
+
+    object NameGenerator {
+        var index = 0
+
+        fun getName() = "$${index++}"
     }
 }

@@ -1,15 +1,19 @@
 import Utils.sortAngle
 import entity.AngleRelations
+import entity.ArcRelations
+import entity.CircleRelations
 import entity.EntityRelations
 import entity.LineRelations
-import entity.Point
+import entity.PointRelations
 import entity.RayRelations
 import entity.SegmentRelations
+import expr.ArcNotation
 import expr.BinaryEquals
 import expr.BinaryIn
 import expr.BinaryIntersects
 import expr.BinaryParallel
 import expr.Expr
+import expr.IdentNotation
 import expr.Notation
 import expr.Point2Notation
 import expr.Point3Notation
@@ -22,25 +26,39 @@ interface PointCollection {
     fun getPointsInCollection(): Set<String>
 
     fun getRespectableNotationClass(symbolTable: SymbolTable): KClass<out Notation>
+
+    fun addPoints(added: List<String>)
 }
 
 data class LinePointCollection(val points: MutableSet<String>) : PointCollection {
     override fun getPointsInCollection(): Set<String> = points
     override fun getRespectableNotationClass(symbolTable: SymbolTable): KClass<out Notation> = Point2Notation::class
+    override fun addPoints(added: List<String>) {
+        points.addAll(added)
+    }
 }
 
 data class RayPointCollection(val start: String, val points: MutableSet<String>) : PointCollection {
     override fun getPointsInCollection(): Set<String> = setOf(start) + points
     override fun getRespectableNotationClass(symbolTable: SymbolTable): KClass<out Notation> = RayNotation::class
+    override fun addPoints(added: List<String>) {
+        // TODO is it bad if added point is [start]?
+        points.addAll(added)
+    }
 }
 
-data class SegmentPointCollection(val bounds: Set<String>, val points: MutableSet<String>) : PointCollection {
+data class SegmentPointCollection(val bounds: Set<String>, val points: MutableSet<String> = mutableSetOf()) :
+    PointCollection {
     override fun getPointsInCollection(): Set<String> = bounds + points
     override fun getRespectableNotationClass(symbolTable: SymbolTable): KClass<out Notation> = SegmentNotation::class
+    override fun addPoints(added: List<String>) {
+        // TODO is it bad if added point is in [bounds]?
+        points.addAll(points)
+    }
 }
 
 open class SymbolTable {
-    private val points = mutableMapOf<String, Point>()
+    private val points = mutableMapOf<String, PointRelations>()
     val lines = mutableMapOf<LinePointCollection, LineRelations>()
     val rays = mutableMapOf<RayPointCollection, RayRelations>()
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
@@ -50,6 +68,8 @@ open class SymbolTable {
         Point2Notation::class to lines
     )
     private val angles = mutableMapOf<Point3Notation, AngleRelations>()
+    private val circles = mutableMapOf<IdentNotation, CircleRelations>()
+    private val arcs = mutableMapOf<SegmentPointCollection, ArcRelations>()
     private val mappings = mutableMapOf<Notation, Vector<Int>>()
     var addRelations = false
 
@@ -91,7 +111,7 @@ open class SymbolTable {
     fun getPointSetNotationByNotation(notation: Notation): Set<String> {
         return when (notation) {
             is PointNotation -> setOf(notation.p)
-            is Point2Notation -> getKeyValueByNotation(notation).first as Set<String>
+            is Point2Notation -> (getKeyValueByNotation(notation).first as PointCollection).getPointsInCollection()
             is Point3Notation -> return setOf(notation.p1, notation.p2, notation.p3)
             else -> throw SpoofError(notation.toString())
         }
@@ -100,20 +120,20 @@ open class SymbolTable {
     /**
      * Make point distinct from all others
      */
-    fun newPoint(notation: PointNotation): Point {
+    fun newPoint(notation: PointNotation): PointRelations {
         // println(name)
-        return Point()
+        return PointRelations()
         // if (points[name] != null)
         //     throw Exception("Point ${name} already defined")
         // points[name] = Point(points.keys.toMutableSet())
         // return points[name]!!
     }
 
-    fun getPoint(name: String): Point {
+    fun getPoint(name: String): PointRelations {
         return points[name] ?: throw Exception("Point $name is not instantiated")
     }
 
-    fun getPoint(pointNotation: PointNotation): Point {
+    fun getPoint(pointNotation: PointNotation): PointRelations {
         return getPoint(pointNotation.p)
     }
 
@@ -123,6 +143,15 @@ open class SymbolTable {
             lines as MutableMap<MutableSet<String>, EntityRelations>,
             LineRelations::class
         ) as LineRelations
+    }
+
+    fun getCircle(notation: IdentNotation): CircleRelations {
+        var res = circles[notation]
+        if (res == null) {
+            res = CircleRelations()
+            circles[notation] = res
+        }
+        return res
     }
 
     private fun getLinear(
@@ -166,9 +195,13 @@ open class SymbolTable {
         }
     }
 
-    open fun handleRelation() {}
+    fun getArc(notation: ArcNotation): ArcRelations {
+        for ((collection, value) in arcs) {
+            if (collection.getPointsInCollection().containsAll(notation.getLetters()))
+                return value
+        }
+        val res = ArcRelations()
+        arcs[SegmentPointCollection(notation.getLetters().toSet())] = res
+        return res
+    }
 }
-
-class DescriptionTable : SymbolTable()
-
-class SolutionTable : SymbolTable()

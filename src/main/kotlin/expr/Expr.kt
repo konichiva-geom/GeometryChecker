@@ -1,11 +1,20 @@
 package expr
 
+import PointCollection
 import Relation
 import Signature
 import SymbolTable
+import Utils
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
 import entity.LineRelations
+
+/**
+ * Expression that returns some value, e.g. [BinaryIntersects] returns point, or segment, or something else
+ */
+interface Returnable {
+    fun getReturnValue(): Any
+}
 
 interface Foldable {
     fun flatten(): MutableMap<Any, Float> = mutableMapOf(this to 1f)
@@ -58,10 +67,8 @@ class PrefixNot(private val expr: Expr) : Expr {
 }
 
 class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
+    // TODO check intersects for all except points
     override fun check(symbolTable: SymbolTable): Boolean {
-        // segment AB in segment AB
-        if (left == right)
-            return true
         if (left is PointNotation && right is Point2Notation) {
             // A in ray AB
             if ((right.p1 == left.p || right.p2 == left.p))
@@ -70,12 +77,25 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
             val pointEntity = symbolTable.getPoint(left)
             if (symbolTable.getPoint(right.p1) == pointEntity || symbolTable.getPoint(right.p2) == pointEntity)
                 return true
+            // point in circle
+        } else if (left is PointNotation && right is IdentNotation) {
+            val point = symbolTable.getPoint(left)
+            return symbolTable.getCircle(right).points
+                .map { symbolTable.getPoint(it) }.toSet().contains(point)
+            // arc in arc, point in arc
+        } else if (right is ArcNotation) {
+            val pointLetters = (left as Point2Notation).getLetters()
+            return symbolTable.getPointSetNotationByNotation(right).containsAll(pointLetters)
         }
-        return symbolTable.getRelationsByNotation(left as Notation).isIn(right as Notation)
+        return BinaryIntersects(left as Notation, right as Notation).check(symbolTable)
     }
 
     override fun make(symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+        if (right is IdentNotation)
+            symbolTable.getCircle(right).points.add((left as PointNotation).p)
+        val pointList = if (left is PointNotation) listOf(left.p) else (left as Point2Notation).getLetters()
+        val (collection, _) = symbolTable.getKeyValueByNotation(right as Point2Notation)
+        (collection as PointCollection).addPoints(pointList)
     }
 
     override fun toString(): String {
@@ -83,7 +103,10 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
     }
 }
 
-class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right) {
+class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right), Returnable {
+    lateinit var intersectionValue: Any // two circles intersect by array of points
+    override fun getReturnValue(): Any = intersectionValue
+
     override fun toString(): String {
         return "$left ∩ $right"
     }
@@ -97,7 +120,15 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
     }
 
     override fun make(symbolTable: SymbolTable) {
-        //symbolTable.
+        val leftSet = symbolTable.getPointSetNotationByNotation(left as Notation)
+        val rightSet = symbolTable.getPointSetNotationByNotation(right as Notation)
+        val intersection = leftSet.intersect(rightSet)
+        if (intersection.isNotEmpty()) {
+            // TODO: maybe validate that all intersection points are the same object
+            intersectionValue = PointNotation(intersection.first())
+            return
+        }
+        val intersectionPoint = Utils.NameGenerator.getName()
     }
 }
 
@@ -122,12 +153,16 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
     override fun make(symbolTable: SymbolTable) {
         val line1 = (left as Point2Notation).toLine()
         val line2 = (right as Point2Notation).toLine()
-        (symbolTable.getRelationsByNotation(line1) as LineRelations).parallel.add(line2)
-        (symbolTable.getRelationsByNotation(line2) as LineRelations).parallel.add(line1)
+        val lineRelations1 = symbolTable.getLine(line1)
+        val lineRelations2 = symbolTable.getLine(line2)
+        if (!lineRelations1.parallel.map { symbolTable.getLine(it) }.contains(lineRelations2))
+            lineRelations1.parallel.add(line2)
+        if (!lineRelations2.parallel.map { symbolTable.getLine(it) }.contains(lineRelations1))
+            lineRelations1.parallel.add(line1)
     }
 }
 
-class BinaryPerpendicular(left: Notation, right: Notation) : BinaryExpr(left, right) {
+class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun toString(): String {
         return "$left ⊥ $right"
     }

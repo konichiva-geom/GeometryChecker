@@ -152,7 +152,7 @@ object GeomGrammar : Grammar<Any>() {
     private val relation: Parser<Expr> by relatableNotation and relationToken and relatableNotation or
         (negationToken and parser(GeomGrammar::relation)) map {
         if (it is Tuple3<*, *, *>) {
-            Utils.getRelationByString((it as Tuple3<Notation, TokenMatch, Notation>))
+            Utils.getBinaryRelationByString((it as Tuple3<Notation, TokenMatch, Notation>))
         } else {
             (it as Tuple2<*, *>)
             PrefixNot(it.t2 as Expr)
