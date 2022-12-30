@@ -99,6 +99,20 @@ open class SymbolTable {
         }
     }
 
+    /**
+     * // TODO new: THIS happens only when points are merging =>
+     * not a problem that lines are merged implicitly.
+     * Should merge them when points are merged
+     * (e.g A == B, then find lines that intersect
+     * and one contains A, other contains B).
+     * TODO ^ check that upper approach works because it is really
+     * THE ONLY case when lines merge (lines merge ONLY IF points merge)
+     * // TODO change reset to ...
+     * // TODO we shouldn't set equal lines implicitly, but how do we know which line to pick if they have same points
+     * // TODO and user didn't merge them?
+     * @param newRelations value to set
+     * @param notation notation to find what value to set
+     */
     fun resetLine(newRelations: LineRelations, notation: Point2Notation) {
         for ((searchedNotation, _) in lines) {
             if (searchedNotation.getPointsInCollection().containsAll(notation.getLetters())) {
