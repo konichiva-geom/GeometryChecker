@@ -69,11 +69,9 @@ class TheoremParser: Parser() {
     fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody) {
         traverseSignature(call, theoremSignature)
         println(mappings)
-        symbolTable.addRelations = true
         for (statement in theoremBody.body) {
             println()
         }
-        symbolTable.addRelations = false
         clearMappings()
     }
 

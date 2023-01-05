@@ -1,19 +1,14 @@
 import Utils.sortAngle
 import entity.*
 import expr.*
-import kotlin.reflect.KClass
 
 interface PointCollection {
     fun getPointsInCollection(): Set<String>
-
-    fun getRespectableNotationClass(symbolTable: SymbolTable): KClass<out Notation>
-
     fun addPoints(added: List<String>)
 }
 
 data class LinePointCollection(val points: MutableSet<String>) : PointCollection {
     override fun getPointsInCollection(): Set<String> = points
-    override fun getRespectableNotationClass(symbolTable: SymbolTable): KClass<out Notation> = Point2Notation::class
     override fun addPoints(added: List<String>) {
         points.addAll(added)
     }
@@ -21,7 +16,6 @@ data class LinePointCollection(val points: MutableSet<String>) : PointCollection
 
 data class RayPointCollection(val start: String, val points: MutableSet<String>) : PointCollection {
     override fun getPointsInCollection(): Set<String> = setOf(start) + points
-    override fun getRespectableNotationClass(symbolTable: SymbolTable): KClass<out Notation> = RayNotation::class
     override fun addPoints(added: List<String>) {
         // TODO is it bad if added point is [start]?
         points.addAll(added)
@@ -31,7 +25,6 @@ data class RayPointCollection(val start: String, val points: MutableSet<String>)
 data class SegmentPointCollection(val bounds: Set<String>, val points: MutableSet<String> = mutableSetOf()) :
     PointCollection {
     override fun getPointsInCollection(): Set<String> = bounds + points
-    override fun getRespectableNotationClass(symbolTable: SymbolTable): KClass<out Notation> = SegmentNotation::class
     override fun addPoints(added: List<String>) {
         // TODO is it bad if added point is in [bounds]?
         points.addAll(points)
@@ -43,27 +36,16 @@ open class SymbolTable {
     val lines = mutableMapOf<LinePointCollection, LineRelations>()
     val rays = mutableMapOf<RayPointCollection, RayRelations>()
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
-    val linear = mapOf(
-        RayNotation::class to rays,
-        SegmentNotation::class to segments,
-        Point2Notation::class to lines
-    )
     private val angles = mutableMapOf<Point3Notation, AngleRelations>()
     private val circles = mutableMapOf<IdentNotation, CircleRelations>()
     private val arcs = mutableMapOf<SegmentPointCollection, ArcRelations>()
-    private val mappings = mutableMapOf<Notation, Vector<Int>>()
-    var addRelations = false
+    private val comparisons = mutableMapOf<Notation, Vector<Int>>()
 
     fun getRelationsByNotation(notation: Notation): EntityRelations {
-        return when (notation) {
-            is PointNotation -> getPoint(notation)
-            is RayNotation -> getRay(notation)
-            is SegmentNotation -> getSegment(notation)
-            is Point2Notation -> getLine(notation)
-            is Point3Notation -> getAngle(notation)
-            else -> throw SpoofError(notation.toString())
-        }
+        return getKeyValueByNotation(notation).second
     }
+
+    fun getKeyByNotation(notation: Notation): Any = getKeyValueByNotation(notation).first
 
     fun getKeyValueByNotation(notation: Notation): Pair<Any, EntityRelations> {
         when (notation) {
@@ -89,6 +71,17 @@ open class SymbolTable {
                 segments[collection] = segmentRelations
                 return collection to segmentRelations
             }
+            is ArcNotation -> {
+                for ((collection, value) in arcs) {
+                    if (pointsContain(notation.p1, collection.bounds) && pointsContain(notation.p2, collection.bounds))
+                        return collection to value
+                }
+                val res = ArcRelations()
+                val collection =
+                    SegmentPointCollection(notation.getLetters().toMutableSet(), notation.getLetters().toMutableSet())
+                arcs[collection] = res
+                return collection to res
+            }
             is Point2Notation -> {
                 for ((collection, line) in lines) {
                     if (pointsContain(notation.p1, collection.points) && pointsContain(notation.p2, collection.points))
@@ -100,7 +93,6 @@ open class SymbolTable {
                 lines[collection] = lineRelations
                 return collection to lineRelations
             }
-
             is Point3Notation -> return notation to getAngle(notation)
             else -> throw SpoofError(notation.toString())
         }
@@ -133,10 +125,14 @@ open class SymbolTable {
         return when (notation) {
             is PointNotation -> setOf(notation.p)
             is Point2Notation -> (getKeyValueByNotation(notation).first as PointCollection).getPointsInCollection()
-            is Point3Notation -> return setOf(notation.p1, notation.p2, notation.p3)
+            is Point3Notation -> setOf(notation.p1, notation.p2, notation.p3)
+            is IdentNotation -> getCircle(notation).points
             else -> throw SpoofError(notation.toString())
         }
     }
+
+    fun getPointObjectsByNotation(notation: Notation): Set<PointRelations> =
+        getPointSetNotationByNotation(notation).map { symbolTable.getPoint(it) }.toSet()
 
     fun pointsEqual(p1: String, p2: String): Boolean = points[p1] == points[p2]
     fun pointsContain(p1: String, collection: Set<String>): Boolean = collection.any { points[p1] == points[it] }
@@ -162,11 +158,7 @@ open class SymbolTable {
     }
 
     fun getLine(notation: Point2Notation): LineRelations {
-        return getLinear(
-            notation,
-            lines as MutableMap<MutableSet<String>, EntityRelations>,
-            LineRelations::class
-        ) as LineRelations
+        return getKeyValueByNotation(notation).second as LineRelations
     }
 
     fun getCircle(notation: IdentNotation): CircleRelations {
@@ -178,26 +170,12 @@ open class SymbolTable {
         return res
     }
 
-    private fun getLinear(
-        notation: Point2Notation,
-        linearStorage: MutableMap<MutableSet<String>, EntityRelations>,
-        linearClass: KClass<out EntityRelations>
-    ): EntityRelations {
-        linearStorage.forEach {
-            if (it.key.contains(notation.p1) && it.key.contains(notation.p2))
-                return it.value
-        }
-        val res = linearClass.constructors.first().call()
-        linearStorage[mutableSetOf(notation.p1, notation.p2)] = res
-        return res
-    }
-
     fun getRay(notation: RayNotation): RayRelations {
-        return RayRelations()//return getLinear(notation, segments as MutableMap<MutableSet<String>, Entity>, Line::class) as Line
+        return getKeyValueByNotation(notation).second as RayRelations
     }
 
     fun getSegment(notation: SegmentNotation): SegmentRelations {
-        return SegmentRelations()//return getLinear(notation, lines as MutableMap<MutableSet<String>, Entity>, Line::class) as Line
+        return getKeyValueByNotation(notation).second as SegmentRelations
     }
 
     fun getAngle(notation: Point3Notation): AngleRelations {

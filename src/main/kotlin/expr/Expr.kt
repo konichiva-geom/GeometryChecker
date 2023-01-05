@@ -2,8 +2,10 @@ package expr
 
 import PointCollection
 import Relation
+import SegmentPointCollection
 import Signature
 import SymbolTable
+import SystemFatalError
 import Utils
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
@@ -66,36 +68,30 @@ class PrefixNot(private val expr: Expr) : Expr {
     }
 }
 
+/**
+ * `in` relation in tree
+ */
 class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
-    // TODO check intersects for all except points
     override fun check(symbolTable: SymbolTable): Boolean {
-        if (left is PointNotation && right is Point2Notation) {
-            // A in ray AB
-            if ((right.p1 == left.p || right.p2 == left.p))
-                return true
-            // A == C; C in AB
-            val pointEntity = symbolTable.getPoint(left)
-            if (symbolTable.getPoint(right.p1) == pointEntity || symbolTable.getPoint(right.p2) == pointEntity)
-                return true
-            // point in circle
-        } else if (left is PointNotation && right is IdentNotation) {
-            val point = symbolTable.getPoint(left)
-            return symbolTable.getCircle(right).points
-                .map { symbolTable.getPoint(it) }.toSet().contains(point)
-            // arc in arc, point in arc
-        } else if (right is ArcNotation) {
-            val pointLetters = (left as Point2Notation).getLetters()
-            return symbolTable.getPointSetNotationByNotation(right).containsAll(pointLetters)
-        }
-        return BinaryIntersects(left as Notation, right as Notation).check(symbolTable)
+        symbolTable.getPointObjectsByNotation(right as Notation)
+            .containsAll(symbolTable.getPointObjectsByNotation(left as Notation))
+        throw SystemFatalError("Unexpected")
     }
 
     override fun make(symbolTable: SymbolTable) {
         if (right is IdentNotation)
             symbolTable.getCircle(right).points.add((left as PointNotation).p)
+        if (right is ArcNotation) {
+            val arcCollection = symbolTable.getKeyByNotation(right as Notation) as SegmentPointCollection
+            val collection = symbolTable.getKeyByNotation(left as Notation)
+            // left is a point
+            if (collection is String) arcCollection.points.add(collection)
+            // left is an arc
+            else arcCollection.points.addAll((collection as SegmentPointCollection).getPointsInCollection())
+        }
         val pointList = if (left is PointNotation) listOf(left.p) else (left as Point2Notation).getLetters()
-        val (collection, _) = symbolTable.getKeyValueByNotation(right as Point2Notation)
-        (collection as PointCollection).addPoints(pointList)
+        val collection = symbolTable.getKeyByNotation(right as Point2Notation) as PointCollection
+        collection.addPoints(pointList)
     }
 
     override fun toString(): String {
@@ -111,11 +107,14 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
         return "$left ∩ $right"
     }
 
+    /**
+     * Check that exactly one point is in intersection
+     */
     override fun check(symbolTable: SymbolTable): Boolean {
         return if (left is Notation && right is Notation) {
             symbolTable.getPointSetNotationByNotation(left)
                 .intersect(symbolTable.getPointSetNotationByNotation(right))
-                .isNotEmpty() && left.getOrder() < right.getOrder()
+                .map { symbolTable.getPoint(it) }.toSet().size == 1
         } else false
     }
 
@@ -132,6 +131,9 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
     }
 }
 
+/**
+ * `||` relation in tree
+ */
 class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun toString(): String {
         return "$left || $right"
@@ -142,12 +144,11 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
      */
     override fun check(symbolTable: SymbolTable): Boolean {
         val line1 = (left as Point2Notation).toLine()
-        val expectedNotation = (symbolTable.getRelationsByNotation((right as Point2Notation).toLine()) as LineRelations)
-        for (lineNotation in (symbolTable.getRelationsByNotation(line1) as LineRelations).parallel) {
-            if (symbolTable.getLine(lineNotation) == expectedNotation)
-                return true
-        }
-        return false
+        val line2 = (right as Point2Notation).toLine()
+        val lineRelations1 = symbolTable.getLine(line1)
+        val lineRelations2 = symbolTable.getLine(line2)
+        return lineRelations1.parallel.map { symbolTable.getLine(it) }.contains(lineRelations2)
+                || lineRelations2.parallel.map { symbolTable.getLine(it) }.contains(lineRelations1)
     }
 
     override fun make(symbolTable: SymbolTable) {
@@ -162,17 +163,32 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
     }
 }
 
+/**
+ * `⊥` relation in tree
+ */
 class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun toString(): String {
         return "$left ⊥ $right"
     }
 
     override fun check(symbolTable: SymbolTable): Boolean {
-        TODO("Not yet implemented")
+        val line1 = (left as Point2Notation).toLine()
+        val line2 = (right as Point2Notation).toLine()
+        val lineRelations1 = symbolTable.getLine(line1)
+        val lineRelations2 = symbolTable.getLine(line2)
+        return lineRelations1.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations2)
+                || lineRelations2.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations1)
     }
 
     override fun make(symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+        val line1 = (left as Point2Notation).toLine()
+        val line2 = (right as Point2Notation).toLine()
+        val lineRelations1 = symbolTable.getLine(line1)
+        val lineRelations2 = symbolTable.getLine(line2)
+        if (!lineRelations1.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations2))
+            lineRelations1.perpendicular.add(line2)
+        if (!lineRelations2.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations1))
+            lineRelations1.perpendicular.add(line1)
     }
 }
 

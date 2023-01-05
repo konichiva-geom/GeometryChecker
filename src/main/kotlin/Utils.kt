@@ -1,14 +1,6 @@
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.utils.Tuple3
-import expr.BinaryExpr
-import expr.BinaryIn
-import expr.BinaryIntersects
-import expr.BinaryParallel
-import expr.BinaryPerpendicular
-import expr.Notation
-import expr.Point2Notation
-import expr.Point3Notation
-import expr.PointNotation
+import expr.*
 
 object Utils {
     const val THEOREMS_PATH = "examples/theorems.txt"
@@ -39,7 +31,8 @@ object Utils {
     }
 
     fun sortLine(notation: Point2Notation): Point2Notation {
-        if (notation.p1 == notation.p2) throw SpoofError("Line %{line} consists of same points", "line" to notation)
+        if (notation.p1 == notation.p2)
+            throw SpoofError("Line %{line} consists of same points", "line" to notation)
         if (notation.p1 > notation.p2)
             notation.p1 = notation.p2.also { notation.p2 = notation.p1 }
         return notation
@@ -65,24 +58,37 @@ object Utils {
      */
     fun getBinaryRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
         try {
-            return when (tuple.t2.text) {
-                "in" ->  {
-                    checkNotPoint(tuple.t3, tuple.t2.text)
-                    BinaryIn(tuple.t1, tuple.t3)
+            val first = tuple.t1
+            val operator = tuple.t2.text
+            val second = tuple.t3
+            return when (operator) {
+                "in" -> {
+                    checkNotCircle(first, operator)
+                    checkNotPoint(second, operator)
+                    checkNotAngle(first, operator)
+                    checkNotAngle(second, operator)
+                    if (first is ArcNotation && second !is ArcNotation)
+                        throw SpoofError("If arc is at the first position in `in`, then it should be in the second position too")
+                    if (second is ArcNotation && first !is PointNotation)
+                        throw SpoofError("If arc is at the second position in `in`, then point or arc should be in the first position")
+                    checkNoGreaterOrder(first, second)
+                    BinaryIn(first, second)
                 }
-                "intersects", "∩" ->{
-                    checkNotPoint(tuple.t1, tuple.t2.text)
-                    checkNotPoint(tuple.t3, tuple.t2.text)
-                    BinaryIntersects(tuple.t1, tuple.t3)}
+                "intersects", "∩" -> {
+                    checkNotPoint(first, operator)
+                    checkNotPoint(second, operator)
+                    checkNotAngle(first, operator)
+                    checkNotAngle(second, operator)
+                    BinaryIntersects(first, second)
+                }
                 "parallel", "||" -> {
-                    checkLinear(tuple.t1, tuple.t3, tuple.t2.text)
-                    BinaryParallel(tuple.t1 as Point2Notation, tuple.t3 as Point2Notation)
+                    checkLinear(first, second, operator)
+                    BinaryParallel(first as Point2Notation, second as Point2Notation)
                 }
                 "perpendicular", "⊥" -> {
-                    checkLinear(tuple.t1, tuple.t3, tuple.t2.text)
-                    BinaryPerpendicular(tuple.t1 as Point2Notation, tuple.t3 as Point2Notation)
+                    checkLinear(first, second, operator)
+                    BinaryPerpendicular(first as Point2Notation, second as Point2Notation)
                 }
-
                 else -> throw Exception("Unknown comparison")
             }
         } catch (spoof: SpoofError) {
@@ -90,14 +96,31 @@ object Utils {
         }
     }
 
+    private fun checkNoGreaterOrder(first: Notation, second: Notation) {
+        if (first.getOrder() > second.getOrder())
+            throw SpoofError("`$first` is 'smaller' than `$second`")
+    }
+
     private fun checkNotPoint(notation: Notation, operator: String) {
-        if(notation is PointNotation)
+        if (notation is PointNotation)
             throw SpoofError("`$notation` is point, `$operator` is not applicable to points in this position")
     }
 
+    private fun checkNotAngle(notation: Notation, operator: String) {
+        if (notation is Point3Notation)
+            throw SpoofError("`$notation` is angle, `$operator` is not applicable to angle in this position")
+    }
+
+    private fun checkNotCircle(notation: Notation, operator: String) {
+        if (notation is IdentNotation)
+            throw SpoofError("`$notation` is circle, `$operator` is not applicable to circle in this position")
+    }
+
     private fun checkLinear(first: Notation, second: Notation, operator: String) {
-        if (first !is Point2Notation || second !is Point2Notation)
-            throw SpoofError("`${if (first !is Point2Notation) first else second}` is not linear, `$operator` is not applicable")
+        if (first !is Point2Notation || second !is Point2Notation || first is ArcNotation || second is ArcNotation)
+            throw SpoofError(
+                "`${if (first !is Point2Notation) first else second}` is not linear, `$operator` is not applicable"
+            )
     }
 
     fun <T : Comparable<T>?> max(t1: T, t2: T): T {
@@ -109,7 +132,7 @@ object Utils {
     }
 
     object NameGenerator {
-        var index = 0
+        private var index = 0
 
         fun getName() = "$${index++}"
     }

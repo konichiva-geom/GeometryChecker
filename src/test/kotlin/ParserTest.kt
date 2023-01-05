@@ -1,7 +1,3 @@
-import com.github.h0tk3y.betterParse.grammar.parseToEnd
-import com.github.h0tk3y.betterParse.parser.AlternativesFailure
-import com.github.h0tk3y.betterParse.parser.ParseException
-import pipeline.GeomGrammar
 import pipeline.Parser
 import kotlin.test.Test
 import kotlin.test.assertFails
@@ -15,36 +11,37 @@ class ParserTest {
     @Test
     fun failsNotApplicableOperator() {
         for (op in listOf("intersects", "parallel", "in", "perpendicular"))
-            defaultErrorTest(
-                """
-            description:
-                AB $op A
-            prove:
-            
-            solution:
-        """.trimIndent(), "`$op` is not applicable"
-            )
+            defaultErrorTest("AB $op A", "`$op` is not applicable")
     }
 
     @Test
     fun failsAngleInRelations() {
-        // TODO make it get a proper exception text
         for (op in listOf("intersects", "parallel", "in", "perpendicular"))
-            defaultErrorTest(
-                """
-            description:
-                AB $op ABC
-            prove:
-            
-            solution:
-        """.trimIndent(), "", true
-            )
+            defaultErrorTest("AB $op ABC", "`$op` is not applicable")
     }
 
-    private fun defaultErrorTest(code: String, expected: String, print: Boolean = false) {
+    @Test
+    fun failsInRelations() {
+        defaultErrorTest("segment AB in A", "is not applicable to points in this position")
+        defaultErrorTest("AB in segment AB", "is 'smaller' than")
+        defaultErrorTest("omega in segment AB", "is not applicable to circle in this position")
+        defaultErrorTest("arc AB of omega in segment AB", "If arc is at the first position in `in`, then it should be in the second position too")
+        defaultErrorTest("AB in arc AB of omega", "If arc is at the second position in `in`, then point or arc should be in the first position")
+    }
+
+    private fun defaultErrorTest(code: String, expected: String, print: Boolean = true) {
         val exception = assertFails {
             val parser = Parser()
-            parser.parse(code)
+            parser.parse(
+                """
+                description:
+                $code
+                prove:
+                    A in AB
+                solution:
+                    A in AB
+            """.trimIndent()
+            )
         }
         if (print)
             println(exception.message!!)

@@ -4,16 +4,7 @@ import Signature
 import TheoremBody
 import Utils
 import Utils.signToLambda
-import com.github.h0tk3y.betterParse.combinators.and
-import com.github.h0tk3y.betterParse.combinators.leftAssociative
-import com.github.h0tk3y.betterParse.combinators.map
-import com.github.h0tk3y.betterParse.combinators.oneOrMore
-import com.github.h0tk3y.betterParse.combinators.optional
-import com.github.h0tk3y.betterParse.combinators.or
-import com.github.h0tk3y.betterParse.combinators.separatedTerms
-import com.github.h0tk3y.betterParse.combinators.times
-import com.github.h0tk3y.betterParse.combinators.unaryMinus
-import com.github.h0tk3y.betterParse.combinators.zeroOrMore
+import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parser
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
@@ -22,23 +13,7 @@ import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
-import expr.ArcNotation
-import expr.ArithmeticBinaryExpr
-import expr.BinaryEquals
-import expr.BinaryGEQ
-import expr.BinaryGreater
-import expr.BinaryNotEquals
-import expr.Expr
-import expr.IdentNotation
-import expr.Notation
-import expr.NumNotation
-import expr.Point2Notation
-import expr.Point3Notation
-import expr.PointNotation
-import expr.PrefixNot
-import expr.RayNotation
-import expr.SegmentNotation
-import expr.TheoremUse
+import expr.*
 import symbolTable
 
 object GeomGrammar : Grammar<Any>() {
@@ -48,6 +23,7 @@ object GeomGrammar : Grammar<Any>() {
     private val arc by literalToken("arc")
     //endregion
 
+    private val ofToken by literalToken("of")
     private val negationToken by literalToken("not")
     private val newToken by literalToken("new")
     private val comment by regexToken("//.*\n?", ignore = true)
@@ -68,7 +44,7 @@ object GeomGrammar : Grammar<Any>() {
     private val shortParallelToken by literalToken("||")
     private val inToken by literalToken("in")
     private val relationToken by intersectsToken or shortIntersectsToken or inToken or
-        perpendicularToken or shortPerpendicularToken or parallelToken or shortParallelToken
+            perpendicularToken or shortPerpendicularToken or parallelToken or shortParallelToken
     //endregion
 
     //region comparison tokens
@@ -109,12 +85,12 @@ object GeomGrammar : Grammar<Any>() {
         symbolTable.getLine(res)
         res
     }) or (point map { PointNotation(it.text) }) or
-        (-arc and line map { ArcNotation(it.first, it.second) }) or
-        (ident map { IdentNotation(it.text) })
+            (-arc and line and -ofToken and ident map { ArcNotation(it.t1.first, it.t1.second, it.t2.text) }) or
+            (ident map { IdentNotation(it.text) })
 
     // segment AB, A, ray DF
     private val notation by (-segment and line map { SegmentNotation(it.first, it.second) }) or
-        (-ray and line map { RayNotation(it.first, it.second) }) or (angle map {
+            (-ray and line map { RayNotation(it.first, it.second) }) or (angle map {
         val res = Point3Notation(it[0].text, it[1].text, it[2].text)
         symbolTable.getAngle(res)
         res
@@ -150,7 +126,7 @@ object GeomGrammar : Grammar<Any>() {
     }
 
     private val relation: Parser<Expr> by notation and relationToken and notation or
-        (negationToken and parser(GeomGrammar::relation)) map {
+            (negationToken and parser(GeomGrammar::relation)) map {
         if (it is Tuple3<*, *, *>) {
             Utils.getBinaryRelationByString((it as Tuple3<Notation, TokenMatch, Notation>))
         } else {
@@ -191,7 +167,7 @@ object GeomGrammar : Grammar<Any>() {
         theoremUsage or /*inference or*/ binaryStatement, lineBreak
     ) and -zeroOrMore(lineBreak) map { it }
     private val block by ident and -colon and -lineBreak and blockContent map
-        { Tuple2(it.t1.text, it.t2) }
+            { Tuple2(it.t1.text, it.t2) }
 
     private val returnStatement by -returnToken and args map { it }
     private val thStatement by theoremUsage or relation or comparison
@@ -200,7 +176,7 @@ object GeomGrammar : Grammar<Any>() {
     private val thBlock by -zeroOrMore(lineBreak) and (separatedTerms(
         thStatement, lineBreak
     ) and optional(-lineBreak and returnStatement) or returnStatement) and
-        -zeroOrMore(lineBreak) map {
+            -zeroOrMore(lineBreak) map {
         // only return statement
         if (it is ArrayList<*>)
             TheoremBody(emptyList(), it as List<Expr>)

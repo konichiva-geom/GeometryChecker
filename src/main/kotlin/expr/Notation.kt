@@ -4,6 +4,18 @@ import TheoremParser
 import Utils.max
 import Utils.min
 
+/**
+ * Represents some structure of points (angle, line e.t.c) or te name of a circle
+ * Order:
+ * Num: 0
+ * Point: 1
+ * Segment: 2
+ * Ray: 3
+ * Arc: 4
+ * Point2 (Line): 5
+ * Point3: 6
+ * Ident: 7
+ */
 abstract class Notation : Expr, Comparable<Expr>, Foldable {
     abstract fun getOrder(): Int
     fun compareOrSame(other: Expr): Int? {
@@ -61,7 +73,7 @@ abstract class RelatableNotation : Notation()
 // }
 
 class Point3Notation(var p1: String, var p2: String, var p3: String) : RelatableNotation() {
-    override fun getOrder(): Int = 3
+    override fun getOrder(): Int = 6
 
     override fun flatten(): MutableMap<Any, Float> {
         return mutableMapOf(this to 1f)
@@ -89,7 +101,7 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
         this.p2 = max(p1, p2)
     }
 
-    override fun getOrder(): Int = 2
+    override fun getOrder(): Int = 5
 
     override fun flatten(): MutableMap<Any, Float> {
         return mutableMapOf(this to 1f)
@@ -132,32 +144,34 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
         this.p1 = p1
         this.p2 = p2
     }
+
     override fun mergeMapping(tp: TheoremParser, other: Notation) {
         other as RayNotation
         tp.mergeMapping(p1, listOf(other.p1))
         tp.mergeMapping(p2, listOf(other.p2))
     }
 
-    override fun getOrder(): Int {
-        return super.getOrder() + 1
-    }
+    override fun getOrder(): Int = 3
 
     override fun toLine() = Point2Notation(p1, p2)
+    override fun toString(): String = "ray ${super.toString()}"
 }
 
 class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
-    override fun getOrder(): Int {
-        return super.getOrder() + 2
-    }
+    override fun getOrder(): Int = 2
 
     override fun toLine() = Point2Notation(p1, p2)
+    override fun toString(): String = "segment ${super.toString()}"
 }
 
-class ArcNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
+class ArcNotation(p1: String, p2: String, val circle: String) : Point2Notation(p1, p2) {
+    override fun getOrder(): Int = 4
     override fun toLine() = Point2Notation(p1, p2)
+    override fun toString(): String = "arc ${super.toString()} of $circle"
 }
+
 class IdentNotation(private val text: String) : RelatableNotation() {
-    override fun getOrder(): Int = 0
+    override fun getOrder(): Int = 7
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
@@ -170,7 +184,7 @@ class IdentNotation(private val text: String) : RelatableNotation() {
 }
 
 class NumNotation(val number: Number) : Notation() {
-    override fun getOrder(): Int = -1
+    override fun getOrder(): Int = 0
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
