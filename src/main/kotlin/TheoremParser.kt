@@ -1,9 +1,10 @@
-import Utils.THEOREMS_PATH
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
+import com.github.h0tk3y.betterParse.parser.AlternativesFailure
+import com.github.h0tk3y.betterParse.parser.ParseException
 import expr.Expr
 import expr.Notation
 import pipeline.GeomGrammar
-import java.io.File
+import pipeline.Parser
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
     override fun toString(): String {
@@ -33,11 +34,25 @@ data class Signature(val name: String, val args: List<Expr>) {
     }
 }
 
-class TheoremParser {
+class TheoremParser: Parser() {
     private val theorems = mutableMapOf<Signature, TheoremBody>()
     private val mappings = mutableMapOf<String, MutableList<String>>()
-    fun addTheorems(path: String = THEOREMS_PATH) {
-        theorems.putAll((GeomGrammar.parseToEnd(File(path).readText()) as List<Pair<Signature, TheoremBody>>).toMap())
+    fun clearTheorems() {
+        theorems.clear()
+    }
+
+    private fun clearMappings() {
+        mappings.clear()
+    }
+
+    fun addTheorems(theoremsCode: String) {
+        try {
+            theorems.putAll((GeomGrammar.parseToEnd(theoremsCode) as List<Pair<Signature, TheoremBody>>).toMap())
+        } catch(e: ParseException) {
+            val tokens = getAllErrorTokens(e.errorResult as AlternativesFailure)
+            chooseFurthestUnexpectedToken(tokens)
+            throw findProblemToken(e.errorResult as AlternativesFailure)
+        }
     }
 
     fun getTheoremBodyBySignature(signature: Signature): TheoremBody {
@@ -59,6 +74,7 @@ class TheoremParser {
             println()
         }
         symbolTable.addRelations = false
+        clearMappings()
     }
 
     fun traverseSignature(callSignature: Signature, defSignature: Signature) {
@@ -105,7 +121,7 @@ class TheoremParser {
             if (res.isEmpty())
                 throw SpoofError(
                     "Got empty intersection while resolving theorem " +
-                        "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
+                            "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
                     "letter" to key
                 )
             mappings[key] = res.toMutableList()

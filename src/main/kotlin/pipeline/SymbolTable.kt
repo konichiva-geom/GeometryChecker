@@ -1,25 +1,6 @@
 import Utils.sortAngle
-import entity.AngleRelations
-import entity.ArcRelations
-import entity.CircleRelations
-import entity.EntityRelations
-import entity.LineRelations
-import entity.PointRelations
-import entity.RayRelations
-import entity.SegmentRelations
-import expr.ArcNotation
-import expr.BinaryEquals
-import expr.BinaryIn
-import expr.BinaryIntersects
-import expr.BinaryParallel
-import expr.Expr
-import expr.IdentNotation
-import expr.Notation
-import expr.Point2Notation
-import expr.Point3Notation
-import expr.PointNotation
-import expr.RayNotation
-import expr.SegmentNotation
+import entity.*
+import expr.*
 import kotlin.reflect.KClass
 
 interface PointCollection {
@@ -87,11 +68,37 @@ open class SymbolTable {
     fun getKeyValueByNotation(notation: Notation): Pair<Any, EntityRelations> {
         when (notation) {
             is PointNotation -> return notation.p to getPoint(notation)
+            is RayNotation -> {
+                for ((collection, ray) in rays) {
+                    if (pointsEqual(collection.start, notation.p1) && pointsContain(notation.p2, collection.points))
+                        return collection to ray
+                }
+                val rayRelations = RayRelations()
+                val collection = RayPointCollection(notation.p1, mutableSetOf(notation.p2))
+                rays[collection] = rayRelations
+                return collection to rayRelations
+            }
+            is SegmentNotation -> {
+                for ((collection, segment) in segments) {
+                    if (pointsContain(notation.p1, collection.bounds) && pointsContain(notation.p2, collection.bounds))
+                        return collection to segment
+                }
+                val segmentRelations = SegmentRelations()
+                val collection =
+                    SegmentPointCollection(notation.getLetters().toMutableSet(), notation.getLetters().toMutableSet())
+                segments[collection] = segmentRelations
+                return collection to segmentRelations
+            }
             is Point2Notation -> {
-                for ((collection, value) in linear[notation::class]!!)
-                    if (collection.getPointsInCollection().containsAll(notation.getLetters()))
-                        return collection to value
-                throw SpoofError("not found")
+                for ((collection, line) in lines) {
+                    if (pointsContain(notation.p1, collection.points) && pointsContain(notation.p2, collection.points))
+                        return collection to line
+                }
+                val lineRelations = LineRelations()
+                val collection =
+                    LinePointCollection(notation.getLetters().toMutableSet())
+                lines[collection] = lineRelations
+                return collection to lineRelations
             }
 
             is Point3Notation -> return notation to getAngle(notation)
@@ -130,6 +137,9 @@ open class SymbolTable {
             else -> throw SpoofError(notation.toString())
         }
     }
+
+    fun pointsEqual(p1: String, p2: String): Boolean = points[p1] == points[p2]
+    fun pointsContain(p1: String, collection: Set<String>): Boolean = collection.any { points[p1] == points[it] }
 
     /**
      * Make point distinct from all others

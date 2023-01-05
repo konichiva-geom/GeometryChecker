@@ -8,3 +8,8 @@ any C, any D, AB || CD, C != A, C != B, D != A, D != B, \
 // Проверяем, знаем ли мы их.
 
 // any - конструкция, начинающая перебор. Хочется, чтобы после any
+
+// merging lines
+A in BC => AB == BC, BC == AC
+AB ∩ CD, any K, any M, K in AB, M in AB, K in CD, M in CD => AB == CD
+A == B, any C => AC == BC
