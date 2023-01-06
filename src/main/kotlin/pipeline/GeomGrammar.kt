@@ -27,7 +27,7 @@ object GeomGrammar : Grammar<Any>() {
     private val ofToken by literalToken("of")
     private val negationToken by literalToken("not")
     private val newToken by literalToken("new")
-    private val comment by regexToken("//.*\n?", ignore = true)
+    private val comment by regexToken("//.*(\\n[\\t ]*)*", ignore = true)
     private val multilineComment by regexToken("/\\*[.\n]*\\*/", ignore = true)
     private val thDefStart by literalToken("th")
     private val returnToken by literalToken("return")
@@ -73,6 +73,7 @@ object GeomGrammar : Grammar<Any>() {
     private val ident by regexToken("[a-zA-Z]+[\\w_]*")
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
     private val optionalLineBreak by regexToken("(\\n[\\t ]*)*")
+    private val statementSeparator by lineBreak or comment
 
     //region creation tokens
     private val creation by -newToken and (point or ident) map {
@@ -167,9 +168,9 @@ object GeomGrammar : Grammar<Any>() {
     //     (comparison and -comma and comparison and -inferToken and comparison map { it })
 
     private val blockContent by -zeroOrMore(lineBreak) and separatedTerms(
-        theoremUsage or /*inference or*/ binaryStatement, lineBreak
+        theoremUsage or /*inference or*/ binaryStatement, statementSeparator
     ) and -zeroOrMore(lineBreak) map { it }
-    private val block by ident and -colon and -lineBreak and blockContent map
+    private val block by ident and -colon and -statementSeparator and blockContent map
             { Tuple2(it.t1.text, it.t2) }
 
     private val returnStatement by -returnToken and args map { it }
@@ -177,8 +178,8 @@ object GeomGrammar : Grammar<Any>() {
 
     //private val seq by
     private val thBlock by -zeroOrMore(lineBreak) and (separatedTerms(
-        thStatement, lineBreak
-    ) and optional(-lineBreak and returnStatement) or returnStatement) and
+        thStatement, statementSeparator
+    ) and optional(-statementSeparator and returnStatement) or returnStatement) and
             -zeroOrMore(lineBreak) map {
         // only return statement
         if (it is ArrayList<*>)
@@ -189,13 +190,12 @@ object GeomGrammar : Grammar<Any>() {
         }
     }
 
-    private val thDef by -thDefStart and zeroArgsOrMoreInvocation and -colon and thBlock map {
-        Pair(it.t1, it.t2)
-    }
+    private val thDef by -thDefStart and zeroArgsOrMoreInvocation and
+            -colon and thBlock map { Pair(it.t1, it.t2) }
 
     private val inferenceArgs by separatedTerms((anyToken and notation) or binaryStatement or notation, comma)
     private val inferenceStatement by inferenceArgs and (iffToken or inferToken) and inferenceArgs
 
     override val rootParser: Parser<Any> by oneOrMore(thDef) or (3 times block map { it }) or
-            (-zeroOrMore(lineBreak) and separatedTerms(inferenceStatement, lineBreak) and -zeroOrMore(lineBreak))
+            (-zeroOrMore(lineBreak) and separatedTerms(inferenceStatement, statementSeparator) and -zeroOrMore(lineBreak))
 }

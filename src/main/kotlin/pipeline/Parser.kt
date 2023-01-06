@@ -30,7 +30,7 @@ open class Parser {
                 throw PosError(
                     IntRange(token.offset, token.input.length),
                     "Couldn't parse input, starting with: %{text}",
-                    "text" to token.input.substring(token.offset, token.offset + Utils.min(20, remainderLength))
+                    "text" to token.input.substring(token.offset - 1, token.offset - 1 + Utils.min(20, remainderLength))
                 )
             }
             val tokens = getAllErrorTokens(e.errorResult as AlternativesFailure)

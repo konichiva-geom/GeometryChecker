@@ -5,7 +5,16 @@ import kotlin.test.assertTrue
 
 class ParserTest {
     @Test
-    fun testParenthesesParse() {
+    fun commentTest() {
+        defaultPassTest("""
+            description:
+                    A in AB
+                prove:
+                    A in AB
+                solution:
+                    A in AB
+           
+        """.trimIndent(), allCodeWritten = true)
     }
 
     @Test
@@ -25,8 +34,14 @@ class ParserTest {
         defaultErrorTest("segment AB in A", "is not applicable to points in this position")
         defaultErrorTest("AB in segment AB", "is 'smaller' than")
         defaultErrorTest("omega in segment AB", "is not applicable to circle in this position")
-        defaultErrorTest("arc AB of omega in segment AB", "If arc is at the first position in `in`, then it should be in the second position too")
-        defaultErrorTest("AB in arc AB of omega", "If arc is at the second position in `in`, then point or arc should be in the first position")
+        defaultErrorTest(
+            "arc AB of omega in segment AB",
+            "If arc is at the first position in `in`, then it should be in the second position too"
+        )
+        defaultErrorTest(
+            "AB in arc AB of omega",
+            "If arc is at the second position in `in`, then point or arc should be in the first position"
+        )
     }
 
     private fun defaultErrorTest(code: String, expected: String, print: Boolean = true) {
@@ -46,5 +61,19 @@ class ParserTest {
         if (print)
             println(exception.message!!)
         assertTrue(exception.message!!.contains(expected))
+    }
+
+    private fun defaultPassTest(code: String, allCodeWritten: Boolean = false) {
+        val parser = Parser()
+        parser.parse(
+            if (allCodeWritten) code else """
+                description:
+                $code
+                prove:
+                    A in AB
+                solution:
+                    A in AB
+            """.trimIndent()
+        )
     }
 }
