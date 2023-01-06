@@ -1,7 +1,7 @@
 A in BC <=> not A !in BC
 A in segment BC => A in BC, A in ray BC
 A in ray BC => A in BC
-any C, any D, AB || CD, C != A, C != B, D != A, D != B, \
+AB || CD, any C, any D, C != A, C != B, D != A, D != B, \
  CD || EF => AB || EF
 // чтобы это работало, нужно идти в обратную сторону. Представим, что хотим A in BC, имея A in ray BC.
 // Проходим по всем правым частям (после =>) и ищем A in ray BC. Где нашли, смотрим, какие отношения нужны.

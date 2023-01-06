@@ -23,6 +23,7 @@ object GeomGrammar : Grammar<Any>() {
     private val arc by literalToken("arc")
     //endregion
 
+    private val anyToken by literalToken("any")
     private val ofToken by literalToken("of")
     private val negationToken by literalToken("not")
     private val newToken by literalToken("new")
@@ -48,6 +49,7 @@ object GeomGrammar : Grammar<Any>() {
     //endregion
 
     //region comparison tokens
+    private val iffToken by literalToken("<=>")
     private val eqToken by literalToken("==")
     private val neqToken by literalToken("!=")
     private val geq by literalToken(">=")
@@ -98,6 +100,8 @@ object GeomGrammar : Grammar<Any>() {
         NumNotation(it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number"))
     })
 
+    private val inferenceNotation by (anyToken and notation) or notation
+
     private val term by notation or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar) map { it }
 
     private val divMulChain: Parser<Expr> by leftAssociative(term, div or mul) { a, op, b ->
@@ -146,6 +150,7 @@ object GeomGrammar : Grammar<Any>() {
             it.t2
         )
     }
+
     private val theoremUsage by (zeroArgsOrMoreInvocation and -inferToken and (mul or args)) or (invocation) map {
         if (it is Signature) TheoremUse(
             it,
@@ -189,5 +194,9 @@ object GeomGrammar : Grammar<Any>() {
     private val thDef by -thDefStart and zeroArgsOrMoreInvocation and -colon and thBlock map {
         Pair(it.t1, it.t2)
     }
-    override val rootParser: Parser<Any> by oneOrMore(thDef) or (3 times block map { it })
+
+    private val inferenceStatement by args and (iffToken or inferToken) and args
+
+    override val rootParser: Parser<Any> by oneOrMore(thDef) or (3 times block map { it }) or
+            separatedTerms(inferenceStatement, lineBreak)
 }

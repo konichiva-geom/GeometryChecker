@@ -27,7 +27,8 @@ class RelationTest {
         """.trimIndent()
         )
     }
-    @Test fun testRelationHaving() {
+
+    @Test fun testRelationChecking() {
 
     }
 
