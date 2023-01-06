@@ -35,6 +35,11 @@ class Pipeline {
         return this
     }
 
+    fun parseFile(path: String): Pipeline {
+        tree = parser.parse(File(path).readText())
+        return this
+    }
+
     fun interpret(): Pipeline {
         if (!this::tree.isInitialized)
             throw SpoofError("Parse code before interpreting")

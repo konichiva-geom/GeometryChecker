@@ -100,8 +100,6 @@ object GeomGrammar : Grammar<Any>() {
         NumNotation(it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number"))
     })
 
-    private val inferenceNotation by (anyToken and notation) or notation
-
     private val term by notation or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar) map { it }
 
     private val divMulChain: Parser<Expr> by leftAssociative(term, div or mul) { a, op, b ->
@@ -195,8 +193,9 @@ object GeomGrammar : Grammar<Any>() {
         Pair(it.t1, it.t2)
     }
 
-    private val inferenceStatement by args and (iffToken or inferToken) and args
+    private val inferenceArgs by separatedTerms((anyToken and notation) or binaryStatement or notation, comma)
+    private val inferenceStatement by inferenceArgs and (iffToken or inferToken) and inferenceArgs
 
     override val rootParser: Parser<Any> by oneOrMore(thDef) or (3 times block map { it }) or
-            separatedTerms(inferenceStatement, lineBreak)
+            (-zeroOrMore(lineBreak) and separatedTerms(inferenceStatement, lineBreak) and -zeroOrMore(lineBreak))
 }

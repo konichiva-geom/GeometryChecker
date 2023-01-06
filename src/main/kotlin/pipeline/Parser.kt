@@ -2,6 +2,7 @@ package pipeline
 
 import PosError
 import SpoofError
+import Utils
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.*
 import com.github.h0tk3y.betterParse.st.SyntaxTree
@@ -23,6 +24,15 @@ open class Parser {
         } catch (e: ParseException) {
             if (!smartExceptions)
                 throw e
+            if (e.errorResult is UnparsedRemainder) {
+                val token = (e.errorResult as UnparsedRemainder).startsWith
+                val remainderLength = token.input.length - token.offset
+                throw PosError(
+                    IntRange(token.offset, token.input.length),
+                    "Couldn't parse input, starting with: %{text}",
+                    "text" to token.input.substring(token.offset, token.offset + Utils.min(20, remainderLength))
+                )
+            }
             val tokens = getAllErrorTokens(e.errorResult as AlternativesFailure)
             chooseFurthestUnexpectedToken(tokens)
             throw findProblemToken(e.errorResult as AlternativesFailure)

@@ -17,7 +17,10 @@ fun main() {
         //fdfds4
         //
         prove:
+        
         D == 3
+        
+        
         R + 42 > 4
         //RD || CD
         tUse(T in AB) => *
@@ -26,7 +29,7 @@ fun main() {
         
         
       //  D==3, R==4+42 => F==3
-        arc AB < 3
+        arc AB of omega < 3
         tUse() => TB in BA, B == C
         """
 
@@ -38,9 +41,13 @@ fun main() {
          
         th defa(D > 3* 2+4/T, F in ED, D ): // re fewfw
         return A
+        
+        
+        
     //"""
     val pipeline = Pipeline()
     pipeline.parse(a)
+    pipeline.parseFile("examples/inference.txt")
     pipeline.parse(th)
     pipeline.addTheoremsFromFile().parse(a).interpret()
 }
