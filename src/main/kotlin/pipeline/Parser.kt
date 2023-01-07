@@ -5,6 +5,7 @@ import SpoofError
 import Utils
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.*
+import com.github.h0tk3y.betterParse.st.LiftToSyntaxTreeOptions
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
 import com.github.h0tk3y.betterParse.utils.Tuple2
@@ -20,7 +21,7 @@ open class Parser {
      */
     fun parse(code: String, smartExceptions: Boolean = true): SyntaxTree<List<Tuple2<Any, List<Expr>>>> {
         try {
-            return GeomGrammar.liftToSyntaxTreeGrammar().parseToEnd(code) as SyntaxTree<List<Tuple2<Any, List<Expr>>>>
+            return GeomGrammar.liftToSyntaxTreeGrammar(LiftToSyntaxTreeOptions(retainSeparators = false)).parseToEnd(code) as SyntaxTree<List<Tuple2<Any, List<Expr>>>>
         } catch (e: ParseException) {
             if (!smartExceptions)
                 throw e

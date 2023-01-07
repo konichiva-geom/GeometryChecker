@@ -8,10 +8,14 @@ val symbolTable = SymbolTable()
 
 fun main() {
     val a = """description:
+        new A
+        new B
         AB || CD
         equal_sided_triangles_i(CD == D1C1, EC == C1E1, ECD == D1C1E1) => *
         //R==2*(3*4+(42-R))+A
        // D==3, R==2*(3*4+(42-R))+A => F==3
+       A in AB
+       check(A in AB)
         tUse(T in AC) => *
         //tUse() => T in B
         //fdfds4

@@ -1,6 +1,25 @@
 import Utils.sortAngle
-import entity.*
-import expr.*
+import entity.AngleRelations
+import entity.ArcRelations
+import entity.CircleRelations
+import entity.EntityRelations
+import entity.LineRelations
+import entity.PointRelations
+import entity.RayRelations
+import entity.SegmentRelations
+import expr.ArcNotation
+import expr.BinaryEquals
+import expr.BinaryIn
+import expr.BinaryIntersects
+import expr.BinaryParallel
+import expr.Expr
+import expr.IdentNotation
+import expr.Notation
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointNotation
+import expr.RayNotation
+import expr.SegmentNotation
 
 interface PointCollection {
     fun getPointsInCollection(): Set<String>
@@ -141,16 +160,18 @@ open class SymbolTable {
      * Make point distinct from all others
      */
     fun newPoint(notation: PointNotation): PointRelations {
-        // println(name)
-        return PointRelations()
-        // if (points[name] != null)
-        //     throw Exception("Point ${name} already defined")
-        // points[name] = Point(points.keys.toMutableSet())
-        // return points[name]!!
+        if (points[notation.p] != null)
+            throw SpoofError("Point %{name} already defined", "name" to notation.p)
+        points[notation.p] = PointRelations()
+        return points[notation.p]!!
+    }
+
+    fun newCircle(notation: IdentNotation): CircleRelations {
+        return CircleRelations()
     }
 
     fun getPoint(name: String): PointRelations {
-        return points[name] ?: throw Exception("Point $name is not instantiated")
+        return points[name] ?: throw SpoofError("Point %{name} is not instantiated", "name" to name)
     }
 
     fun getPoint(pointNotation: PointNotation): PointRelations {

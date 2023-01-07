@@ -4,7 +4,10 @@ import SymbolTable
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
 
-abstract class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Float) -> Float) : BinaryExpr(left, right),
+/**
+ * Represents +, -, *, /
+ */
+class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Float) -> Float) : BinaryExpr(left, right),
     Foldable {
     override fun flatten(): MutableMap<Any, Float> =
         (left as Foldable).flatten().mergeWithOperation((right as Foldable).flatten(), op)

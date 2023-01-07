@@ -10,6 +10,7 @@ import Utils
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
 import entity.LineRelations
+import symbolTable
 
 /**
  * Expression that returns some value, e.g. [BinaryIntersects] returns point, or segment, or something else
@@ -20,6 +21,13 @@ interface Returnable {
 
 interface Foldable {
     fun flatten(): MutableMap<Any, Float> = mutableMapOf(this to 1f)
+}
+
+/**
+ * Interface for creation (points, circles)
+ */
+interface Creation {
+    fun create(symbolTable: SymbolTable)
 }
 
 interface Expr : Comparable<Expr> {
@@ -57,5 +65,35 @@ class PrefixNot(private val expr: Expr) : Expr {
 
     override fun toString(): String {
         return "not $expr"
+    }
+}
+
+class PointCreation(private val name: String): Expr, Creation {
+    override fun getChildren(): List<Expr> {
+        return emptyList()
+    }
+
+    override fun compareTo(other: Expr): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun create(symbolTable: SymbolTable) {
+        val res = PointNotation(name)
+        symbolTable.newPoint(res)
+    }
+}
+
+class CircleCreation(private val name: String): Expr, Creation {
+    override fun getChildren(): List<Expr> {
+        return emptyList()
+    }
+
+    override fun compareTo(other: Expr): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun create(symbolTable: SymbolTable) {
+        val res = IdentNotation(name)
+        symbolTable.newCircle(res)
     }
 }

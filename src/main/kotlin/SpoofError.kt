@@ -9,7 +9,7 @@ val normalFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
  * @param msg message of the error (different for all languages)
  * @param args arguments of the error (same for all languages)
  */
-open class SpoofError(var msg: String, private vararg val args: Pair<String, Any>) : Exception() {
+open class SpoofError(var msg: String, vararg val args: Pair<String, Any>) : Exception() {
     override val message: String
         get() = changeAllIndicesInOrder(msg)
 
