@@ -4,8 +4,6 @@ import pipeline.Pipeline
 
 class Procedure
 
-val symbolTable = SymbolTable()
-
 fun main() {
     val a = """description:
         new A

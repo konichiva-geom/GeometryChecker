@@ -151,7 +151,7 @@ open class SymbolTable {
     }
 
     fun getPointObjectsByNotation(notation: Notation): Set<PointRelations> =
-        getPointSetNotationByNotation(notation).map { symbolTable.getPoint(it) }.toSet()
+        getPointSetNotationByNotation(notation).map { getPoint(it) }.toSet()
 
     fun pointsEqual(p1: String, p2: String): Boolean = points[p1] == points[p2]
     fun pointsContain(p1: String, collection: Set<String>): Boolean = collection.any { points[p1] == points[it] }

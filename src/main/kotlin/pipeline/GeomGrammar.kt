@@ -41,7 +41,6 @@ import expr.PrefixNot
 import expr.RayNotation
 import expr.SegmentNotation
 import expr.TheoremUse
-import symbolTable
 
 object GeomGrammar : Grammar<Any>() {
     // region entity prefix tokens
@@ -111,7 +110,6 @@ object GeomGrammar : Grammar<Any>() {
 
     private val relatableNotation by (line map {
         val res = Point2Notation(it.first, it.second)
-        symbolTable.getLine(res)
         res
     }) or (point map { PointNotation(it.text) }) or
             (-arc and line and -ofToken and ident map { ArcNotation(it.t1.first, it.t1.second, it.t2.text) }) or
@@ -120,9 +118,7 @@ object GeomGrammar : Grammar<Any>() {
     // segment AB, A, ray DF
     private val notation by (-segment and line map { SegmentNotation(it.first, it.second) }) or
             (-ray and line map { RayNotation(it.first, it.second) }) or (angle map {
-        val res = Point3Notation(it[0].text, it[1].text, it[2].text)
-        symbolTable.getAngle(res)
-        res
+        Point3Notation(it[0].text, it[1].text, it[2].text)
     }) or relatableNotation or (number map {
         NumNotation(it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number"))
     })
