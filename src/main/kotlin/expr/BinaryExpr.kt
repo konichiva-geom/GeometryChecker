@@ -5,6 +5,7 @@ import Relation
 import SegmentPointCollection
 import SymbolTable
 import SystemFatalError
+import Utils
 import entity.LineRelations
 
 abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
