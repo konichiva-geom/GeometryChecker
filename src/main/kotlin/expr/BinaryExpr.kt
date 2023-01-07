@@ -21,9 +21,8 @@ abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
  */
 class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
     override fun check(symbolTable: SymbolTable): Boolean {
-        symbolTable.getPointObjectsByNotation(right as Notation)
+        return symbolTable.getPointObjectsByNotation(right as Notation)
             .containsAll(symbolTable.getPointObjectsByNotation(left as Notation))
-        throw SystemFatalError("Unexpected")
     }
 
     override fun make(symbolTable: SymbolTable) {

@@ -1,16 +1,7 @@
 package expr
 
-import PointCollection
-import Relation
-import SegmentPointCollection
 import Signature
 import SymbolTable
-import SystemFatalError
-import Utils
-import Utils.lambdaToSign
-import Utils.mergeWithOperation
-import entity.LineRelations
-import symbolTable
 
 /**
  * Expression that returns some value, e.g. [BinaryIntersects] returns point, or segment, or something else
@@ -68,7 +59,7 @@ class PrefixNot(private val expr: Expr) : Expr {
     }
 }
 
-class PointCreation(private val name: String): Expr, Creation {
+class PointCreation(private val name: String) : Expr, Creation {
     override fun getChildren(): List<Expr> {
         return emptyList()
     }
@@ -83,7 +74,7 @@ class PointCreation(private val name: String): Expr, Creation {
     }
 }
 
-class CircleCreation(private val name: String): Expr, Creation {
+class CircleCreation(private val name: String) : Expr, Creation {
     override fun getChildren(): List<Expr> {
         return emptyList()
     }

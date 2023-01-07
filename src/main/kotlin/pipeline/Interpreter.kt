@@ -60,8 +60,9 @@ class Interpreter {
                     throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
                 theoremParser.check(rel, symbolTable)
             }
+        } else {
+            val body = theoremParser.getTheoremBodyBySignature(expr.signature)
+            theoremParser.parseTheorem(expr.signature, theoremParser.getSignature(expr.signature), body)
         }
-        val body = theoremParser.getTheoremBodyBySignature(expr.signature)
-        theoremParser.parseTheorem(expr.signature, theoremParser.getSignature(expr.signature), body)
     }
 }
