@@ -6,7 +6,7 @@ A in ray BC => A in BC
 AB || CD, any C, any D, C != A, C != B, D != A, D != B, CD || EF => AB || EF
 // merging lines
 A in BC => AB == BC, BC == AC
-AB ∩ CD, any K, any M, K in AB, M in AB, K in CD, M in CD => AB == CD // a
+AB ∩ CD, any K, any M, K in AB, M in AB, K in CD, M in CD => AB == CD
 A == B, any C => AC == BC
 // Проходим по всем правым частям (после =>) и ищем A in ray BC. Где нашли, смотрим, какие отношения нужны.
 // Проверяем, знаем ли мы их.

@@ -72,7 +72,6 @@ object GeomGrammar : Grammar<Any>() {
     private val ws by regexToken("[\\t ]+", ignore = true)
     private val ident by regexToken("[a-zA-Z]+[\\w_]*")
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
-    private val optionalLineBreak by regexToken("(\\n[\\t ]*)*")
     private val statementSeparator by lineBreak or comment
 
     //region creation tokens

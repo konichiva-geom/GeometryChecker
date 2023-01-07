@@ -7,11 +7,20 @@ class ParserTest {
     @Test
     fun commentTest() {
         defaultPassTest("""
+            // comment
             description:
+            // comment
                     A in AB
                 prove:
                     A in AB
+                    
+                    //comment
                 solution:
+                //
+                //
+                    A in AB
+                //comment
+                
                     A in AB
            
         """.trimIndent(), allCodeWritten = true)

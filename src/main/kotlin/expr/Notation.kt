@@ -164,7 +164,7 @@ class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun toString(): String = "segment ${super.toString()}"
 }
 
-class ArcNotation(p1: String, p2: String, val circle: String) : Point2Notation(p1, p2) {
+class ArcNotation(p1: String, p2: String, private val circle: String) : Point2Notation(p1, p2) {
     override fun getOrder(): Int = 4
     override fun toLine() = Point2Notation(p1, p2)
     override fun toString(): String = "arc ${super.toString()} of $circle"
