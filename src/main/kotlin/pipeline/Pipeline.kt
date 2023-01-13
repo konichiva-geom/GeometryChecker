@@ -1,5 +1,6 @@
 package pipeline
 
+import PosError
 import SpoofError
 import Utils.THEOREMS_PATH
 import com.github.h0tk3y.betterParse.st.SyntaxTree
@@ -14,6 +15,9 @@ class Pipeline {
     val parser = Parser()
     val interpreter = Interpreter()
     lateinit var tree: SyntaxTree<Any>
+
+    // TODO: delete in production
+    lateinit var code: String
 
     fun clearTheorems(): Pipeline {
         interpreter.theoremParser.clearTheorems()
@@ -32,6 +36,7 @@ class Pipeline {
 
     fun parse(code: String): Pipeline {
         tree = parser.parse(code)
+        this.code = code
         return this
     }
 
@@ -40,10 +45,21 @@ class Pipeline {
         return this
     }
 
-    fun interpret(): Pipeline {
+    fun interpretForProduction(): Pipeline {
         if (!this::tree.isInitialized)
             throw SpoofError("Parse code before interpreting")
         interpreter.interpret(tree as SyntaxTree<List<Tuple2<Any, List<Expr>>>>)
+        return this
+    }
+
+    fun interpret(): Pipeline {
+        if (!this::tree.isInitialized)
+            throw SpoofError("Parse code before interpreting")
+        try {
+            interpreter.interpret(tree as SyntaxTree<List<Tuple2<Any, List<Expr>>>>)
+        } catch (e: PosError) {
+            throw PosError(e.range, e.msg + "\n${code.substring(e.range)}\n", *e.args)
+        }
         return this
     }
 }

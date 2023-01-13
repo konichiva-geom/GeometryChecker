@@ -23,6 +23,7 @@ class Interpreter {
             TokenMatch(LiteralToken("", ""), 0, "", 0, tree.range.count(), 0, 0)
         )
         interpretDescription(tree.item[0].t2, tree.children[0].children[1])
+        checkIfProven(tree.item[1].t2, tree.children[1].children[1])
     }
 
     fun checkHeaders(blocks: List<Tuple2<String, *>>, allMatch: TokenMatch) {
@@ -63,6 +64,19 @@ class Interpreter {
         } else {
             val body = theoremParser.getTheoremBodyBySignature(expr.signature)
             theoremParser.parseTheorem(expr.signature, theoremParser.getSignature(expr.signature), body)
+        }
+    }
+
+    private fun checkIfProven(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
+        for ((i, expr) in block.withIndex()) {
+            try {
+                when (expr) {
+                    is Relation -> theoremParser.check(expr, symbolTable)
+                    else -> throw SpoofError("Expected relation to check")
+                }
+            } catch (e: SpoofError) {
+                throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
+            }
         }
     }
 }

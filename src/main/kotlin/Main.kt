@@ -51,8 +51,7 @@ fun main() {
         
     //"""
     val pipeline = Pipeline()
-    pipeline.parse(a)
-    pipeline.parseFile("examples/inference.txt")
+        //    pipeline.parseFile("examples/inference.txt")
     pipeline.parse(th)
     pipeline.addTheoremsFromFile().parse(a).interpret()
 }
