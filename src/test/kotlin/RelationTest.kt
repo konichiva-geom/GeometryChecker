@@ -5,32 +5,52 @@ import kotlin.test.Test
 
 class RelationTest {
     @Test
-    fun testRelationAdding() {
+    fun testInRelationTrivial() {
         interpret(
             """
             description:
-                A in AB
+                new A;new B;
+            prove:
                 segment AB in AB
                 ray AB in AB
                 A in segment AB
                 A in ray AB
                 segment AB in ray AB
                 ray AB in AB
-                
-                AB || CD1
-                AB intersects CD
-                AB perpendicular CD
+            solution:;
+        """.trimIndent())
+    }
+
+        @Test
+    fun testParallelRelation() {
+        interpret("""
+            description:
+                new A;new B;new C; new D
+                AD parallel segment BC
             prove:
-                A in AB
+                AD parallel BC
+                segment AD parallel segment BC
+                ray DA || segment CB
             solution:
-                A in AB
-        """.trimIndent()
-        )
+
+        """.trimIndent())
     }
 
-    @Test fun testRelationChecking() {
-
-    }
+//    @Test
+//    fun testInRelation() {
+//        interpret("""
+//            description:
+//                new A
+//                new B
+//                new C
+//                A in segment BC
+//            prove:
+//                A in BC
+//                A in ray BC
+//            solution:
+//
+//        """.trimIndent())
+//    }
 
     private fun interpret(code: String): SymbolTable {
         val pipeline = Pipeline()
