@@ -1,0 +1,4 @@
+AB || CD <=> segment AB || CD
+AB ⊥ CD <=> segment AB ⊥ CD
+
+segment AB ∩ CD => AB ∩ CD

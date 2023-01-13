@@ -3,8 +3,8 @@ package expr
 import PointCollection
 import Relation
 import SegmentPointCollection
+import SpoofError
 import SymbolTable
-import SystemFatalError
 import Utils
 import entity.LineRelations
 
@@ -46,8 +46,16 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
     }
 }
 
+/**
+ * Intersection means that two line objects are not on the same line
+ * In this case:
+ * segment AB in CD
+ * segment BE in CD
+ *
+ * segments AB and BE are not intersecting, but have a common point
+ */
 class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right), Returnable {
-    lateinit var intersectionValue: Any // two circles intersect by array of points
+    private lateinit var intersectionValue: Any // two circles intersect by array of points
     override fun getReturnValue(): Any = intersectionValue
 
     override fun toString(): String {
@@ -69,12 +77,15 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
         val leftSet = symbolTable.getPointSetNotationByNotation(left as Notation)
         val rightSet = symbolTable.getPointSetNotationByNotation(right as Notation)
         val intersection = leftSet.intersect(rightSet)
-        if (intersection.isNotEmpty()) {
-            // TODO: maybe validate that all intersection points are the same object
-            intersectionValue = PointNotation(intersection.first())
-            return
-        }
-        val intersectionPoint = Utils.NameGenerator.getName()
+        intersectionValue = if (intersection.isNotEmpty())
+            PointNotation(intersection.first())
+        else PointNotation(Utils.NameGenerator.getName())
+        if (intersection.map { symbolTable.getPoint(it) }.toSet().size > 1)
+            throw SpoofError(
+                "This task is incorrect. There can be only one intersection point between two lines, " +
+                    "but got another one from: %{expr}",
+                "expr" to this
+            )
     }
 }
 
