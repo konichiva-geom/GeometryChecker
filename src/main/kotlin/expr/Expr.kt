@@ -22,10 +22,15 @@ interface Creation {
 }
 
 interface Expr : Comparable<Expr> {
-    fun run(symbolTable: SymbolTable) {
-    }
-
     fun getChildren(): List<Expr>
+}
+
+class AnyExpr(val notation: Notation): Expr {
+    override fun getChildren(): List<Expr> = listOf(notation)
+
+    override fun compareTo(other: Expr): Int {
+        TODO("Not yet implemented")
+    }
 }
 
 class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
@@ -34,18 +39,6 @@ class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
-}
-
-class MockExpr : Expr {
-    override fun compareTo(other: Expr): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun getChildren(): List<Expr> {
-        TODO("Not yet implemented")
-    }
-
-    override fun toString(): String = "%"
 }
 
 class PrefixNot(private val expr: Expr) : Expr {

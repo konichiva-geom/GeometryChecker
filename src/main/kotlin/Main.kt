@@ -2,8 +2,6 @@ import pipeline.Pipeline
 
 // TODO check wolfram alpha paid how can he check geom, geogebra
 
-class Procedure
-
 fun main() {
     val a = """description:
         new A
@@ -51,7 +49,7 @@ fun main() {
         
     //"""
     val pipeline = Pipeline()
-        //    pipeline.parseFile("examples/inference.txt")
+    pipeline.parseFile("examples/inference.txt")
     pipeline.parse(th)
     pipeline.addTheoremsFromFile().parse(a).interpret()
 }

@@ -4,9 +4,17 @@ import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
 class ParserTest {
+    // region inference
+    @Test
+    fun failAnyExprAtTheRight() {
+        defaultErrorTest("any A => any B", "any expressions are not allowed at the right side of the inference", allCodeWritten = true)
+    }
+    // endregion
+
     @Test
     fun commentTest() {
-        defaultPassTest("""
+        defaultPassTest(
+            """
             // comment
             description:
             // comment
@@ -53,11 +61,17 @@ class ParserTest {
         )
     }
 
-    private fun defaultErrorTest(code: String, expected: String, print: Boolean = true) {
+    private fun defaultErrorTest(
+        code: String,
+        expected: String,
+        allCodeWritten: Boolean = true,
+        print: Boolean = true
+    ) {
         val exception = assertFails {
             val parser = Parser()
             parser.parse(
-                """
+                if (allCodeWritten) code else
+                    """
                 description:
                 $code
                 prove:

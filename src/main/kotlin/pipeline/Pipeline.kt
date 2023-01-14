@@ -6,6 +6,8 @@ import Utils.THEOREMS_PATH
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import expr.Expr
+import inference.InferenceChecker
+import pipeline.interpreter.Interpreter
 import java.io.File
 
 /**
@@ -14,7 +16,9 @@ import java.io.File
 class Pipeline {
     val parser = Parser()
     val interpreter = Interpreter()
+    val inferenceChecker = InferenceChecker()
     lateinit var tree: SyntaxTree<Any>
+    lateinit var mode: Mode
 
     // TODO: delete in production
     lateinit var code: String
@@ -28,6 +32,8 @@ class Pipeline {
         interpreter.theoremParser.addTheorems(theorems)
         return this
     }
+
+    fun addInference() {}
 
     fun addTheoremsFromFile(path: String = THEOREMS_PATH): Pipeline {
         addTheorems(File(path).readText())
@@ -61,5 +67,11 @@ class Pipeline {
             throw PosError(e.range, e.msg + "\n${code.substring(e.range)}\n", *e.args)
         }
         return this
+    }
+
+    enum class Mode {
+        PROBLEM,
+        THEOREMS,
+        INFERENCE
     }
 }

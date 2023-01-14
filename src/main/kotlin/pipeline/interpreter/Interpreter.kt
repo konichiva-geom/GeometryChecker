@@ -1,4 +1,4 @@
-package pipeline
+package pipeline.interpreter
 
 import PosError
 import Relation
@@ -12,6 +12,8 @@ import com.github.h0tk3y.betterParse.utils.Tuple2
 import expr.Creation
 import expr.Expr
 import expr.TheoremUse
+
+
 
 class Interpreter {
     val theoremParser = TheoremParser()

@@ -1,26 +1,40 @@
 package inference
 
+import expr.AnyExpr
 import expr.Expr
-import expr.Notation
 
 /**
  * Convert result of expressions from inference.txt
  */
 open class Inference(
-    val leftSideExpressions: Set<Expr>,
-    val rightSideExpressions: Set<Expr>,
-    val leftSideQuantifier: Set<Notation>
+    fromSide: List<Expr>,
+    toSide: List<Expr>
 ) {
-    open fun process(newlyAddedExpr: Expr) {
+    val fromSideExpressions = mutableListOf<Expr>()
+    val toSideExpressions = mutableListOf<Expr>()
+    val fromSideQuantifier = mutableListOf<AnyExpr>()
 
+    init {
+        fromSide.forEach {
+            if (it is AnyExpr)
+                fromSideQuantifier.add(it)
+            else fromSideExpressions.add(it)
+        }
+        toSideExpressions.addAll(toSide)
+    }
+
+    open fun process(newlyAddedExpr: Expr) {
     }
 }
 
 class DoubleSidedInference(
-    leftSideExpressions: Set<Expr>,
-    rightSideExpressions: Set<Expr>,
-    leftSideQuantifier: Set<Notation>,
-    val rightSideQuantifier: Set<Notation>
-) : Inference(leftSideExpressions, rightSideExpressions, leftSideQuantifier) {
+    fromSide: List<Expr>,
+    toSide: List<Expr>
+) : Inference(fromSide, toSide) {
+    val toSideQuantifier = mutableListOf<AnyExpr>()
 
+    init {
+        toSideQuantifier.addAll(toSideExpressions.filterIsInstance<AnyExpr>())
+        toSideExpressions.retainAll { it !is AnyExpr }
+    }
 }

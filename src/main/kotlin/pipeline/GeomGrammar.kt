@@ -1,10 +1,19 @@
 package pipeline
 
+import PosError
 import Signature
 import TheoremBody
 import Utils
 import Utils.signToLambda
-import com.github.h0tk3y.betterParse.combinators.*
+import com.github.h0tk3y.betterParse.combinators.and
+import com.github.h0tk3y.betterParse.combinators.leftAssociative
+import com.github.h0tk3y.betterParse.combinators.map
+import com.github.h0tk3y.betterParse.combinators.oneOrMore
+import com.github.h0tk3y.betterParse.combinators.optional
+import com.github.h0tk3y.betterParse.combinators.or
+import com.github.h0tk3y.betterParse.combinators.separatedTerms
+import com.github.h0tk3y.betterParse.combinators.times
+import com.github.h0tk3y.betterParse.combinators.unaryMinus
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parser
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
@@ -13,7 +22,29 @@ import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
-import expr.*
+import expr.AnyExpr
+import expr.ArcNotation
+import expr.ArithmeticBinaryExpr
+import expr.BinaryEquals
+import expr.BinaryGEQ
+import expr.BinaryGreater
+import expr.BinaryNotEquals
+import expr.CircleCreation
+import expr.Expr
+import expr.IdentNotation
+import expr.Notation
+import expr.NumNotation
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointCreation
+import expr.PointNotation
+import expr.PrefixNot
+import expr.RayNotation
+import expr.SegmentNotation
+import expr.TheoremUse
+import inference.DoubleSidedInference
+import inference.Inference
+import toRange
 
 object GeomGrammar : Grammar<Any>() {
     // region entity prefix tokens
@@ -188,14 +219,30 @@ object GeomGrammar : Grammar<Any>() {
     }
 
     private val thDef by -thDefStart and zeroArgsOrMoreInvocation and
-            -colon and thBlock map { Pair(it.t1, it.t2) }
+        -colon and thBlock map { Pair(it.t1, it.t2) }
 
-    private val inferenceArgs by separatedTerms((anyToken and notation) or binaryStatement or notation, comma)
-    private val inferenceStatement by inferenceArgs and (iffToken or inferToken) and inferenceArgs
+    private val inferenceArgs by separatedTerms(
+        (anyToken and notation) or binaryStatement,
+        comma
+    ) map { list -> list.map { if (it !is Expr) AnyExpr((it as Tuple2<Any, Notation>).t2) else it } }
 
-    override val rootParser: Parser<Any> by oneOrMore(thDef) or (3 times block map { it }) or
-            (-optional(statementSeparator) and separatedTerms(
-                inferenceStatement,
-                statementSeparator
-            ) and -optional(statementSeparator))
+    private val inferenceStatement by inferenceArgs and (iffToken or inferToken) and inferenceArgs map { it ->
+        if (it.t2.text == "=>") {
+            if (it.t3.any { it is AnyExpr })
+                throw PosError(it.t2.toRange(), "any expressions are not allowed at the right side of the inference")
+            Inference(it.t1, it.t3)
+        } else
+            DoubleSidedInference(it.t1, it.t3)
+    }
+
+    override val rootParser: Parser<Any> by
+    // theorem parser
+    oneOrMore(thDef) or
+        // solution parser
+        (3 times block map { it }) or
+        // inference parser
+        (-optional(statementSeparator) and separatedTerms(
+            inferenceStatement,
+            statementSeparator
+        ) and -optional(statementSeparator))
 }
