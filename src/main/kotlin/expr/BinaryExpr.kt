@@ -21,6 +21,12 @@ abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
  * `in` relation in tree
  */
 class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
+    override fun getRepr(): StringBuilder = left.getRepr().append(" in ").append(right.getRepr())
+
+    override fun toString(): String {
+        return "$left in $right"
+    }
+
     override fun check(symbolTable: SymbolTable): Boolean {
         return symbolTable.getPointObjectsByNotation(right as Notation)
             .containsAll(symbolTable.getPointObjectsByNotation(left as Notation))
@@ -41,10 +47,6 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
         val collection = symbolTable.getKeyByNotation(right as Point2Notation) as PointCollection
         collection.addPoints(pointList)
     }
-
-    override fun toString(): String {
-        return "$left in $right"
-    }
 }
 
 /**
@@ -58,6 +60,7 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
 class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right), Returnable {
     private lateinit var intersectionValue: Any // two circles intersect by array of points
     override fun getReturnValue(): Any = intersectionValue
+    override fun getRepr(): StringBuilder = left.getRepr().append(" intersects ").append(right.getRepr())
 
     override fun toString(): String {
         return "$left ∩ $right"
@@ -94,6 +97,7 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
  * `||` relation in tree
  */
 class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
+    override fun getRepr(): StringBuilder = left.getRepr().append(" parallel ").append(right.getRepr())
     override fun toString(): String {
         return "$left || $right"
     }
@@ -120,6 +124,7 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
  * `⊥` relation in tree
  */
 class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
+    override fun getRepr(): StringBuilder = left.getRepr().append(" perpendicular ").append(right.getRepr())
     override fun toString(): String {
         return "$left ⊥ $right"
     }

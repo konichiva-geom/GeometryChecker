@@ -2,6 +2,7 @@ package expr
 
 import Signature
 import SymbolTable
+import SystemFatalError
 
 /**
  * Expression that returns some value, e.g. [BinaryIntersects] returns point, or segment, or something else
@@ -23,10 +24,13 @@ interface Creation {
 
 interface Expr : Comparable<Expr> {
     fun getChildren(): List<Expr>
+
+    fun getRepr(): StringBuilder
 }
 
 class AnyExpr(val notation: Notation): Expr {
     override fun getChildren(): List<Expr> = listOf(notation)
+    override fun getRepr(): StringBuilder = notation.getRepr().insert(0, "any ")
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -35,6 +39,7 @@ class AnyExpr(val notation: Notation): Expr {
 
 class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
     override fun getChildren(): List<Expr> = signature.args + output
+    override fun getRepr(): StringBuilder = throw SystemFatalError("Unexpected getRepr() for TheoremUse")
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -43,6 +48,8 @@ class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
 
 class PrefixNot(private val expr: Expr) : Expr {
     override fun getChildren(): List<Expr> = listOf(expr)
+    override fun getRepr(): StringBuilder = expr.getRepr().insert(0, "not ")
+
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
@@ -56,6 +63,8 @@ class PointCreation(private val name: String) : Expr, Creation {
     override fun getChildren(): List<Expr> {
         return emptyList()
     }
+
+    override fun getRepr(): StringBuilder = StringBuilder("new A")
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -71,6 +80,8 @@ class CircleCreation(private val name: String) : Expr, Creation {
     override fun getChildren(): List<Expr> {
         return emptyList()
     }
+
+    override fun getRepr(): StringBuilder = StringBuilder("new c")
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
