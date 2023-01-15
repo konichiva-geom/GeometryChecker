@@ -1,5 +1,6 @@
 package inference
 
+import SymbolTable
 import expr.AnyExpr
 import expr.Expr
 
@@ -23,7 +24,10 @@ open class Inference(
         toSideExpressions.addAll(toSide)
     }
 
-    open fun process(newlyAddedExpr: Expr) {
+    /**
+     * Process inference by first mapping all the letters from the newly added expression
+     */
+    open fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable) {
     }
 }
 

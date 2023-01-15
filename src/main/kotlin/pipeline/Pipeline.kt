@@ -11,7 +11,7 @@ import pipeline.interpreter.Interpreter
 import java.io.File
 
 /**
- * Builder-like class that
+ * Builder-like class that is responsible for all API operations (also a facade)
  */
 class Pipeline {
     val parser = Parser()
@@ -34,7 +34,7 @@ class Pipeline {
     }
 
     fun addInferenceFromFile(path: String) {
-        inferenceChecker.addInference(parser.parseInference(File(path).readText()).item)
+        inferenceChecker.setInference(parser.parseInference(File(path).readText()).item)
     }
 
     fun addTheoremsFromFile(path: String = THEOREMS_PATH): Pipeline {
