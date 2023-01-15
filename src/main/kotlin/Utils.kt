@@ -1,6 +1,17 @@
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.utils.Tuple3
-import expr.*
+import expr.ArcNotation
+import expr.BinaryExpr
+import expr.BinaryIn
+import expr.BinaryIntersects
+import expr.BinaryParallel
+import expr.BinaryPerpendicular
+import expr.IdentNotation
+import expr.Notation
+import expr.NumNotation
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointNotation
 
 object Utils {
     const val THEOREMS_PATH = "examples/theorems.txt"
@@ -63,6 +74,8 @@ object Utils {
             val second = tuple.t3
             return when (operator) {
                 "in" -> {
+                    checkNotNumber(first, operator)
+                    checkNotNumber(second, operator)
                     checkNotCircle(first, operator)
                     checkNotPoint(second, operator)
                     checkNotAngle(first, operator)
@@ -75,6 +88,8 @@ object Utils {
                     BinaryIn(first, second)
                 }
                 "intersects", "∩" -> {
+                    checkNotNumber(first, operator)
+                    checkNotNumber(second, operator)
                     checkNotPoint(first, operator)
                     checkNotPoint(second, operator)
                     checkNotAngle(first, operator)
@@ -99,6 +114,12 @@ object Utils {
     private fun checkNoGreaterOrder(first: Notation, second: Notation) {
         if (first.getOrder() > second.getOrder())
             throw SpoofError("`$first` is 'smaller' than `$second`")
+    }
+
+    private fun checkNotNumber(notation: Notation, operator: String) {
+        if (notation is NumNotation
+        )
+            throw SpoofError("`$notation` is number, `$operator` is not applicable to numbers")
     }
 
     private fun checkNotPoint(notation: Notation, operator: String) {

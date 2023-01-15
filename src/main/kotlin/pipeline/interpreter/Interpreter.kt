@@ -4,7 +4,6 @@ import PosError
 import Relation
 import SpoofError
 import SymbolTable
-import TheoremParser
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
@@ -28,7 +27,7 @@ class Interpreter {
         checkIfProven(tree.item[1].t2, tree.children[1].children[1])
     }
 
-    fun checkHeaders(blocks: List<Tuple2<String, *>>, allMatch: TokenMatch) {
+    private fun checkHeaders(blocks: List<Tuple2<String, *>>, allMatch: TokenMatch) {
         if (blocks[0].t1 != "description"
             || blocks[1].t1 != "prove"
             || blocks[2].t1 != "solution"
@@ -58,11 +57,7 @@ class Interpreter {
 
     private fun interpretTheoremUse(expr: TheoremUse) {
         if (expr.signature.name == "check") {
-            for (rel in expr.signature.args) {
-                if (rel !is Relation)
-                    throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
-                theoremParser.check(rel, symbolTable)
-            }
+            theoremParser.check(expr.signature.args, symbolTable)
         } else {
             val body = theoremParser.getTheoremBodyBySignature(expr.signature)
             theoremParser.parseTheorem(expr.signature, theoremParser.getSignature(expr.signature), body)
@@ -74,7 +69,11 @@ class Interpreter {
             try {
                 when (expr) {
                     is Relation -> theoremParser.check(expr, symbolTable)
-                    else -> throw SpoofError("Expected relation to check")
+                    else -> {
+                        if (expr is TheoremUse && expr.signature.name == "check")
+                            theoremParser.check(expr.signature.args, symbolTable)
+                        else throw SpoofError("Expected relation to check")
+                    }
                 }
             } catch (e: SpoofError) {
                 throw PosError(syntaxTree.children[i].range, e.msg, *e.args)

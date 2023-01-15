@@ -1,8 +1,8 @@
 package expr
 
-import TheoremParser
 import Utils.max
 import Utils.min
+import pipeline.interpreter.TheoremParser
 
 /**
  * Represents some structure of points (angle, line e.t.c) or te name of a circle

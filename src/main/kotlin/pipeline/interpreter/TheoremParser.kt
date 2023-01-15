@@ -1,3 +1,8 @@
+package pipeline.interpreter
+
+import Relation
+import SpoofError
+import SymbolTable
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
@@ -63,7 +68,8 @@ class TheoremParser: Parser() {
     }
 
     fun getSignature(call: Signature): Signature {
-        return theorems.keys.find { it.hashCode() == call.hashCode() } ?: throw Exception("Signature not found")
+        return theorems.keys.find { it.hashCode() == call.hashCode() }
+            ?: throw Exception("pipeline.interpreter.Signature not found")
     }
 
     fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody) {
@@ -76,11 +82,20 @@ class TheoremParser: Parser() {
     }
 
     fun check(relation: Relation, symbolTable: SymbolTable) {
-        if(!relation.check(symbolTable))
+        if (!relation.check(symbolTable))
             throw SpoofError("Relation unknown")
     }
 
-    fun traverseSignature(callSignature: Signature, defSignature: Signature) {
+    fun check(expressions: List<Expr>, symbolTable: SymbolTable) {
+        for (rel in expressions) {
+            if (rel !is Relation)
+                throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
+            if (!rel.check(symbolTable))
+                throw SpoofError("Relation unknown")
+        }
+    }
+
+    private fun traverseSignature(callSignature: Signature, defSignature: Signature) {
         for ((i, arg) in callSignature.args.withIndex())
             traverseExpr(arg, defSignature.args[i])
     }
@@ -88,7 +103,7 @@ class TheoremParser: Parser() {
     /**
      * Visit tree of args and build mappings
      */
-    fun traverseExpr(call: Expr, definition: Expr) {
+    private fun traverseExpr(call: Expr, definition: Expr) {
         if (call::class != definition::class)
             throw Exception("Expected ${definition::class}, got ${call::class}")
         if (call is Notation) {
@@ -124,7 +139,7 @@ class TheoremParser: Parser() {
             if (res.isEmpty())
                 throw SpoofError(
                     "Got empty intersection while resolving theorem " +
-                            "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
+                        "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
                     "letter" to key
                 )
             mappings[key] = res.toMutableList()

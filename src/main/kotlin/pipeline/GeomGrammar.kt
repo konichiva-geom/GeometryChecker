@@ -1,8 +1,6 @@
 package pipeline
 
 import PosError
-import Signature
-import TheoremBody
 import Utils
 import Utils.signToLambda
 import com.github.h0tk3y.betterParse.combinators.and
@@ -44,6 +42,8 @@ import expr.SegmentNotation
 import expr.TheoremUse
 import inference.DoubleSidedInference
 import inference.Inference
+import pipeline.interpreter.Signature
+import pipeline.interpreter.TheoremBody
 import toRange
 
 object GeomGrammar : Grammar<Any>() {
@@ -109,8 +109,8 @@ object GeomGrammar : Grammar<Any>() {
     //region creation tokens
     private val creation by -newToken and (point or ident) map {
         if (it.text[0] in 'A'..'Z')
-            PointCreation(it.text) as Expr
-        else CircleCreation(it.text) as Expr
+            PointCreation(it.text)
+        else CircleCreation(it.text)
     }
     //endregion
 
@@ -165,16 +165,22 @@ object GeomGrammar : Grammar<Any>() {
             PrefixNot(it.t2 as Expr)
         }
     }
+
     private val binaryStatement by creation or comparison or relation map { it }
 
     private val args by separatedTerms(binaryStatement or notation, comma)
     private val optionalArgs by optional(args) map { it ?: emptyList() }
 
-    private val invocation by ident and -leftPar and args and -rightPar map { Signature(it.t1.text, it.t2) }
+    private val invocation by ident and -leftPar and args and -rightPar map {
+        Signature(
+            it.t1.text,
+            it.t2 as List<Expr>
+        )
+    }
     private val zeroArgsOrMoreInvocation by ident and -leftPar and optionalArgs and -rightPar map {
         Signature(
             it.t1.text,
-            it.t2
+            it.t2 as List<Expr>
         )
     }
 

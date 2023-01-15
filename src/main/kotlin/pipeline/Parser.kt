@@ -4,24 +4,39 @@ import PosError
 import SpoofError
 import Utils
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
-import com.github.h0tk3y.betterParse.parser.*
+import com.github.h0tk3y.betterParse.parser.AlternativesFailure
+import com.github.h0tk3y.betterParse.parser.MismatchedToken
+import com.github.h0tk3y.betterParse.parser.NoMatchingToken
+import com.github.h0tk3y.betterParse.parser.ParseException
+import com.github.h0tk3y.betterParse.parser.UnexpectedEof
+import com.github.h0tk3y.betterParse.parser.UnparsedRemainder
 import com.github.h0tk3y.betterParse.st.LiftToSyntaxTreeOptions
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import expr.Expr
+import inference.Inference
 import toRange
 import toViewable
 
 open class Parser {
+    fun parseInference(code: String): SyntaxTree<List<Inference>> {
+        return parse(code) as SyntaxTree<List<Inference>>
+    }
+
+    fun parseSolution(code: String): SyntaxTree<List<Tuple2<Any, List<Expr>>>> {
+        return parse(code) as SyntaxTree<List<Tuple2<Any, List<Expr>>>>
+    }
+
     /**
      * Parse input and return syntax tree
      * @param code parsed input
      * @param smartExceptions whether to convert exceptions to human-readable
      */
-    fun parse(code: String, smartExceptions: Boolean = true): SyntaxTree<List<Tuple2<Any, List<Expr>>>> {
+    private fun parse(code: String, smartExceptions: Boolean = true): SyntaxTree<Any> {
         try {
-            return GeomGrammar.liftToSyntaxTreeGrammar(LiftToSyntaxTreeOptions(retainSeparators = false)).parseToEnd(code) as SyntaxTree<List<Tuple2<Any, List<Expr>>>>
+            return GeomGrammar.liftToSyntaxTreeGrammar(LiftToSyntaxTreeOptions(retainSeparators = false))
+                .parseToEnd(code)
         } catch (e: ParseException) {
             if (!smartExceptions)
                 throw e

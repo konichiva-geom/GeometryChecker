@@ -33,7 +33,9 @@ class Pipeline {
         return this
     }
 
-    fun addInference() {}
+    fun addInferenceFromFile(path: String) {
+        inferenceChecker.addInference(parser.parseInference(File(path).readText()).item)
+    }
 
     fun addTheoremsFromFile(path: String = THEOREMS_PATH): Pipeline {
         addTheorems(File(path).readText())
@@ -41,13 +43,13 @@ class Pipeline {
     }
 
     fun parse(code: String): Pipeline {
-        tree = parser.parse(code)
+        tree = parser.parseSolution(code)
         this.code = code
         return this
     }
 
     fun parseFile(path: String): Pipeline {
-        tree = parser.parse(File(path).readText())
+        tree = parser.parseSolution(File(path).readText())
         return this
     }
 

@@ -1,8 +1,8 @@
 package expr
 
-import Signature
 import SymbolTable
 import SystemFatalError
+import pipeline.interpreter.Signature
 
 /**
  * Expression that returns some value, e.g. [BinaryIntersects] returns point, or segment, or something else

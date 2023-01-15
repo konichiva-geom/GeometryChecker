@@ -12,28 +12,29 @@ fun main() {
        // D==3, R==2*(3*4+(42-R))+A => F==3
        A in AB
        check(A in AB)
-        tUse(T in AC) => *
+       // tUse(T in AC) => *
         //tUse() => T in B
         //fdfds4
         //
+        new D
+        D in AB
         prove:
-        
-        D == 3
+        D in AB
         
         // middle comment
         
         
         
-        R + 42 > 4
+      //  R + 42 > 4
         //RD || CD
-        tUse(T in AB) => *
+       // tUse(T in AB) => *
        // D==3, R==4+42 => F==3
          solution:   
         
         
       //  D==3, R==4+42 => F==3
-        arc AB of omega < 3
-        tUse() => TB in BA, B == C
+       // arc AB of omega < 3
+       // tUse() => TB in BA, B == C
         """
 
     val th = """th name(): /**/
@@ -49,7 +50,7 @@ fun main() {
         
     //"""
     val pipeline = Pipeline()
-    pipeline.parseFile("examples/inference.txt")
+    pipeline.addInferenceFromFile("examples/inference.txt")
     pipeline.parse(th)
     pipeline.addTheoremsFromFile().parse(a).interpret()
 }

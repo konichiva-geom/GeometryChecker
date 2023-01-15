@@ -69,7 +69,7 @@ class ParserTest {
     ) {
         val exception = assertFails {
             val parser = Parser()
-            parser.parse(
+            parser.parseSolution(
                 if (allCodeWritten) code else
                     """
                 description:
@@ -88,7 +88,7 @@ class ParserTest {
 
     private fun defaultPassTest(code: String, allCodeWritten: Boolean = false) {
         val parser = Parser()
-        parser.parse(
+        parser.parseSolution(
             if (allCodeWritten) code else """
                 description:
                 $code
