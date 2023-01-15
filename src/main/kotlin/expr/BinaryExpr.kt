@@ -116,7 +116,7 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
         if (!lineRelations1.parallel.map { symbolTable.getLine(it) }.contains(lineRelations2))
             lineRelations1.parallel.add(line2)
         if (!lineRelations2.parallel.map { symbolTable.getLine(it) }.contains(lineRelations1))
-            lineRelations1.parallel.add(line1)
+            lineRelations2.parallel.add(line1)
     }
 }
 
@@ -140,7 +140,7 @@ class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryE
         if (!lineRelations1.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations2))
             lineRelations1.perpendicular.add(line2)
         if (!lineRelations2.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations1))
-            lineRelations1.perpendicular.add(line1)
+            lineRelations2.perpendicular.add(line1)
     }
 }
 

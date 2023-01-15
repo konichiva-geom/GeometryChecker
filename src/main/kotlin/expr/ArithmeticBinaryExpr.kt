@@ -12,7 +12,8 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Floa
     override fun flatten(): MutableMap<Any, Float> =
         (left as Foldable).flatten().mergeWithOperation((right as Foldable).flatten(), op)
 
-    override fun getRepr(): StringBuilder = left.getRepr().append(" ${lambdaToSign[op]} ").append(right.getRepr())
+    override fun getRepr() = getReprForBinaryWithExpressions(left, right, " ${lambdaToSign[op]} ")
+
     override fun toString(): String {
         return "$left${lambdaToSign[op]}$right"
     }
@@ -27,7 +28,8 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Floa
 }
 
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
-    override fun getRepr(): StringBuilder = left.getRepr().append(" == ").append(right.getRepr())
+    override fun getRepr() = getReprForBinaryWithExpressions(left, right, " == ")
+
     override fun toString(): String {
         return "$left == $right"
     }
@@ -45,7 +47,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 }
 
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
-    override fun getRepr(): StringBuilder = left.getRepr().append(" != ").append(right.getRepr())
+    override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
     override fun toString(): String {
         return "$left != $right"
     }
@@ -60,7 +62,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 }
 
 class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
-    override fun getRepr(): StringBuilder = left.getRepr().append(" > ").append(right.getRepr())
+    override fun getRepr() = getReprForBinaryWithExpressions(left, right, " > ")
     override fun toString(): String {
         return "$left > $right"
     }
@@ -75,7 +77,7 @@ class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
 }
 
 class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
-    override fun getRepr(): StringBuilder = left.getRepr().append(" >= ").append(right.getRepr())
+    override fun getRepr() = getReprForBinaryWithExpressions(left, right, " >= ")
 
     override fun toString(): String {
         return "$left >= $right"
@@ -88,4 +90,29 @@ class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun make(symbolTable: SymbolTable) {
         TODO("Not yet implemented")
     }
+}
+
+/**
+ * Sort left and right representations by:
+ * 1. Notation
+ * 2. Size of repr
+ * 3. Hashcode, if nothing above works
+ *
+ * Not using hashcode for all to make it more predictable
+ */
+private fun getReprForBinaryWithExpressions(left: Expr, right: Expr, sign: String): StringBuilder {
+    if (left is Notation && right is Notation)
+        return if (left.getOrder() > right.getOrder())
+            right.getRepr().append(sign).append(left.getRepr())
+        else left.getRepr().append(sign).append(right.getRepr())
+    val leftRepr = left.getRepr()
+    val rightRepr = right.getRepr()
+    if (leftRepr.length == rightRepr.length) {
+        return if (leftRepr.hashCode() > rightRepr.hashCode())
+            rightRepr.append(sign).append(leftRepr)
+        else leftRepr.append(sign).append(rightRepr)
+    }
+    return if (leftRepr.length > rightRepr.length)
+        right.getRepr().append(sign).append(left.getRepr())
+    else left.getRepr().append(sign).append(right.getRepr())
 }

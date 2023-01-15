@@ -8,7 +8,7 @@ class RelationTest {
     fun testInRelationTrivial() {
         interpret(
             """
-            description:
+            description: 
                 new A;new B;
             prove:
                 segment AB in AB
@@ -21,7 +21,7 @@ class RelationTest {
         """.trimIndent())
     }
 
-        @Test
+    @Test
     fun testParallelRelation() {
         interpret("""
             description:
