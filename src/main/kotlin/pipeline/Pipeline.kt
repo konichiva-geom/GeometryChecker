@@ -18,7 +18,6 @@ class Pipeline {
     val interpreter = Interpreter()
     val inferenceChecker = InferenceChecker()
     lateinit var tree: SyntaxTree<Any>
-    lateinit var mode: Mode
 
     // TODO: delete in production
     lateinit var code: String
@@ -69,11 +68,5 @@ class Pipeline {
             throw PosError(e.range, e.msg + "\n${code.substring(e.range)}\n", *e.args)
         }
         return this
-    }
-
-    enum class Mode {
-        PROBLEM,
-        THEOREMS,
-        INFERENCE
     }
 }
