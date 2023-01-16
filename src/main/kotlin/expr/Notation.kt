@@ -2,7 +2,7 @@ package expr
 
 import Utils.max
 import Utils.min
-import pipeline.interpreter.TheoremParser
+import pipeline.interpreter.ExpressionMapper
 
 /**
  * Represents some structure of points (angle, line e.t.c) or te name of a circle
@@ -28,7 +28,7 @@ abstract class Notation : Expr, Comparable<Expr>, Foldable {
 
     abstract fun getLetters(): MutableList<String>
 
-    abstract fun mergeMapping(tp: TheoremParser, other: Notation)
+    abstract fun mergeMapping(mapper: ExpressionMapper, other: Notation)
 
     override fun equals(other: Any?): Boolean = toString() == other.toString()
     override fun hashCode(): Int = toString().hashCode()
@@ -85,7 +85,7 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun toString(): String = "$p1$p2$p3"
 
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2, p3)
-    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+    override fun mergeMapping(tp: ExpressionMapper, other: Notation) {
         other as Point3Notation
         tp.mergeMapping(p1, listOf(other.p1, other.p3))
         tp.mergeMapping(p3, listOf(other.p1, other.p3))
@@ -115,10 +115,10 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     override fun getRepr() = StringBuilder("AA")
     override fun toString(): String = "$p1$p2"
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2)
-    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         other as Point2Notation
-        tp.mergeMapping(p1, other.getLetters())
-        tp.mergeMapping(p2, other.getLetters())
+        mapper.mergeMapping(p1, other.getLetters())
+        mapper.mergeMapping(p2, other.getLetters())
     }
 
     fun toRayNotation() = RayNotation(p1, p2)
@@ -136,9 +136,9 @@ class PointNotation(val p: String) : RelatableNotation() {
     override fun getRepr() = StringBuilder("A")
     override fun toString(): String = p
     override fun getLetters(): MutableList<String> = mutableListOf(p)
-    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         other as PointNotation
-        tp.mergeMapping(p, listOf(other.p))
+        mapper.mergeMapping(p, listOf(other.p))
     }
 }
 
@@ -148,10 +148,10 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
         this.p2 = p2
     }
 
-    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         other as RayNotation
-        tp.mergeMapping(p1, listOf(other.p1))
-        tp.mergeMapping(p2, listOf(other.p2))
+        mapper.mergeMapping(p1, listOf(other.p1))
+        mapper.mergeMapping(p2, listOf(other.p2))
     }
 
     override fun getOrder(): Int = 3
@@ -185,8 +185,8 @@ class IdentNotation(private val text: String) : RelatableNotation() {
     override fun getRepr() = StringBuilder("c")
     override fun toString(): String = text
     override fun getLetters(): MutableList<String> = mutableListOf(text)
-    override fun mergeMapping(tp: TheoremParser, other: Notation) {
-        tp.mergeMapping(text, listOf((other as IdentNotation).text))
+    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
+        mapper.mergeMapping(text, listOf((other as IdentNotation).text))
     }
 }
 
@@ -200,7 +200,7 @@ class NumNotation(val number: Number) : Notation() {
     override fun toString(): String = number.toString()
     override fun getLetters(): MutableList<String> = mutableListOf()
 
-    override fun mergeMapping(tp: TheoremParser, other: Notation) {
+    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         // do nothing
     }
 }

@@ -2,9 +2,11 @@ package inference
 
 import SymbolTable
 import expr.Expr
+import pipeline.interpreter.ExpressionMapper
 
 class InferenceChecker {
     private val inferenceSets = mutableMapOf<String, MutableSet<Inference>>()
+    private val mapper = ExpressionMapper()
 
     /**
      * Check all inferences for this expression

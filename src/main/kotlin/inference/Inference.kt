@@ -3,6 +3,7 @@ package inference
 import SymbolTable
 import expr.AnyExpr
 import expr.Expr
+import pipeline.interpreter.ExpressionMapper
 
 /**
  * Convert result of expressions from inference.txt
@@ -27,7 +28,13 @@ open class Inference(
     /**
      * Process inference by first mapping all the letters from the newly added expression
      */
-    open fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable) {
+    open fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: ExpressionMapper) {
+        for (expr in toSideExpressions) {
+            if (expr::class == newlyAddedExpr::class) {
+                mapper.traverseExpr(newlyAddedExpr, expr)
+            }
+        }
+        mapper.clearMappings()
     }
 }
 
