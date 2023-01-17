@@ -10,6 +10,20 @@ import expr.Notation
 class ExpressionMapper {
     val mappings = mutableMapOf<String, MutableList<String>>()
 
+    /**
+     * On inference there might be ambiguous mappings
+     * This method chooses first mapping and makes all mappings unique
+     *
+     */
+    fun forceUniqueMappings() {
+        for (key in mappings.keys) {
+            if (mappings[key]!!.size != 1) {
+                mappings[key] = mutableListOf(mappings[key]!!.first())
+                removeFromOthers(key, mappings[key]!!.first())
+            }
+        }
+    }
+
     fun mergeMapping(key: String, value: List<String>) {
         if (mappings[key] == null)
             mappings[key] = value.toMutableList()
@@ -24,9 +38,13 @@ class ExpressionMapper {
             mappings[key] = res.toMutableList()
             // if one mapping is unique, then it is removed from all other mappings
             if (res.size == 1)
-                for (otherKey in mappings.keys.filter { it != key })
-                    mappings[otherKey]!!.remove(res.first())
+                removeFromOthers(key, res.first())
         }
+    }
+
+    private fun removeFromOthers(key: String, removed: String) {
+        for (otherKey in mappings.keys.filter { it != key })
+            mappings[otherKey]!!.remove(removed)
     }
 
     fun clearMappings() {

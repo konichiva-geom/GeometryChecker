@@ -7,6 +7,7 @@ import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
 import expr.Expr
+import expr.TheoremUse
 import pipeline.GeomGrammar
 import pipeline.Parser
 
@@ -68,11 +69,26 @@ class TheoremParser : Parser() {
             ?: throw Exception("pipeline.interpreter.Signature not found")
     }
 
-    fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody) {
+    fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody, symbolTable: SymbolTable) {
         traverseSignature(call, theoremSignature)
         println(signatureMapper.mappings)
-        for (statement in theoremBody.body) {
-            println()
+        // TODO map mappings to body
+        for (expr in theoremBody.body) {
+            when (expr) {
+                is Relation -> {
+                    expr.make(symbolTable)
+                }
+
+                is TheoremUse -> {
+                    if (expr.signature.name == "check")
+                        check(expr.signature.args, symbolTable)
+                    else throw SpoofError("Expected relation to check")
+                }
+            }
+        }
+        if (theoremBody.ret.isNotEmpty()) {
+            for (expr in theoremBody.ret)
+                (expr as Relation).make(symbolTable)
         }
         signatureMapper.clearMappings()
     }

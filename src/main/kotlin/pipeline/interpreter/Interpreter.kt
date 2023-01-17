@@ -11,10 +11,10 @@ import com.github.h0tk3y.betterParse.utils.Tuple2
 import expr.Creation
 import expr.Expr
 import expr.TheoremUse
+import inference.InferenceProcessor
 
-
-
-class Interpreter {
+// TODO interpreter is becoming a pipeline too. Maybe convert it to pipeline and move part of its logic to a separate class
+class Interpreter(val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
     private val symbolTable = SymbolTable()
 
@@ -44,7 +44,11 @@ class Interpreter {
             try {
                 when (expr) {
                     is TheoremUse -> interpretTheoremUse(expr)
-                    is Relation -> expr.make(symbolTable)
+                    is Relation -> {
+                        expr.make(symbolTable)
+                        inferenceProcessor.processInference(expr, symbolTable)
+                    }
+
                     is Creation -> expr.create(symbolTable)
                     else -> {
                     }
@@ -60,7 +64,7 @@ class Interpreter {
             theoremParser.check(expr.signature.args, symbolTable)
         } else {
             val body = theoremParser.getTheoremBodyBySignature(expr.signature)
-            theoremParser.parseTheorem(expr.signature, theoremParser.getSignature(expr.signature), body)
+            theoremParser.parseTheorem(expr.signature, theoremParser.getSignature(expr.signature), body, symbolTable)
         }
     }
 

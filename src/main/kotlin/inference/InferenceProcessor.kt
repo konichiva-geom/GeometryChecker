@@ -4,18 +4,18 @@ import SymbolTable
 import expr.Expr
 import pipeline.interpreter.ExpressionMapper
 
-class InferenceChecker {
+class InferenceProcessor {
     private val inferenceSets = mutableMapOf<String, MutableSet<Inference>>()
     private val mapper = ExpressionMapper()
 
     /**
      * Check all inferences for this expression
      */
-    fun checkInference(expr: Expr, symbolTable: SymbolTable) {
+    fun processInference(expr: Expr, symbolTable: SymbolTable) {
         val repr = expr.getRepr().toString()
         val inferences = inferenceSets[repr] ?: return
         for (inference in inferences) {
-
+            inference.process(expr, symbolTable, mapper)
         }
     }
 
