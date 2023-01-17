@@ -140,6 +140,10 @@ open class SymbolTable {
         }
     }
 
+    fun resetPoint(newRelations: PointRelations, notation: PointNotation) {
+        points[notation.p] = newRelations
+    }
+
     fun getPointSetNotationByNotation(notation: Notation): Set<String> {
         return when (notation) {
             is PointNotation -> setOf(notation.p)

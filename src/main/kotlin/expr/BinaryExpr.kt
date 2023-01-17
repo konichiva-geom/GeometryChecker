@@ -8,6 +8,7 @@ import SymbolTable
 import Utils
 import com.github.h0tk3y.betterParse.utils.Tuple4
 import entity.LineRelations
+import pipeline.interpreter.ExpressionMapper
 
 abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
     override fun getChildren(): List<Expr> = listOf(left, right)
@@ -22,6 +23,8 @@ abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
  */
 class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
     override fun getRepr(): StringBuilder = left.getRepr().append(" in ").append(right.getRepr())
+    override fun rename(mapper: ExpressionMapper) =
+        BinaryIn(left.rename(mapper) as Notation, right.rename(mapper) as Notation)
 
     override fun toString(): String {
         return "$left in $right"
@@ -61,6 +64,8 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
     private lateinit var intersectionValue: Any // two circles intersect by array of points
     override fun getReturnValue(): Any = intersectionValue
     override fun getRepr(): StringBuilder = left.getRepr().append(" intersects ").append(right.getRepr())
+    override fun rename(mapper: ExpressionMapper) =
+        BinaryIntersects(left.rename(mapper) as Notation, right.rename(mapper) as Notation)
 
     override fun toString(): String {
         return "$left ∩ $right"
@@ -98,6 +103,8 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
  */
 class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder = left.getRepr().append(" parallel ").append(right.getRepr())
+    override fun rename(mapper: ExpressionMapper) =
+        BinaryParallel(left.rename(mapper) as Point2Notation, right.rename(mapper) as Point2Notation)
     override fun toString(): String {
         return "$left || $right"
     }
@@ -125,6 +132,8 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
  */
 class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder = left.getRepr().append(" perpendicular ").append(right.getRepr())
+    override fun rename(mapper: ExpressionMapper) =
+        BinaryPerpendicular(left.rename(mapper) as Point2Notation, right.rename(mapper) as Point2Notation)
     override fun toString(): String {
         return "$left ⊥ $right"
     }

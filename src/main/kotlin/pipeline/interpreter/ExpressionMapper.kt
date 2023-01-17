@@ -10,6 +10,8 @@ import expr.Notation
 class ExpressionMapper {
     val mappings = mutableMapOf<String, MutableList<String>>()
 
+    fun get(pointOrIdent: String) = mappings[pointOrIdent]!!.first()
+
     /**
      * On inference there might be ambiguous mappings
      * This method chooses first mapping and makes all mappings unique

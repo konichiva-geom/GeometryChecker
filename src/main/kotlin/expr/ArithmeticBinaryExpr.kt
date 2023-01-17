@@ -3,6 +3,7 @@ package expr
 import SymbolTable
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
+import pipeline.interpreter.ExpressionMapper
 
 /**
  * Represents +, -, *, /
@@ -13,6 +14,7 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Floa
         (left as Foldable).flatten().mergeWithOperation((right as Foldable).flatten(), op)
 
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " ${lambdaToSign[op]} ")
+    override fun rename(mapper: ExpressionMapper) = ArithmeticBinaryExpr(left.rename(mapper), right.rename(mapper), op)
 
     override fun toString(): String {
         return "$left${lambdaToSign[op]}$right"
@@ -29,6 +31,7 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Floa
 
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " == ")
+    override fun rename(mapper: ExpressionMapper) = BinaryEquals(left.rename(mapper), right.rename(mapper))
 
     override fun toString(): String {
         return "$left == $right"
@@ -48,12 +51,17 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
+    override fun rename(mapper: ExpressionMapper) = BinaryNotEquals(left.rename(mapper), right.rename(mapper))
     override fun toString(): String {
         return "$left != $right"
     }
 
     override fun check(symbolTable: SymbolTable): Boolean {
         TODO("Not yet implemented")
+        if (left is PointNotation && right is PointNotation) {
+            val point = symbolTable.getPoint(left.p)
+            point.merge(right, symbolTable)
+        }
     }
 
     override fun make(symbolTable: SymbolTable) {
@@ -63,6 +71,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " > ")
+    override fun rename(mapper: ExpressionMapper) = BinaryGreater(left.rename(mapper), right.rename(mapper))
     override fun toString(): String {
         return "$left > $right"
     }
@@ -78,6 +87,7 @@ class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " >= ")
+    override fun rename(mapper: ExpressionMapper) = BinaryGEQ(left.rename(mapper), right.rename(mapper))
 
     override fun toString(): String {
         return "$left >= $right"

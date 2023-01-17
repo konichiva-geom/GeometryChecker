@@ -82,6 +82,7 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun compareTo(other: Expr): Int = super.compareOrSame(other) ?: toString().compareTo(other.toString())
 
     override fun getRepr() = StringBuilder("AAA")
+    override fun rename(mapper: ExpressionMapper) = Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
     override fun toString(): String = "$p1$p2$p3"
 
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2, p3)
@@ -113,6 +114,7 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("AA")
+    override fun rename(mapper: ExpressionMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
     override fun toString(): String = "$p1$p2"
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2)
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
@@ -134,6 +136,7 @@ class PointNotation(val p: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("A")
+    override fun rename(mapper: ExpressionMapper) = PointNotation(mapper.get(p))
     override fun toString(): String = p
     override fun getLetters(): MutableList<String> = mutableListOf(p)
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
@@ -157,6 +160,8 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun getOrder(): Int = 3
 
     override fun toLine() = Point2Notation(p1, p2)
+    override fun rename(mapper: ExpressionMapper) = RayNotation(mapper.get(p1), mapper.get(p2))
+
     override fun getRepr() = StringBuilder("ray AA")
     override fun toString(): String = "ray ${super.toString()}"
 }
@@ -166,6 +171,7 @@ class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
 
     override fun toLine() = Point2Notation(p1, p2)
     override fun getRepr() = StringBuilder("segment AA")
+    override fun rename(mapper: ExpressionMapper) = SegmentNotation(mapper.get(p1), mapper.get(p2))
     override fun toString(): String = "segment ${super.toString()}"
 }
 
@@ -173,6 +179,7 @@ class ArcNotation(p1: String, p2: String, private val circle: String) : Point2No
     override fun getOrder(): Int = 4
     override fun toLine() = Point2Notation(p1, p2)
     override fun getRepr() = StringBuilder("arc AA")
+    override fun rename(mapper: ExpressionMapper) = ArcNotation(mapper.get(p1), mapper.get(p2), mapper.get(circle))
     override fun toString(): String = "arc ${super.toString()} of $circle"
 }
 
@@ -183,6 +190,7 @@ class IdentNotation(private val text: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("c")
+    override fun rename(mapper: ExpressionMapper) = IdentNotation(mapper.get(text))
     override fun toString(): String = text
     override fun getLetters(): MutableList<String> = mutableListOf(text)
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
@@ -197,6 +205,7 @@ class NumNotation(val number: Number) : Notation() {
     }
 
     override fun getRepr() = StringBuilder("0")
+    override fun rename(mapper: ExpressionMapper) = NumNotation(number)
     override fun toString(): String = number.toString()
     override fun getLetters(): MutableList<String> = mutableListOf()
 

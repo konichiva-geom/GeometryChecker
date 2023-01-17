@@ -6,6 +6,7 @@ import pipeline.interpreter.ExpressionMapper
 
 class InferenceProcessor {
     private val inferenceSets = mutableMapOf<String, MutableSet<Inference>>()
+    private val doubleInferenceSets = mutableMapOf<String, MutableSet<Pair<Inference, Boolean>>>()
     private val mapper = ExpressionMapper()
 
     /**
@@ -25,19 +26,25 @@ class InferenceProcessor {
     fun setInference(list: List<Inference>) {
         inferenceSets.clear()
         for (inference in list) {
-            addInferenceFromRepr(inference, inference.fromSideExpressions)
-            if (inference is DoubleSidedInference)
-                addInferenceFromRepr(inference, inference.toSideExpressions)
+            addInferenceFromRepr(inference.fromSideExpressions, inferenceSets, inference)
+            if (inference is DoubleSidedInference) {
+                addInferenceFromRepr(inference.toSideExpressions, doubleInferenceSets, Pair(inference, true))
+                addInferenceFromRepr(inference.fromSideExpressions, doubleInferenceSets, Pair(inference, false))
+            }
         }
     }
 
-    private fun addInferenceFromRepr(inference: Inference, expressions: List<Expr>) {
+    private fun <T> addInferenceFromRepr(
+        expressions: List<Expr>,
+        sets: MutableMap<String, MutableSet<T>>,
+        added: T
+    ) {
         for (expr in expressions) {
             val repr = expr.getRepr().toString()
-            if (inferenceSets[repr] == null)
-                inferenceSets[repr] = mutableSetOf(inference)
+            if (sets[repr] == null)
+                sets[repr] = mutableSetOf(added)
             else
-                inferenceSets[repr]!!.add(inference)
+                sets[repr]!!.add(added)
         }
     }
 }
