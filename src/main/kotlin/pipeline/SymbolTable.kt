@@ -136,9 +136,25 @@ open class SymbolTable {
      * @param notation notation to find what value to set
      */
     fun resetLine(newRelations: LineRelations, notation: Point2Notation) {
-        for ((searchedNotation, _) in lines) {
+        resetLinear(lines, notation, newRelations)
+    }
+
+    fun resetSegment(newRelations: SegmentRelations, notation: SegmentNotation) {
+        resetLinear(segments, notation, newRelations)
+    }
+
+    fun resetRay(newRelations: RayRelations, notation: RayNotation) {
+        resetLinear(rays, notation, newRelations)
+    }
+
+    private fun <T : PointCollection, R : EntityRelations> resetLinear(
+        linearCollection: MutableMap<T, R>,
+        notation: Point2Notation,
+        newRelations: R
+    ) {
+        for ((searchedNotation, _) in linearCollection) {
             if (searchedNotation.getPointsInCollection().containsAll(notation.getLetters())) {
-                lines[searchedNotation] = newRelations
+                linearCollection[searchedNotation] = newRelations
                 return
             }
         }

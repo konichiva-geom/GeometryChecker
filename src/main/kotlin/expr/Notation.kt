@@ -2,6 +2,7 @@ package expr
 
 import Utils.max
 import Utils.min
+import Utils.sortAngle
 import pipeline.interpreter.ExpressionMapper
 
 /**
@@ -73,6 +74,10 @@ abstract class RelatableNotation : Notation()
 // }
 
 class Point3Notation(var p1: String, var p2: String, var p3: String) : RelatableNotation() {
+    init {
+        sortAngle(this)
+    }
+
     override fun getOrder(): Int = 6
 
     override fun flatten(): MutableMap<Any, Float> {

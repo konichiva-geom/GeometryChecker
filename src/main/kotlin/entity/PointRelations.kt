@@ -3,10 +3,22 @@ package entity
 import SymbolTable
 import expr.Notation
 import expr.PointNotation
+import expr.RayNotation
+import expr.SegmentNotation
 
-class RayRelations : LineRelations()
+class RayRelations : LinearRelations() {
+    override fun merge(other: Notation, symbolTable: SymbolTable) {
+        mergeDifferentPoints(symbolTable.getRay(other as RayNotation))
+        symbolTable.resetRay(this, other)
+    }
+}
 
-class SegmentRelations : LineRelations()
+class SegmentRelations : LinearRelations() {
+    override fun merge(other: Notation, symbolTable: SymbolTable) {
+        mergeDifferentPoints(symbolTable.getSegment(other as SegmentNotation))
+        symbolTable.resetSegment(this, other)
+    }
+}
 
 class PointRelations : EntityRelations() {
     val unknown = mutableSetOf<String>()
