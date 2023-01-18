@@ -92,7 +92,7 @@ class TheoremParser : Parser() {
 
     fun check(relation: Relation, symbolTable: SymbolTable) {
         if (!relation.check(symbolTable))
-            throw SpoofError("Relation unknown")
+            throw SpoofError("Relation ${relation as Expr} unknown")
     }
 
     fun check(expressions: List<Expr>, symbolTable: SymbolTable) {
@@ -100,7 +100,7 @@ class TheoremParser : Parser() {
             if (rel !is Relation)
                 throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
             if (!rel.check(symbolTable))
-                throw SpoofError("Relation unknown")
+                throw SpoofError("Relation ${rel} unknown")
         }
     }
 

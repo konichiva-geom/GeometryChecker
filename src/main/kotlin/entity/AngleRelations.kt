@@ -2,9 +2,10 @@ package entity
 
 import SymbolTable
 import expr.Notation
+import expr.Point3Notation
 
 class AngleRelations : EntityRelations() {
     override fun merge(other: Notation, symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+        symbolTable.resetAngle(this, other as Point3Notation)
     }
 }

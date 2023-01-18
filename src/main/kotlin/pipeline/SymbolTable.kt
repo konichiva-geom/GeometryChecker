@@ -112,9 +112,13 @@ open class SymbolTable {
                 lines[collection] = lineRelations
                 return collection to lineRelations
             }
+
             is Point3Notation -> return notation to getAngle(notation)
             else -> throw SpoofError(notation.toString())
         }
+    }
+
+    fun setRelationByNotation(relations: EntityRelations, notation: Notation) {
     }
 
     /**
@@ -142,6 +146,10 @@ open class SymbolTable {
 
     fun resetPoint(newRelations: PointRelations, notation: PointNotation) {
         points[notation.p] = newRelations
+    }
+
+    fun resetAngle(newRelations: AngleRelations, notation: Point3Notation) {
+        angles[notation] = newRelations
     }
 
     fun getPointSetNotationByNotation(notation: Notation): Set<String> {

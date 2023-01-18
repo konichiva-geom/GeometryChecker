@@ -57,14 +57,25 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     }
 
     override fun check(symbolTable: SymbolTable): Boolean {
-        TODO("Not yet implemented")
         if (left is PointNotation && right is PointNotation) {
-            val point = symbolTable.getPoint(left.p)
-            point.merge(right, symbolTable)
+            val leftPoint = symbolTable.getPoint(left)
+            val rightPoint = symbolTable.getPoint(right)
+            if (leftPoint == rightPoint)
+                return false
+            if (leftPoint.unknown.contains(right.p) || rightPoint.unknown.contains(left.p))
+                return false
+            return !(leftPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(rightPoint)
+                || rightPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(leftPoint))
         }
+        TODO("Not yet implemented")
     }
 
     override fun make(symbolTable: SymbolTable) {
+        if (left is PointNotation && right is PointNotation) {
+            val point = symbolTable.getPoint(left.p)
+            point.merge(right, symbolTable)
+            return
+        }
         TODO("Not yet implemented")
     }
 }
