@@ -30,6 +30,7 @@ abstract class Notation : Expr, Comparable<Expr>, Foldable {
     abstract fun getLetters(): MutableList<String>
 
     abstract fun mergeMapping(mapper: ExpressionMapper, other: Notation)
+    abstract fun createLinks(mapper: ExpressionMapper)
 
     override fun equals(other: Any?): Boolean = toString() == other.toString()
     override fun hashCode(): Int = toString().hashCode()
@@ -91,11 +92,15 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun toString(): String = "$p1$p2$p3"
 
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2, p3)
-    override fun mergeMapping(tp: ExpressionMapper, other: Notation) {
+    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         other as Point3Notation
-        tp.mergeMapping(p1, listOf(other.p1, other.p3))
-        tp.mergeMapping(p3, listOf(other.p1, other.p3))
-        tp.mergeMapping(p2, listOf(other.p2))
+        mapper.mergeMapping(p1, listOf(other.p1, other.p3))
+        mapper.mergeMapping(p3, listOf(other.p1, other.p3))
+        mapper.mergeMapping(p2, listOf(other.p2))
+    }
+
+    override fun createLinks(mapper: ExpressionMapper) {
+        mapper.addLink(p1, p3)
     }
 }
 
@@ -128,6 +133,10 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
         mapper.mergeMapping(p2, other.getLetters())
     }
 
+    override fun createLinks(mapper: ExpressionMapper) {
+        mapper.addLink(p1, p2)
+    }
+
     fun toRayNotation() = RayNotation(p1, p2)
     fun toSegmentNotation() = SegmentNotation(p1, p2)
     open fun toLine() = this
@@ -148,6 +157,8 @@ class PointNotation(val p: String) : RelatableNotation() {
         other as PointNotation
         mapper.mergeMapping(p, listOf(other.p))
     }
+
+    override fun createLinks(mapper: ExpressionMapper) {}
 }
 
 class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
@@ -161,6 +172,7 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
         mapper.mergeMapping(p1, listOf(other.p1))
         mapper.mergeMapping(p2, listOf(other.p2))
     }
+    override fun createLinks(mapper: ExpressionMapper) {}
 
     override fun getOrder(): Int = 3
 
@@ -201,6 +213,7 @@ class IdentNotation(private val text: String) : RelatableNotation() {
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         mapper.mergeMapping(text, listOf((other as IdentNotation).text))
     }
+    override fun createLinks(mapper: ExpressionMapper) {}
 }
 
 class NumNotation(val number: Number) : Notation() {
@@ -217,4 +230,5 @@ class NumNotation(val number: Number) : Notation() {
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         // do nothing
     }
+    override fun createLinks(mapper: ExpressionMapper) {}
 }

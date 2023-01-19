@@ -24,7 +24,8 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
             TokenMatch(LiteralToken("", ""), 0, "", 0, tree.range.count(), 0, 0)
         )
         interpretDescription(tree.item[0].t2, tree.children[0].children[1])
-        interpretSolution(tree.item[2].t2, tree.children[2].children[1])
+        if (tree.item[2].t2 != null)
+            interpretSolution(tree.item[2].t2, tree.children[2].children[1])
         interpretProve(tree.item[1].t2, tree.children[1].children[1])
     }
 
@@ -62,16 +63,16 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
 
     private fun interpretSolution(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex()) {
-            try {
+          //  try {
                 when (expr) {
                     is TheoremUse -> interpretTheoremUse(expr)
                     is Relation -> throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
                     is Creation -> expr.create(symbolTable)
                     else -> throw SpoofError("Unexpected expression in solution. Use theorems or creation statements")
                 }
-            } catch (e: SpoofError) {
-                throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
-            }
+           // } catch (e: SpoofError) {
+          //      throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
+          //  }
         }
     }
 

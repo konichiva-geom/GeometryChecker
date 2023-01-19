@@ -152,6 +152,13 @@ object Utils {
         return if (t1!! < t2) t1 else t2
     }
 
+    fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key:R, element: T) {
+        if(this.isEmpty())
+            this[key] = mutableSetOf(element)
+        else
+            this[key]!!.add(element)
+    }
+
     object NameGenerator {
         private var index = 0
 

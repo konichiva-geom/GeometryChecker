@@ -1,6 +1,7 @@
 package pipeline.interpreter
 
 import SpoofError
+import Utils.addToOrCreateSet
 import expr.Expr
 import expr.Notation
 
@@ -8,7 +9,8 @@ import expr.Notation
  * TODO move mapping from Theorem parser to this class to use in  [inference.Inference.process] too
  */
 class ExpressionMapper {
-    val mappings = mutableMapOf<String, MutableList<String>>()
+    val mappings = mutableMapOf<String, MutableSet<String>>()
+    val links = mutableMapOf<String, MutableSet<String>>()
 
     fun get(pointOrIdent: String) = mappings[pointOrIdent]!!.first()
 
@@ -20,36 +22,56 @@ class ExpressionMapper {
     fun forceUniqueMappings() {
         for (key in mappings.keys) {
             if (mappings[key]!!.size != 1) {
-                mappings[key] = mutableListOf(mappings[key]!!.first())
-                removeFromOthers(key, mappings[key]!!.first())
+                mappings[key] = mutableSetOf(mappings[key]!!.first())
+                removeFromLinks(key, mappings[key]!!.first())
             }
         }
     }
 
     fun mergeMapping(key: String, value: List<String>) {
         if (mappings[key] == null)
-            mappings[key] = value.toMutableList()
+            mappings[key] = value.toMutableSet()
         else {
             val res = mappings[key]!!.intersect(value.toSet())
             if (res.isEmpty())
                 throw SpoofError(
                     "Got empty intersection while resolving theorem " +
-                        "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
+                            "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
                     "letter" to key
                 )
-            mappings[key] = res.toMutableList()
+            mappings[key] = res.toMutableSet()
             // if one mapping is unique, then it is removed from all other mappings
             if (res.size == 1)
-                removeFromOthers(key, res.first())
+                removeFromLinks(key, res.first())
         }
     }
 
-    private fun removeFromOthers(key: String, removed: String) {
-        for (otherKey in mappings.keys.filter { it != key })
-            mappings[otherKey]!!.remove(removed)
+    private fun removeFromLinks(key: String, removed: String) {
+        for (linked in links[key]!!) {
+            mappings[linked]!!.remove(removed)
+        }
     }
 
-    fun clearMappings() {
+    fun addLink(first: String, second: String) {
+        links.addToOrCreateSet(first, second)
+        links.addToOrCreateSet(second, first)
+    }
+
+    fun createLinks(call: Expr, definition: Expr) {
+        if (call::class != definition::class)
+            throw SpoofError("Expected ${definition::class}, got ${call::class}")
+        if (definition is Notation) {
+            definition.createLinks(this)
+        }
+        val (callChildren, defChildren) = listOf(call.getChildren(), definition.getChildren())
+        if (callChildren.size != defChildren.size)
+            throw Exception("Expected ${defChildren.size}, got ${callChildren.size}")
+        for ((i, child) in callChildren.withIndex())
+            traverseExpr(child, defChildren[i])
+    }
+
+    fun clear() {
+        links.clear()
         mappings.clear()
     }
 
@@ -58,7 +80,7 @@ class ExpressionMapper {
      */
     fun traverseExpr(call: Expr, definition: Expr) {
         if (call::class != definition::class)
-            throw Exception("Expected ${definition::class}, got ${call::class}")
+            throw SpoofError("Expected ${definition::class}, got ${call::class}")
         if (call is Notation) {
             val callLetters = call.getLetters()
             val defLetters = (definition as Notation).getLetters()

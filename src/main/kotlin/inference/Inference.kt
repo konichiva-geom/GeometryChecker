@@ -34,7 +34,7 @@ open class Inference(
             mapper.traverseExpr(newlyAddedExpr, it)
         }
         mapper.forceUniqueMappings()
-        mapper.clearMappings()
+        mapper.clear()
     }
 }
 
@@ -55,7 +55,7 @@ class DoubleSidedInference(
             mapper.traverseExpr(newlyAddedExpr, it)
         }
         mapper.forceUniqueMappings()
-        mapper.clearMappings()
+        mapper.clear()
     }
 
     fun processSide(
@@ -70,6 +70,6 @@ class DoubleSidedInference(
                 mapper.traverseExpr(newlyAddedExpr, it)
             }
         mapper.forceUniqueMappings()
-        mapper.clearMappings()
+        mapper.clear()
     }
 }

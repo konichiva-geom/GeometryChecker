@@ -62,11 +62,11 @@ class Pipeline {
     fun interpret(): Pipeline {
         if (!this::tree.isInitialized)
             throw SpoofError("Parse code before interpreting")
-        try {
+        //try {
             interpreter.interpret(tree as SyntaxTree<List<Tuple2<Any, List<Expr>>>>)
-        } catch (e: PosError) {
-            throw PosError(e.range, e.msg + "\n${code.substring(e.range)}\n", *e.args)
-        }
+        //} catch (e: PosError) {
+       //     throw PosError(e.range, e.msg + "\n${code.substring(e.range)}\n", *e.args)
+       // }
         return this
     }
 }

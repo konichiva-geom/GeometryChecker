@@ -87,7 +87,7 @@ class TheoremParser : Parser() {
             for (expr in theoremBody.ret)
                 (expr.rename(signatureMapper) as Relation).make(symbolTable)
         }
-        signatureMapper.clearMappings()
+        signatureMapper.clear()
     }
 
     fun check(relation: Relation, symbolTable: SymbolTable) {
