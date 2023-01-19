@@ -30,9 +30,10 @@ open class Inference(
      */
     open fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: ExpressionMapper) {
         val searchedRepr = newlyAddedExpr.getRepr().toString()
-        toSideExpressions.filter { it.getRepr().toString() == searchedRepr }.forEach {
-            mapper.traverseExpr(newlyAddedExpr, it)
-        }
+        val foundExpr = fromSideExpressions.first { it.getRepr().toString() == searchedRepr }
+        mapper.createLinks(newlyAddedExpr, foundExpr)
+        mapper.traverseExpr(newlyAddedExpr, foundExpr)
+
         mapper.forceUniqueMappings()
         mapper.clear()
     }

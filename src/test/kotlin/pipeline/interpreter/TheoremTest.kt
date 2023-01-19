@@ -24,6 +24,9 @@ internal class TheoremTest {
         )
     }
 
+    /**
+     * Reason why expression mapper has links now
+     */
     @Test
     fun testEqualSidedTrianglesWithCommonPoints() {
         interpret(

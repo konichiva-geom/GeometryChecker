@@ -6,11 +6,14 @@ import expr.Expr
 import expr.Notation
 
 /**
- * TODO move mapping from Theorem parser to this class to use in  [inference.Inference.process] too
+ * Responsible for mapping points in theorem bodies and inference expressions.
+ *
+ * Previously was mapping one point uniquely to other, but two different points can be mapped to same one,
+ * e.g we use *equal_sided_triangles* for triangles with common points: ABC and BCD.
  */
 class ExpressionMapper {
     val mappings = mutableMapOf<String, MutableSet<String>>()
-    val links = mutableMapOf<String, MutableSet<String>>()
+    private val links = mutableMapOf<String, MutableSet<String>>()
 
     fun get(pointOrIdent: String) = mappings[pointOrIdent]!!.first()
 

@@ -22,28 +22,31 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
     private val symbolTable = SymbolTable()
 
-    fun interpret(tree: SyntaxTree<List<Tuple2<Any, List<Expr>>>>) {
+    fun interpret(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
         checkHeaders(
             tree.item as List<Tuple2<String, *>>,
             TokenMatch(LiteralToken("", ""), 0, "", 0, tree.range.count(), 0, 0)
         )
         validatePointInitialization(tree)
-        interpretDescription(tree.item[0].t2, tree.children[0].children[1])
+        interpretDescription(tree.item[0].t2!!, tree.children[0].children[1])
         if (tree.item[2].t2 != null)
-            interpretSolution(tree.item[2].t2, tree.children[2].children[1])
-        interpretProve(tree.item[1].t2, tree.children[1].children[1])
+            interpretSolution(tree.item[2].t2!!, tree.children[2].children[1])
+        interpretProve(tree.item[1].t2!!, tree.children[1].children[1])
     }
 
-    private fun validatePointInitialization(tree: SyntaxTree<List<Tuple2<Any, List<Expr>>>>) {
+    private fun validatePointInitialization(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
         val tempTable = SymbolTable()
-        for ((i, tuple) in tree.item.withIndex())
-            for ((j, expr) in tuple.t2.withIndex()) {
+        for ((i, tuple) in tree.item.withIndex()) {
+            if (tuple.t2 == null)
+                continue
+            for ((j, expr) in tuple.t2!!.withIndex()) {
                 try {
                     validatePointInitialization(expr, tempTable)
                 } catch (e: SpoofError) {
                     throw PosError(tree.children[i].children[1].children[j].range, e.msg, *e.args)
                 }
             }
+        }
         tempTable.clear()
     }
 
