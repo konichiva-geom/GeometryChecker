@@ -43,7 +43,6 @@ internal class TheoremTest {
                 YXW == XYZ
             solution:
                 equal_sided_triangles_i(segment XY == segment XY, segment YZ == segment XW, ZYX == WXY) => *
-               //equal_sided_triangles_i(segment AB == segment A1B1, segment BC == segment B1C1, ABC == A1B1C1)
         """.trimIndent()
         )
     }
