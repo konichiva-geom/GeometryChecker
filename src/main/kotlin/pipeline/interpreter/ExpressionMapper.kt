@@ -48,7 +48,7 @@ class ExpressionMapper {
 
     private fun removeFromLinks(key: String, removed: String) {
         for (linked in links[key]!!) {
-            mappings[linked]!!.remove(removed)
+            mappings[linked]?.remove(removed)
         }
     }
 
@@ -65,14 +65,9 @@ class ExpressionMapper {
         }
         val (callChildren, defChildren) = listOf(call.getChildren(), definition.getChildren())
         if (callChildren.size != defChildren.size)
-            throw Exception("Expected ${defChildren.size}, got ${callChildren.size}")
+            throw SpoofError("Expected ${defChildren.size}, got ${callChildren.size}")
         for ((i, child) in callChildren.withIndex())
-            traverseExpr(child, defChildren[i])
-    }
-
-    fun clear() {
-        links.clear()
-        mappings.clear()
+            createLinks(child, defChildren[i])
     }
 
     /**
@@ -104,5 +99,10 @@ class ExpressionMapper {
             throw Exception("Expected ${defChildren.size}, got ${callChildren.size}")
         for ((i, child) in callChildren.withIndex())
             traverseExpr(child, defChildren[i])
+    }
+
+    fun clear() {
+        links.clear()
+        mappings.clear()
     }
 }

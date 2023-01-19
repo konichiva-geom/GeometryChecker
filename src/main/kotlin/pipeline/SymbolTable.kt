@@ -255,4 +255,15 @@ open class SymbolTable {
         arcs[SegmentPointCollection(notation.getLetters().toSet())] = res
         return res
     }
+
+    fun clear() {
+        points.clear()
+        lines.clear()
+        rays.clear()
+        segments.clear()
+        angles.clear()
+        circles.clear()
+        arcs.clear()
+        comparisons.clear()
+    }
 }

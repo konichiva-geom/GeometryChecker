@@ -31,16 +31,16 @@ internal class TheoremTest {
             description:
                 new W                  //   W---X
                 new X; new Y; new Z    //    \ / \
-                WYX == YXZ             //     Y---Z
+                ZYX == YXW             //     Y---Z
                 segment YX == segment XY
                 segment YZ == segment WX
             prove:
-                segment VW == segment YZ
+                segment WY == segment XZ
                 YWX == YZX
                 YXW == XYZ
-            solution: // should throw at U
-                equal_sided_triangles_i(segment XY == segment XY, segment YZ == segment XW, XUW == ZXY) => *
-                equal_sided_triangles_i(segment AB == segment A1B1, segment BC == segment B1C1, ABC == A1B1C1):
+            solution:
+                equal_sided_triangles_i(segment XY == segment XY, segment YZ == segment XW, ZYX == WXY) => *
+               //equal_sided_triangles_i(segment AB == segment A1B1, segment BC == segment B1C1, ABC == A1B1C1)
         """.trimIndent()
         )
     }

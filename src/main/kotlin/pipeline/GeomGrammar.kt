@@ -115,8 +115,7 @@ object GeomGrammar : Grammar<Any>() {
     //endregion
 
     private val relatableNotation by (line map {
-        val res = Point2Notation(it.first, it.second)
-        res
+        Point2Notation(it.first, it.second)
     }) or (point map { PointNotation(it.text) }) or
             (-arc and line and -ofToken and ident map { ArcNotation(it.t1.first, it.t1.second, it.t2.text) }) or
             (ident map { IdentNotation(it.text) })
@@ -198,9 +197,6 @@ object GeomGrammar : Grammar<Any>() {
         }
     }
 
-    // private val inference by (comparison and -inferToken and comparison map { it }) or
-    //     (comparison and -comma and comparison and -inferToken and comparison map { it })
-
     private val blockContent by separatedTerms(
         theoremUsage or /*inference or*/ binaryStatement, statementSeparator
     ) map { it }
@@ -210,7 +206,6 @@ object GeomGrammar : Grammar<Any>() {
     private val returnStatement by -returnToken and args map { it }
     private val thStatement by theoremUsage or relation or comparison
 
-    //private val seq by
     private val thBlock by -optional(statementSeparator) and (separatedTerms(
         thStatement, statementSeparator
     ) and optional(-statementSeparator and returnStatement) or returnStatement) and

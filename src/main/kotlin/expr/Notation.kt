@@ -227,8 +227,6 @@ class NumNotation(val number: Number) : Notation() {
     override fun toString(): String = number.toString()
     override fun getLetters(): MutableList<String> = mutableListOf()
 
-    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
-        // do nothing
-    }
+    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {}
     override fun createLinks(mapper: ExpressionMapper) {}
 }

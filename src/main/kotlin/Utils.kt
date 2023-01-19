@@ -153,7 +153,7 @@ object Utils {
     }
 
     fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key:R, element: T) {
-        if(this.isEmpty())
+        if (this[key] == null)
             this[key] = mutableSetOf(element)
         else
             this[key]!!.add(element)

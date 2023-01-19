@@ -10,6 +10,10 @@ import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import expr.Creation
 import expr.Expr
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointCreation
+import expr.PointNotation
 import expr.TheoremUse
 import inference.InferenceProcessor
 
@@ -23,10 +27,44 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
             tree.item as List<Tuple2<String, *>>,
             TokenMatch(LiteralToken("", ""), 0, "", 0, tree.range.count(), 0, 0)
         )
+        validatePointInitialization(tree)
         interpretDescription(tree.item[0].t2, tree.children[0].children[1])
         if (tree.item[2].t2 != null)
             interpretSolution(tree.item[2].t2, tree.children[2].children[1])
         interpretProve(tree.item[1].t2, tree.children[1].children[1])
+    }
+
+    private fun validatePointInitialization(tree: SyntaxTree<List<Tuple2<Any, List<Expr>>>>) {
+        val tempTable = SymbolTable()
+        for ((i, tuple) in tree.item.withIndex())
+            for ((j, expr) in tuple.t2.withIndex()) {
+                try {
+                    validatePointInitialization(expr, tempTable)
+                } catch (e: SpoofError) {
+                    throw PosError(tree.children[i].children[1].children[j].range, e.msg, *e.args)
+                }
+            }
+        tempTable.clear()
+    }
+
+    private fun validatePointInitialization(expr: Expr, tempTable: SymbolTable) {
+        when (expr) {
+            is PointCreation -> expr.create(tempTable)
+            is PointNotation -> tempTable.getPoint(expr)
+            is Point2Notation -> {
+                tempTable.getPoint(expr.p1)
+                tempTable.getPoint(expr.p2)
+            }
+
+            is Point3Notation -> {
+                tempTable.getPoint(expr.p1)
+                tempTable.getPoint(expr.p2)
+                tempTable.getPoint(expr.p3)
+            }
+        }
+        for (child in expr.getChildren()) {
+            validatePointInitialization(child, tempTable)
+        }
     }
 
     private fun checkHeaders(blocks: List<Tuple2<String, *>>, allMatch: TokenMatch) {
@@ -43,7 +81,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
 
     private fun interpretDescription(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex()) {
-            try {
+            //  try {
                 when (expr) {
                     is TheoremUse -> interpretTheoremUse(expr)
                     is Relation -> {
@@ -55,9 +93,9 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
                     else -> {
                     }
                 }
-            } catch (e: SpoofError) {
-                throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
-            }
+            // } catch (e: SpoofError) {
+            //     throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
+            // }
         }
     }
 

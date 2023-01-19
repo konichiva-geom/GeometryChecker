@@ -106,6 +106,8 @@ class TheoremParser : Parser() {
 
     private fun traverseSignature(callSignature: Signature, defSignature: Signature) {
         for ((i, arg) in callSignature.args.withIndex())
+            signatureMapper.createLinks(arg, defSignature.args[i])
+        for ((i, arg) in callSignature.args.withIndex())
             signatureMapper.traverseExpr(arg, defSignature.args[i])
     }
 }
