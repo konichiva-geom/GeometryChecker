@@ -35,7 +35,30 @@ internal class TheoremTest {
                 new W                  //   W---X
                 new X; new Y; new Z    //    \ / \
                 ZYX == YXW             //     Y---Z
-                segment YX == segment XY
+                //segment YX == segment XY
+                segment YZ == segment WX
+            prove:
+                segment WY == segment XZ
+                YWX == YZX
+                YXW == XYZ
+            solution:
+                equal_sided_triangles_i(segment XY == segment XY, segment YZ == segment XW, ZYX == WXY) => *
+        """.trimIndent()
+        )
+    }
+
+    /**
+     * Reason why expression mapper has links now
+     */
+    @Test
+    fun testEqualSidedTrianglesWithEqualSides() {
+        interpret(
+            """
+            description:
+                new W                  //   W---X
+                new X; new Y; new Z    //    \ / \
+                ZYX == YXW             //     Y---Z
+                //segment YX == segment XY
                 segment YZ == segment WX
             prove:
                 segment WY == segment XZ

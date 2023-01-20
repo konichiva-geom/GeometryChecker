@@ -12,6 +12,7 @@ import expr.NumNotation
 import expr.Point2Notation
 import expr.Point3Notation
 import expr.PointNotation
+import java.io.File
 
 object Utils {
     const val THEOREMS_PATH = "examples/theorems.txt"
@@ -163,5 +164,19 @@ object Utils {
         private var index = 0
 
         fun getName() = "$${index++}"
+    }
+
+    /**
+     * Returns next prime number for comparison vectors
+     */
+    object PrimeGetter {
+        private val primes = File("src/main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
+        private var currentIndex = 0
+
+        fun getNext(): Int = primes[currentIndex++]
+
+        fun removeLast() {
+            currentIndex--
+        }
     }
 }

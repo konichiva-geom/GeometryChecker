@@ -22,6 +22,8 @@ data class SegmentRelation(var intersects: EntityRelations?)
 class Vector<T>(
     private val value: MutableMap<T, Float>
 ) : MutableMap<T, Float> {
+    constructor(key: T, newVariable: Int) : this(mutableMapOf(key to newVariable.toFloat()))
+
     override val size: Int = value.size
     override val entries: MutableSet<MutableMap.MutableEntry<T, Float>> = value.entries
     override val keys: MutableSet<T> = value.keys
@@ -34,6 +36,10 @@ class Vector<T>(
     override fun remove(key: T): Float? = value.remove(key)
     override fun putAll(from: Map<out T, Float>) = value.putAll(from)
     override fun put(key: T, value: Float): Float? = this.value.put(key, value)
+}
+
+fun add(key: Any) {
+    val newVector = Vector(key, Utils.PrimeGetter.getNext())
 }
 
 class ComparisonVector(
