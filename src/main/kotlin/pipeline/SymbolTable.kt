@@ -1,25 +1,6 @@
 import Utils.sortAngle
-import entity.AngleRelations
-import entity.ArcRelations
-import entity.CircleRelations
-import entity.EntityRelations
-import entity.LineRelations
-import entity.PointRelations
-import entity.RayRelations
-import entity.SegmentRelations
-import expr.ArcNotation
-import expr.BinaryEquals
-import expr.BinaryIn
-import expr.BinaryIntersects
-import expr.BinaryParallel
-import expr.Expr
-import expr.IdentNotation
-import expr.Notation
-import expr.Point2Notation
-import expr.Point3Notation
-import expr.PointNotation
-import expr.RayNotation
-import expr.SegmentNotation
+import entity.*
+import expr.*
 
 interface PointCollection {
     fun getPointsInCollection(): Set<String>
@@ -46,8 +27,10 @@ data class SegmentPointCollection(val bounds: Set<String>, val points: MutableSe
     override fun getPointsInCollection(): Set<String> = bounds + points
     override fun addPoints(added: List<String>) {
         // TODO is it bad if added point is in [bounds]?
-        points.addAll(points)
+        points.addAll(added)
     }
+
+    override fun toString(): String = "${bounds.joinToString(separator = "")}:$points"
 }
 
 open class SymbolTable {

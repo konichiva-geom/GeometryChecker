@@ -123,9 +123,9 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
         TODO("Not yet implemented")
     }
 
-    override fun getRepr() = StringBuilder("AA")
+    override fun getRepr() = StringBuilder("line AA")
     override fun rename(mapper: ExpressionMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
-    override fun toString(): String = "$p1$p2"
+    override fun toString(): String = "line $p1$p2"
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2)
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         other as Point2Notation
@@ -187,9 +187,9 @@ class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun getOrder(): Int = 2
 
     override fun toLine() = Point2Notation(p1, p2)
-    override fun getRepr() = StringBuilder("segment AA")
+    override fun getRepr() = StringBuilder("AA")
     override fun rename(mapper: ExpressionMapper) = SegmentNotation(mapper.get(p1), mapper.get(p2))
-    override fun toString(): String = "segment ${super.toString()}"
+    override fun toString(): String = "$p1$p2"
 }
 
 class ArcNotation(p1: String, p2: String, private val circle: String) : Point2Notation(p1, p2) {
