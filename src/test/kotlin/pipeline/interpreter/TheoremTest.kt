@@ -12,14 +12,14 @@ internal class TheoremTest {
                 new U; new V; new W    //    U       X
                 new X; new Y; new Z    //   / \     / \
                 VUW == YXZ             //  V---W   Y---Z
-                segment VU == segment XY
-                segment UW == segment ZX
+                VU == XY
+                UW == ZX
             prove:
-                segment VW == segment YZ
+                VW == YZ
                 UVW == XYZ
                 UWV == XZY
             solution:
-                equal_sided_triangles_i(segment VU == segment XY, segment UW == segment XZ, VUW == ZXY) => *
+                equal_sided_triangles_i(VU == XY, UW == XZ, VUW == ZXY) => *
         """.trimIndent()
         )
     }
@@ -35,37 +35,13 @@ internal class TheoremTest {
                 new W                  //   W---X
                 new X; new Y; new Z    //    \ / \
                 ZYX == YXW             //     Y---Z
-                //segment YX == segment XY
-                segment YZ == segment WX
+                YZ == WX
             prove:
-                segment WY == segment XZ
+                WY == XZ
                 YWX == YZX
                 YXW == XYZ
             solution:
-                equal_sided_triangles_i(segment XY == segment XY, segment YZ == segment XW, ZYX == WXY) => *
-        """.trimIndent()
-        )
-    }
-
-    /**
-     * Reason why expression mapper has links now
-     */
-    @Test
-    fun testEqualSidedTrianglesWithEqualSides() {
-        interpret(
-            """
-            description:
-                new W                  //   W---X
-                new X; new Y; new Z    //    \ / \
-                ZYX == YXW             //     Y---Z
-                //segment YX == segment XY
-                segment YZ == segment WX
-            prove:
-                segment WY == segment XZ
-                YWX == YZX
-                YXW == XYZ
-            solution:
-                equal_sided_triangles_i(segment XY == segment XY, segment YZ == segment XW, ZYX == WXY) => *
+                equal_sided_triangles_i(XY == XY, YZ == XW, ZYX == WXY) => *
         """.trimIndent()
         )
     }

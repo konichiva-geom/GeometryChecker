@@ -3,15 +3,7 @@ package pipeline
 import PosError
 import Utils
 import Utils.signToLambda
-import com.github.h0tk3y.betterParse.combinators.and
-import com.github.h0tk3y.betterParse.combinators.leftAssociative
-import com.github.h0tk3y.betterParse.combinators.map
-import com.github.h0tk3y.betterParse.combinators.oneOrMore
-import com.github.h0tk3y.betterParse.combinators.optional
-import com.github.h0tk3y.betterParse.combinators.or
-import com.github.h0tk3y.betterParse.combinators.separatedTerms
-import com.github.h0tk3y.betterParse.combinators.times
-import com.github.h0tk3y.betterParse.combinators.unaryMinus
+import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parser
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
@@ -20,26 +12,7 @@ import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
-import expr.AnyExpr
-import expr.ArcNotation
-import expr.ArithmeticBinaryExpr
-import expr.BinaryEquals
-import expr.BinaryGEQ
-import expr.BinaryGreater
-import expr.BinaryNotEquals
-import expr.CircleCreation
-import expr.Expr
-import expr.IdentNotation
-import expr.Notation
-import expr.NumNotation
-import expr.Point2Notation
-import expr.Point3Notation
-import expr.PointCreation
-import expr.PointNotation
-import expr.PrefixNot
-import expr.RayNotation
-import expr.SegmentNotation
-import expr.TheoremUse
+import expr.*
 import inference.DoubleSidedInference
 import inference.Inference
 import pipeline.interpreter.Signature
@@ -50,6 +23,7 @@ object GeomGrammar : Grammar<Any>() {
     // region entity prefix tokens
     private val ray by literalToken("ray")
     private val segment by literalToken("segment")
+    private val lineToken by literalToken("line")
     private val arc by literalToken("arc")
     //endregion
 
@@ -64,7 +38,8 @@ object GeomGrammar : Grammar<Any>() {
     private val returnToken by literalToken("return")
     private val number by regexToken("((\\d+\\.)?\\d*)|(\\d*)?\\.\\d+")
     private val angle by 3 times parser(this::point)
-    private val line by 2 times parser(this::point) map { Pair(it[0].text, it[1].text) }
+    private val linear by 2 times parser(this::point) map { Pair(it[0].text, it[1].text) }
+    private val line by -lineToken and linear
     private val point by regexToken("[A-Z][0-9]*")
 
     //region relation tokens
@@ -114,15 +89,17 @@ object GeomGrammar : Grammar<Any>() {
     }
     //endregion
 
-    private val relatableNotation by (line map {
-        Point2Notation(it.first, it.second)
+    private val relatableNotation by (linear map {
+        SegmentNotation(it.first, it.second)
     }) or (point map { PointNotation(it.text) }) or
-            (-arc and line and -ofToken and ident map { ArcNotation(it.t1.first, it.t1.second, it.t2.text) }) or
+            (-arc and linear and -ofToken and ident map { ArcNotation(it.t1.first, it.t1.second, it.t2.text) }) or
             (ident map { IdentNotation(it.text) })
 
     // segment AB, A, ray DF
-    private val notation by (-segment and line map { SegmentNotation(it.first, it.second) }) or
-            (-ray and line map { RayNotation(it.first, it.second) }) or (angle map {
+    private val notation by (line map {
+        Point2Notation(it.first, it.second)
+    }) or
+            (-ray and linear map { RayNotation(it.first, it.second) }) or (angle map {
         Point3Notation(it[0].text, it[1].text, it[2].text)
     }) or relatableNotation or (number map {
         NumNotation(it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number"))
@@ -220,7 +197,7 @@ object GeomGrammar : Grammar<Any>() {
     }
 
     private val thDef by -thDefStart and zeroArgsOrMoreInvocation and
-        -colon and thBlock map { Pair(it.t1, it.t2) }
+            -colon and thBlock map { Pair(it.t1, it.t2) }
 
     private val inferenceArgs by separatedTerms(
         (anyToken and notation) or binaryStatement,
@@ -239,11 +216,11 @@ object GeomGrammar : Grammar<Any>() {
     override val rootParser: Parser<Any> by
     // theorem parser
     oneOrMore(thDef) or
-        // solution parser
-        (3 times block map { it }) or
-        // inference parser
-        (-optional(statementSeparator) and separatedTerms(
-            inferenceStatement,
-            statementSeparator
-        ) and -optional(statementSeparator))
+            // solution parser
+            (3 times block map { it }) or
+            // inference parser
+            (-optional(statementSeparator) and separatedTerms(
+                inferenceStatement,
+                statementSeparator
+            ) and -optional(statementSeparator))
 }

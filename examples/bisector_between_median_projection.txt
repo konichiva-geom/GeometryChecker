@@ -8,7 +8,7 @@ DESCRIPTION:
     mid_point(new M, AC)
     projection(new H, B, AC)
 PROVE:
-    D in segment HM
+    D in HM
 SOLUTION:
     circumscribed_circle(new omega, ABC)
     P = ray BD intersects omega // TODO we should check that:

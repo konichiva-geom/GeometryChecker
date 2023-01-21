@@ -48,15 +48,15 @@ class ParserTest {
 
     @Test
     fun failsInRelations() {
-        defaultErrorTest("segment AB in A", "is not applicable to points in this position")
-        defaultErrorTest("AB in segment AB", "is 'smaller' than")
-        defaultErrorTest("omega in segment AB", "is not applicable to circle in this position")
+        defaultErrorTest("AB in A", "is not applicable to points in this position")
+        defaultErrorTest("line AB in AB", "is 'smaller' than")
+        defaultErrorTest("omega in AB", "is not applicable to circle in this position")
         defaultErrorTest(
-            "arc AB of omega in segment AB",
+            "arc AB of omega in line AB",
             "If arc is at the first position in `in`, then it should be in the second position too"
         )
         defaultErrorTest(
-            "AB in arc AB of omega",
+            "line AB in arc AB of omega",
             "If arc is at the second position in `in`, then point or arc should be in the first position"
         )
     }

@@ -1,11 +1,11 @@
-th equal_sided_triangles_i(segment AB == segment A1B1, segment BC == segment B1C1, ABC == A1B1C1):
+th equal_sided_triangles_i(AB == A1B1, BC == B1C1, ABC == A1B1C1):
     check(A != B)
     check(A != C)
     check(B != C)
     check(A1 != B1)
     check(A1 != C1)
     check(B1 != C1)
-    return segment AC == segment A1C1, ACB == A1C1B1, BAC == C1A1B1
+    return AC == A1C1, ACB == A1C1B1, BAC == C1A1B1
     // triangle ABC == triangle A1B1C1 // are triangles needed???
 
 th straight_angle(O, AB): // развернутый угол

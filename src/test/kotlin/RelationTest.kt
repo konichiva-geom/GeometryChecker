@@ -9,12 +9,12 @@ class RelationTest {
             description: 
                 new A;new B;
             prove:
-                segment AB in AB
-                ray AB in AB
-                A in segment AB
+                AB in line AB
+                ray AB in line AB
+                A in AB
                 A in ray AB
-                segment AB in ray AB
-                ray AB in AB
+                AB in ray AB
+                ray AB in line AB
             solution:;
         """.trimIndent())
     }
@@ -24,11 +24,11 @@ class RelationTest {
         interpret("""
             description:
                 new A;new B;new C; new D
-                AD parallel segment BC
+                line AD parallel BC
             prove:
+                line AD parallel BC
                 AD parallel BC
-                segment AD parallel segment BC
-                ray DA || segment CB
+                ray DA || line CB
             solution:
 
         """.trimIndent())
