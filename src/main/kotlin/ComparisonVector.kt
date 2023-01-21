@@ -1,5 +1,7 @@
 import Utils.mergeWithOperation
 import entity.EntityRelations
+import expr.ArithmeticBinaryExpr
+import expr.Notation
 
 class VectorContainer<T : EntityRelations> {
     private val vectors = mutableMapOf<T, ComparisonVector>()
@@ -10,14 +12,6 @@ class VectorContainer<T : EntityRelations> {
         vectors[entity] = ComparisonVector(mutableMapOf(maxDim to 1f)) // TODO `0 to 0f` is important?
     }
 }
-
-enum class ComparisonType {
-    EQUALS,
-    GREATER_THAN,
-    GREATER_OR_EQUALS
-}
-
-data class SegmentRelation(var intersects: EntityRelations?)
 
 class Vector<T>(
     private val value: MutableMap<T, Float>
@@ -42,9 +36,14 @@ fun add(key: Any) {
     val newVector = Vector(key, Utils.PrimeGetter.getNext())
 }
 
+fun <T: Notation> fromExpr(expr: ArithmeticBinaryExpr): Vector<T> {
+    val res =  Vector<T>(mutableMapOf())
+
+    return res
+}
+
 class ComparisonVector(
     private val value: MutableMap<Int, Float>,
-    private val type: ComparisonType = ComparisonType.EQUALS,
     private val left: MutableMap<Any, Float> = mutableMapOf(), // {"ABC": -2, 90: 1} is 90 - 2 * ABC
     private val right: MutableMap<Any, Float> = mutableMapOf()
 ) {

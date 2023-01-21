@@ -8,13 +8,15 @@ import pipeline.interpreter.ExpressionMapper
 /**
  * Represents +, -, *, /
  */
-class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Float) -> Float) : BinaryExpr(left, right),
+class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Float) -> Float) :
+    BinaryExpr(left, right),
     Foldable {
     override fun flatten(): MutableMap<Any, Float> =
         (left as Foldable).flatten().mergeWithOperation((right as Foldable).flatten(), op)
 
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " ${lambdaToSign[op]} ")
-    override fun rename(mapper: ExpressionMapper) = ArithmeticBinaryExpr(left.rename(mapper), right.rename(mapper), op)
+    override fun rename(mapper: ExpressionMapper) =
+        ArithmeticBinaryExpr(left.rename(mapper), right.rename(mapper), op)
 
     override fun toString(): String {
         return "$left${lambdaToSign[op]}$right"

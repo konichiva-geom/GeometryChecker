@@ -2,7 +2,7 @@ th equal_sided_triangles_i(segment AB == segment A1B1, segment BC == segment B1C
     check(A != B)
     check(A != C)
     check(B != C)
-    check(A1 != B1)]
+    check(A1 != B1)
     check(A1 != C1)
     check(B1 != C1)
     return segment AC == segment A1C1, ACB == A1C1B1, BAC == C1A1B1
