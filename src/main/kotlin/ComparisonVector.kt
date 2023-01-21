@@ -1,6 +1,5 @@
 import Utils.mergeWithOperation
 import entity.EntityRelations
-import expr.ArithmeticBinaryExpr
 import expr.Notation
 
 class VectorContainer<T : EntityRelations> {
@@ -13,33 +12,48 @@ class VectorContainer<T : EntityRelations> {
     }
 }
 
-class Vector<T>(
-    private val value: MutableMap<T, Float>
-) : MutableMap<T, Float> {
-    constructor(key: T, newVariable: Int) : this(mutableMapOf(key to newVariable.toFloat()))
+class Vector(
+    private val value: MutableMap<Int, Float>
+) : MutableMap<Int, Float> {
+    constructor(newVariable: Int) : this(mutableMapOf(newVariable to 1f))
 
     override val size: Int = value.size
-    override val entries: MutableSet<MutableMap.MutableEntry<T, Float>> = value.entries
-    override val keys: MutableSet<T> = value.keys
+    override val entries: MutableSet<MutableMap.MutableEntry<Int, Float>> = value.entries
+    override val keys: MutableSet<Int> = value.keys
     override val values: MutableCollection<Float> = value.values
-    override fun containsKey(key: T): Boolean = value.containsKey(key)
+    override fun containsKey(key: Int): Boolean = value.containsKey(key)
     override fun containsValue(value: Float): Boolean = this.value.containsValue(value)
-    override fun get(key: T): Float? = value[key]
+    override fun get(key: Int): Float? = value[key]
     override fun clear() = value.clear()
     override fun isEmpty(): Boolean = value.isEmpty()
-    override fun remove(key: T): Float? = value.remove(key)
-    override fun putAll(from: Map<out T, Float>) = value.putAll(from)
-    override fun put(key: T, value: Float): Float? = this.value.put(key, value)
-}
+    override fun remove(key: Int): Float? = value.remove(key)
+    override fun putAll(from: Map<out Int, Float>) = value.putAll(from)
+    override fun put(key: Int, value: Float): Float? = this.value.put(key, value)
 
-fun add(key: Any) {
-    val newVector = Vector(key, Utils.PrimeGetter.getNext())
-}
+    /**
+     * Merge current vectors by addition or subtraction
+     */
+    fun merge(other: Vector, operation: (Float, Float) -> Float): Vector {
+        return Vector(value.mergeWithOperation(other.value, operation))
+    }
 
-fun <T: Notation> fromExpr(expr: ArithmeticBinaryExpr): Vector<T> {
-    val res =  Vector<T>(mutableMapOf())
+    /**
+     * Multiply or divide current vector by [other]
+     */
+    fun transform(other: Float, operation: (Float, Float) -> Float): Vector {
+        return Vector(value.mapValues { operation(it.value, other) }.toMutableMap())
+    }
 
-    return res
+    companion object {
+        /**
+         * Create vector and add it to the symbol table
+         */
+        fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
+            val res = Vector(Utils.PrimeGetter.getNext())
+
+            return res
+        }
+    }
 }
 
 class ComparisonVector(
@@ -70,19 +84,5 @@ class ComparisonVector(
             if (value)
                 return key
         return 0
-    }
-
-    /**
-     * Merge current vectors by addition or subtraction
-     */
-    fun merge(other: ComparisonVector, operation: (Float, Float) -> Float): ComparisonVector {
-        return ComparisonVector(value.mergeWithOperation(other.value, operation))
-    }
-
-    /**
-     * Multiply or divide current vector by [other]
-     */
-    fun transform(other: Float, operation: (Float, Float) -> Float): ComparisonVector {
-        return ComparisonVector(value.mapValues { operation(it.value, other) }.toMutableMap())
     }
 }

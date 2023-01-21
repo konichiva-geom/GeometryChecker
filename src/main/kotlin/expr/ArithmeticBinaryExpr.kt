@@ -3,7 +3,9 @@ package expr
 import SymbolTable
 import Utils.lambdaToSign
 import Utils.mergeWithOperation
+import Vector
 import pipeline.interpreter.ExpressionMapper
+import kotlin.reflect.KClass
 
 /**
  * Represents +, -, *, /
@@ -28,6 +30,24 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Floa
 
     override fun make(symbolTable: SymbolTable) {
         TODO("Not yet implemented")
+    }
+
+    fun createVectors(symbolTable: SymbolTable): Vector {
+        val leftVector = createVector(left, symbolTable)
+        var rightVector = createVector(right, symbolTable)
+        return leftVector
+    }
+
+    private fun createVector(expr: Expr, symbolTable: SymbolTable): Vector {
+        return if(left is ArithmeticBinaryExpr)
+            left.createVectors(symbolTable)
+        else Vector.fromNotation(symbolTable, left as Notation)
+    }
+
+    fun getType(): KClass<out Expr> {
+        if (left is Notation)
+            return left::class
+        return (left as ArithmeticBinaryExpr).getType()
     }
 }
 
@@ -67,7 +87,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             if (leftPoint.unknown.contains(right.p) || rightPoint.unknown.contains(left.p))
                 return false
             return !(leftPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(rightPoint)
-                || rightPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(leftPoint))
+                    || rightPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(leftPoint))
         }
         TODO("Not yet implemented")
     }
