@@ -2,8 +2,15 @@ package pipeline
 
 import PosError
 import Utils
-import Utils.signToLambda
-import com.github.h0tk3y.betterParse.combinators.*
+import com.github.h0tk3y.betterParse.combinators.and
+import com.github.h0tk3y.betterParse.combinators.leftAssociative
+import com.github.h0tk3y.betterParse.combinators.map
+import com.github.h0tk3y.betterParse.combinators.oneOrMore
+import com.github.h0tk3y.betterParse.combinators.optional
+import com.github.h0tk3y.betterParse.combinators.or
+import com.github.h0tk3y.betterParse.combinators.separatedTerms
+import com.github.h0tk3y.betterParse.combinators.times
+import com.github.h0tk3y.betterParse.combinators.unaryMinus
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parser
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
@@ -12,7 +19,26 @@ import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
-import expr.*
+import expr.AnyExpr
+import expr.ArcNotation
+import expr.ArithmeticBinaryExpr
+import expr.BinaryEquals
+import expr.BinaryGEQ
+import expr.BinaryGreater
+import expr.BinaryNotEquals
+import expr.CircleCreation
+import expr.Expr
+import expr.IdentNotation
+import expr.Notation
+import expr.NumNotation
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointCreation
+import expr.PointNotation
+import expr.PrefixNot
+import expr.RayNotation
+import expr.SegmentNotation
+import expr.TheoremUse
 import inference.DoubleSidedInference
 import inference.Inference
 import pipeline.interpreter.Signature
@@ -89,36 +115,37 @@ object GeomGrammar : Grammar<Any>() {
     }
     //endregion
 
-    private val relatableNotation by (linear map {
+    private val relatableNotation by (angle map {
+        Point3Notation(it[0].text, it[1].text, it[2].text)
+    }) or (linear map {
         SegmentNotation(it.first, it.second)
-    }) or (point map { PointNotation(it.text) }) or
-            (-arc and linear and -ofToken and ident map { ArcNotation(it.t1.first, it.t1.second, it.t2.text) }) or
-            (ident map { IdentNotation(it.text) })
+    }) or (-arc and linear and -ofToken and ident map { ArcNotation(it.t1.first, it.t1.second, it.t2.text) })
 
     // segment AB, A, ray DF
     private val notation by (line map {
         Point2Notation(it.first, it.second)
     }) or
-            (-ray and linear map { RayNotation(it.first, it.second) }) or (angle map {
-        Point3Notation(it[0].text, it[1].text, it[2].text)
-    }) or relatableNotation or (number map {
+        (-ray and linear map { RayNotation(it.first, it.second) }) or relatableNotation or (number map {
         NumNotation(it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number"))
-    })
+    }) or (point map { PointNotation(it.text) }) or
+        (ident map { IdentNotation(it.text) })
 
-    private val term by notation or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar) map { it }
-
-    private val divMulChain: Parser<Expr> by leftAssociative(term, div or mul) { a, op, b ->
+    private val arithmeticTerm by (number and relatableNotation map {
         ArithmeticBinaryExpr(
-            a,
-            b,
-            signToLambda[op.text]!!
+            NumNotation(
+                it.t1.text.toIntOrNull() ?: it.t1.text.toFloatOrNull() ?: throw Exception("Not a number")
+            ), it.t2, "*"
         )
+    }) or notation or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar) map { it }
+
+    private val divMulChain: Parser<Expr> by leftAssociative(arithmeticTerm, div or mul) { a, op, b ->
+        ArithmeticBinaryExpr(a, b, op.text)
     }
 
     private val arithmeticExpression: Parser<Expr> by leftAssociative(
         divMulChain,
         plus or minus
-    ) { a, op, b -> ArithmeticBinaryExpr(a, b, signToLambda[op.text]!!) }
+    ) { a, op, b -> ArithmeticBinaryExpr(a, b, op.text) }
 
     private val comparison by arithmeticExpression and compToken and arithmeticExpression map {
         when (it.t2.text) {

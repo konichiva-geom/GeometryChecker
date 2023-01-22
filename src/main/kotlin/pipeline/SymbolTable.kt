@@ -1,6 +1,25 @@
 import Utils.sortAngle
-import entity.*
-import expr.*
+import entity.AngleRelations
+import entity.ArcRelations
+import entity.CircleRelations
+import entity.EntityRelations
+import entity.LineRelations
+import entity.PointRelations
+import entity.RayRelations
+import entity.SegmentRelations
+import expr.ArcNotation
+import expr.BinaryEquals
+import expr.BinaryIn
+import expr.BinaryIntersects
+import expr.BinaryParallel
+import expr.Expr
+import expr.IdentNotation
+import expr.Notation
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointNotation
+import expr.RayNotation
+import expr.SegmentNotation
 
 interface PointCollection {
     fun getPointsInCollection(): Set<String>
@@ -41,7 +60,7 @@ open class SymbolTable {
     private val angles = mutableMapOf<Point3Notation, AngleRelations>()
     private val circles = mutableMapOf<IdentNotation, CircleRelations>()
     private val arcs = mutableMapOf<SegmentPointCollection, ArcRelations>()
-    private val comparisons = mutableMapOf<Notation, Vector<Int>>()
+    private val comparisons = mutableMapOf<Notation, Vector>()
 
     fun getRelationsByNotation(notation: Notation): EntityRelations {
         return getKeyValueByNotation(notation).second

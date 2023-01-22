@@ -56,12 +56,12 @@ object Utils {
         return notation
     }
 
-    fun <T> MutableMap<T, Float>.mergeWithOperation(
-        other: MutableMap<T, Float>,
-        operation: (Float, Float) -> Float
-    ): MutableMap<T, Float> {
+    fun MutableMap<Int, Float>.mergeWithOperation(
+        other: MutableMap<Int, Float>,
+        operation: String
+    ): MutableMap<Int, Float> {
         return (keys + other.keys)
-            .associateWith { operation(this[it] ?: 0f, other[it] ?: 0f) }
+            .associateWith { signToLambda[operation]!!(this[it] ?: 0f, other[it] ?: 0f) }
             .toMutableMap()
     }
 

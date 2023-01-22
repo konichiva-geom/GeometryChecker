@@ -17,7 +17,7 @@ import pipeline.interpreter.ExpressionMapper
  * Point3: 6
  * Ident: 7
  */
-abstract class Notation : Expr, Comparable<Expr>, Foldable {
+abstract class Notation : Expr, Comparable<Expr> {
     abstract fun getOrder(): Int
     fun compareOrSame(other: Expr): Int? {
         if (other is Notation && other.getOrder() != this.getOrder())
@@ -81,10 +81,6 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
 
     override fun getOrder(): Int = 6
 
-    override fun flatten(): MutableMap<Any, Float> {
-        return mutableMapOf(this to 1f)
-    }
-
     override fun compareTo(other: Expr): Int = super.compareOrSame(other) ?: toString().compareTo(other.toString())
 
     override fun getRepr() = StringBuilder("AAA")
@@ -114,10 +110,6 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     }
 
     override fun getOrder(): Int = 5
-
-    override fun flatten(): MutableMap<Any, Float> {
-        return mutableMapOf(this to 1f)
-    }
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")

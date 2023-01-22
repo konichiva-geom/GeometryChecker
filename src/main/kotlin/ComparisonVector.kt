@@ -33,7 +33,7 @@ class Vector(
     /**
      * Merge current vectors by addition or subtraction
      */
-    fun merge(other: Vector, operation: (Float, Float) -> Float): Vector {
+    fun merge(other: Vector, operation: String): Vector {
         return Vector(value.mergeWithOperation(other.value, operation))
     }
 

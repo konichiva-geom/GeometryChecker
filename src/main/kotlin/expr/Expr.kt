@@ -11,11 +11,6 @@ import pipeline.interpreter.Signature
 interface Returnable {
     fun getReturnValue(): Any
 }
-
-interface Foldable {
-    fun flatten(): MutableMap<Any, Float> = mutableMapOf(this to 1f)
-}
-
 /**
  * Interface for creation (points, circles)
  */

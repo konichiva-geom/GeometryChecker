@@ -1,8 +1,6 @@
 package expr
 
 import SymbolTable
-import Utils.lambdaToSign
-import Utils.mergeWithOperation
 import Vector
 import pipeline.interpreter.ExpressionMapper
 import kotlin.reflect.KClass
@@ -10,18 +8,15 @@ import kotlin.reflect.KClass
 /**
  * Represents +, -, *, /
  */
-class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: (Float, Float) -> Float) :
-    BinaryExpr(left, right),
-    Foldable {
-    override fun flatten(): MutableMap<Any, Float> =
-        (left as Foldable).flatten().mergeWithOperation((right as Foldable).flatten(), op)
+class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: String) :
+    BinaryExpr(left, right) {
 
-    override fun getRepr() = getReprForBinaryWithExpressions(left, right, " ${lambdaToSign[op]} ")
+    override fun getRepr() = getReprForBinaryWithExpressions(left, right, "$op ")
     override fun rename(mapper: ExpressionMapper) =
         ArithmeticBinaryExpr(left.rename(mapper), right.rename(mapper), op)
 
     override fun toString(): String {
-        return "$left${lambdaToSign[op]}$right"
+        return "$left $op $right"
     }
 
     override fun check(symbolTable: SymbolTable): Boolean {
