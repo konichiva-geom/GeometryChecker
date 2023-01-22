@@ -41,7 +41,7 @@ data class RayPointCollection(val start: String, val points: MutableSet<String>)
     }
 }
 
-data class SegmentPointCollection(val bounds: Set<String>, val points: MutableSet<String> = mutableSetOf()) :
+open class SegmentPointCollection(val bounds: Set<String>, val points: MutableSet<String> = mutableSetOf()) :
     PointCollection {
     override fun getPointsInCollection(): Set<String> = bounds + points
     override fun addPoints(added: List<String>) {
@@ -52,6 +52,9 @@ data class SegmentPointCollection(val bounds: Set<String>, val points: MutableSe
     override fun toString(): String = "${bounds.joinToString(separator = "")}:$points"
 }
 
+class ArcPointCollection(bounds: Set<String>, points: MutableSet<String> = mutableSetOf(), val circle: String) :
+    SegmentPointCollection(bounds, points)
+
 open class SymbolTable {
     private val points = mutableMapOf<String, PointRelations>()
     val lines = mutableMapOf<LinePointCollection, LineRelations>()
@@ -59,8 +62,23 @@ open class SymbolTable {
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
     private val angles = mutableMapOf<Point3Notation, AngleRelations>()
     private val circles = mutableMapOf<IdentNotation, CircleRelations>()
-    private val arcs = mutableMapOf<SegmentPointCollection, ArcRelations>()
+    private val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
+
+    private val segmentVectors = mutableMapOf<SegmentPointCollection, Vector>()
+    private val angleVectors = mutableMapOf<Point3Notation, Vector>()
+    private val arcToAngleMap = mutableMapOf<ArcPointCollection, Point3Notation>()
     private val comparisons = mutableMapOf<Notation, Vector>()
+
+    fun addSegmentVector(notation: SegmentNotation, vector: Vector) {}
+    fun addArcVector(notation: ArcNotation, vector: Vector) {}
+    fun addAngleVector(notation: Point3Notation, vector: Vector) {
+    }
+
+    /**
+     * Substitute [nullified] index in all vectors of collection by [substitution]
+     */
+    fun simplifyVectorCollection(collection: MutableMap<Any, Vector>, nullified: Int, substitution: Vector) {
+    }
 
     fun getRelationsByNotation(notation: Notation): EntityRelations {
         return getKeyValueByNotation(notation).second
@@ -99,7 +117,11 @@ open class SymbolTable {
                 }
                 val res = ArcRelations()
                 val collection =
-                    SegmentPointCollection(notation.getLetters().toMutableSet(), notation.getLetters().toMutableSet())
+                    ArcPointCollection(
+                        notation.getLetters().toMutableSet(),
+                        notation.getLetters().toMutableSet(),
+                        notation.circle
+                    )
                 arcs[collection] = res
                 return collection to res
             }
@@ -254,7 +276,7 @@ open class SymbolTable {
                 return value
         }
         val res = ArcRelations()
-        arcs[SegmentPointCollection(notation.getLetters().toSet())] = res
+        arcs[ArcPointCollection(notation.getLetters().toSet(), circle = notation.circle)] = res
         return res
     }
 

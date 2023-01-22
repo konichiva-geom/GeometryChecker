@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: String) :
     BinaryExpr(left, right) {
 
-    override fun getRepr() = getReprForBinaryWithExpressions(left, right, "$op ")
+    override fun getRepr() = getReprForBinaryWithExpressions(left, right, " $op ")
     override fun rename(mapper: ExpressionMapper) =
         ArithmeticBinaryExpr(left.rename(mapper), right.rename(mapper), op)
 
@@ -29,14 +29,14 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: String) :
 
     fun createVectors(symbolTable: SymbolTable): Vector {
         val leftVector = createVector(left, symbolTable)
-        var rightVector = createVector(right, symbolTable)
-        return leftVector
+        val rightVector = createVector(right, symbolTable)
+        return leftVector.merge(rightVector, op)
     }
 
     private fun createVector(expr: Expr, symbolTable: SymbolTable): Vector {
-        return if(left is ArithmeticBinaryExpr)
-            left.createVectors(symbolTable)
-        else Vector.fromNotation(symbolTable, left as Notation)
+        return if (expr is ArithmeticBinaryExpr)
+            expr.createVectors(symbolTable)
+        else Vector.fromNotation(symbolTable, expr as Notation)
     }
 
     fun getType(): KClass<out Expr> {

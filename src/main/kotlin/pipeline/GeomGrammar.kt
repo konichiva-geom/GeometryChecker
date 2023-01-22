@@ -115,6 +115,7 @@ object GeomGrammar : Grammar<Any>() {
     }
     //endregion
 
+    // angle, segment, arc
     private val relatableNotation by (angle map {
         Point3Notation(it[0].text, it[1].text, it[2].text)
     }) or (linear map {

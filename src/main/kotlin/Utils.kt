@@ -56,15 +56,6 @@ object Utils {
         return notation
     }
 
-    fun MutableMap<Int, Float>.mergeWithOperation(
-        other: MutableMap<Int, Float>,
-        operation: String
-    ): MutableMap<Int, Float> {
-        return (keys + other.keys)
-            .associateWith { signToLambda[operation]!!(this[it] ?: 0f, other[it] ?: 0f) }
-            .toMutableMap()
-    }
-
     /**
      * Create relation binary expression
      */
@@ -153,11 +144,18 @@ object Utils {
         return if (t1!! < t2) t1 else t2
     }
 
-    fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key:R, element: T) {
+    fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key: R, element: T) {
         if (this[key] == null)
             this[key] = mutableSetOf(element)
         else
             this[key]!!.add(element)
+    }
+
+    fun <R> MutableMap<R, Float>.addOrCreate(key: R, element: Float) {
+        if (this[key] == null)
+            this[key] = element
+        else
+            this[key] = this[key]!! + element
     }
 
     object NameGenerator {
