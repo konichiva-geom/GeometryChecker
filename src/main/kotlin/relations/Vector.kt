@@ -1,3 +1,8 @@
+package relations
+
+import SymbolTable
+import SystemFatalError
+import Utils
 import Utils.addOrCreate
 import Utils.signToLambda
 import expr.ArcNotation

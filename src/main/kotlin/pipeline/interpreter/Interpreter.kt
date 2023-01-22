@@ -1,21 +1,15 @@
 package pipeline.interpreter
 
 import PosError
-import Relation
 import SpoofError
 import SymbolTable
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
-import expr.Creation
-import expr.Expr
-import expr.Point2Notation
-import expr.Point3Notation
-import expr.PointCreation
-import expr.PointNotation
-import expr.TheoremUse
+import expr.*
 import inference.InferenceProcessor
+import relations.Relation
 
 // TODO interpreter is becoming a pipeline too. Maybe convert it to pipeline and move part of its logic to a separate class
 class Interpreter(val inferenceProcessor: InferenceProcessor) {
@@ -85,17 +79,17 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     private fun interpretDescription(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex()) {
             //  try {
-                when (expr) {
-                    is TheoremUse -> interpretTheoremUse(expr)
-                    is Relation -> {
-                        expr.make(symbolTable)
-                        inferenceProcessor.processInference(expr, symbolTable)
-                    }
-
-                    is Creation -> expr.create(symbolTable)
-                    else -> {
-                    }
+            when (expr) {
+                is TheoremUse -> interpretTheoremUse(expr)
+                is Relation -> {
+                    expr.make(symbolTable)
+                    inferenceProcessor.processInference(expr, symbolTable)
                 }
+
+                is Creation -> expr.create(symbolTable)
+                else -> {
+                }
+            }
             // } catch (e: SpoofError) {
             //     throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
             // }
@@ -104,16 +98,16 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
 
     private fun interpretSolution(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex()) {
-          //  try {
-                when (expr) {
-                    is TheoremUse -> interpretTheoremUse(expr)
-                    is Relation -> throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
-                    is Creation -> expr.create(symbolTable)
-                    else -> throw SpoofError("Unexpected expression in solution. Use theorems or creation statements")
-                }
-           // } catch (e: SpoofError) {
-          //      throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
-          //  }
+            //  try {
+            when (expr) {
+                is TheoremUse -> interpretTheoremUse(expr)
+                is Relation -> throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
+                is Creation -> expr.create(symbolTable)
+                else -> throw SpoofError("Unexpected expression in solution. Use theorems or creation statements")
+            }
+            // } catch (e: SpoofError) {
+            //      throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
+            //  }
         }
     }
 

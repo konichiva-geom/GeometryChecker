@@ -1,25 +1,8 @@
 import Utils.sortAngle
-import entity.AngleRelations
-import entity.ArcRelations
-import entity.CircleRelations
-import entity.EntityRelations
-import entity.LineRelations
-import entity.PointRelations
-import entity.RayRelations
-import entity.SegmentRelations
-import expr.ArcNotation
-import expr.BinaryEquals
-import expr.BinaryIn
-import expr.BinaryIntersects
-import expr.BinaryParallel
-import expr.Expr
-import expr.IdentNotation
-import expr.Notation
-import expr.Point2Notation
-import expr.Point3Notation
-import expr.PointNotation
-import expr.RayNotation
-import expr.SegmentNotation
+import entity.*
+import expr.*
+import relations.Vector
+import relations.VectorContainer
 
 interface PointCollection {
     fun getPointsInCollection(): Set<String>
@@ -64,20 +47,13 @@ open class SymbolTable {
     private val circles = mutableMapOf<IdentNotation, CircleRelations>()
     private val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
 
-    private val segmentVectors = mutableMapOf<SegmentPointCollection, Vector>()
-    private val angleVectors = mutableMapOf<Point3Notation, Vector>()
+    private val segmentVectors = VectorContainer<SegmentPointCollection>()
+    private val angleVectors = VectorContainer<Point3Notation>()
     private val arcToAngleMap = mutableMapOf<ArcPointCollection, Point3Notation>()
-    private val comparisons = mutableMapOf<Notation, Vector>()
 
     fun addSegmentVector(notation: SegmentNotation, vector: Vector) {}
     fun addArcVector(notation: ArcNotation, vector: Vector) {}
     fun addAngleVector(notation: Point3Notation, vector: Vector) {
-    }
-
-    /**
-     * Substitute [nullified] index in all vectors of collection by [substitution]
-     */
-    fun simplifyVectorCollection(collection: MutableMap<Any, Vector>, nullified: Int, substitution: Vector) {
     }
 
     fun getRelationsByNotation(notation: Notation): EntityRelations {
@@ -288,6 +264,8 @@ open class SymbolTable {
         angles.clear()
         circles.clear()
         arcs.clear()
-        comparisons.clear()
+        arcToAngleMap.clear()
+        angleVectors.vectors.clear()
+        segmentVectors.vectors.clear()
     }
 }

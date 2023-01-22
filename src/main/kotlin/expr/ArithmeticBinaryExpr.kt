@@ -1,7 +1,7 @@
 package expr
 
 import SymbolTable
-import Vector
+import relations.Vector
 import pipeline.interpreter.ExpressionMapper
 import kotlin.reflect.KClass
 

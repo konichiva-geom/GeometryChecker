@@ -1,7 +1,6 @@
 package expr
 
 import PointCollection
-import Relation
 import SegmentPointCollection
 import SpoofError
 import SymbolTable
@@ -9,6 +8,7 @@ import Utils
 import com.github.h0tk3y.betterParse.utils.Tuple4
 import entity.LineRelations
 import pipeline.interpreter.ExpressionMapper
+import relations.Relation
 
 abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
     override fun getChildren(): List<Expr> = listOf(left, right)

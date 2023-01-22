@@ -1,6 +1,5 @@
 package pipeline.interpreter
 
-import Relation
 import SpoofError
 import SymbolTable
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
@@ -10,6 +9,7 @@ import expr.Expr
 import expr.TheoremUse
 import pipeline.GeomGrammar
 import pipeline.Parser
+import relations.Relation
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
     override fun toString(): String {
