@@ -60,7 +60,13 @@ class Vector(
         return Vector(map)
     }
 
-    private fun mergeWithOperation(
+    fun multiplyBy(coeff: Float) {
+        for((key, number) in value) {
+            value[key] = number * coeff
+        }
+    }
+
+    fun mergeWithOperation(
         other: Vector,
         operation: String
     ): MutableMap<Int, Float> {

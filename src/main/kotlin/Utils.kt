@@ -168,13 +168,6 @@ object Utils {
      * Returns next prime number for comparison vectors
      */
     object PrimeGetter {
-        private val primes = File("src/main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
-        private var currentIndex = 0
-
-        fun getNext(): Int = primes[currentIndex++]
-
-        fun removeLast() {
-            currentIndex--
-        }
+        val primes = File("src/main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
     }
 }

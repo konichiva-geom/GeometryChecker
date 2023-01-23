@@ -85,7 +85,6 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
                     expr.make(symbolTable)
                     inferenceProcessor.processInference(expr, symbolTable)
                 }
-
                 is Creation -> expr.create(symbolTable)
                 else -> {
                 }
