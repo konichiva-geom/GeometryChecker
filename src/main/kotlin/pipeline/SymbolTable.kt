@@ -51,7 +51,9 @@ open class SymbolTable {
     private val angleVectors = VectorContainer<Point3Notation>()
     private val arcToAngleMap = mutableMapOf<ArcPointCollection, Point3Notation>()
 
-    fun addSegmentVector(notation: SegmentNotation, vector: Vector) {}
+    fun addSegmentVector(notation: SegmentNotation, vector: Vector) {
+        segmentVectors.vectors[notation] = vector
+    }
     fun addArcVector(notation: ArcNotation, vector: Vector) {}
     fun addAngleVector(notation: Point3Notation, vector: Vector) {
     }
@@ -235,15 +237,6 @@ open class SymbolTable {
             return angles[notation]!!
         angles[notation] = AngleRelations()
         return angles[notation]!!
-    }
-
-    fun addRelation(expr: Expr) {
-        when (expr) {
-            is BinaryEquals -> {}
-            is BinaryIn -> {}
-            is BinaryIntersects -> {}
-            is BinaryParallel -> {}
-        }
     }
 
     fun getArc(notation: ArcNotation): ArcRelations {

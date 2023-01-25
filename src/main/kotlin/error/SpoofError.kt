@@ -37,7 +37,7 @@ class PosError(val range: IntRange, msg: String, vararg args: Pair<String, Any>)
  * This error means that there is some fatal flaw in the design.
  * When it happens in the production code, it sends a message to dev mail.
  */
-class SystemFatalError(val msg: String) : Exception() {
+class SystemFatalError(private val msg: String) : Exception() {
     override val message: String
         get() = "Something really bad happened X(. Sending message to devs.\n$msg"
 }

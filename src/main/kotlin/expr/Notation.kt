@@ -3,7 +3,12 @@ package expr
 import Utils.max
 import Utils.min
 import Utils.sortAngle
+import Utils.sortLine
 import pipeline.interpreter.ExpressionMapper
+
+interface Renamable {
+    fun rename(pointPointer: PointPointer)
+}
 
 /**
  * Represents some structure of points (angle, line e.t.c) or te name of a circle
@@ -74,7 +79,7 @@ abstract class RelatableNotation : Notation()
 //     }
 // }
 
-class Point3Notation(var p1: String, var p2: String, var p3: String) : RelatableNotation() {
+class Point3Notation(var p1: String, var p2: String, var p3: String) : RelatableNotation(), Renamable {
     init {
         sortAngle(this)
     }
@@ -98,12 +103,23 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun createLinks(mapper: ExpressionMapper) {
         mapper.addLink(p1, p3)
     }
+
+    override fun rename(pointPointer: PointPointer) {
+        p1 = pointPointer.getIdentical(p1)
+        p2 = pointPointer.getIdentical(p2)
+        p3 = pointPointer.getIdentical(p3)
+        sortAngle(this)
+    }
 }
 
-open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
+open class Point2Notation(p1: String, p2: String) : RelatableNotation(), Renamable {
     var p1: String
     var p2: String
 
+    /**
+     * cannot call sortLine() here, because  it will be called inside RayNotation constructor too,
+     * destroying ray structure
+     */
     init {
         this.p1 = min(p1, p2)
         this.p2 = max(p1, p2)
@@ -132,6 +148,12 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     fun toRayNotation() = RayNotation(p1, p2)
     fun toSegmentNotation() = SegmentNotation(p1, p2)
     open fun toLine() = this
+
+    override fun rename(pointPointer: PointPointer) {
+        p1 = pointPointer.getIdentical(p1)
+        p2 = pointPointer.getIdentical(p2)
+        sortLine(this)
+    }
 }
 
 class PointNotation(val p: String) : RelatableNotation() {
@@ -164,6 +186,7 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
         mapper.mergeMapping(p1, listOf(other.p1))
         mapper.mergeMapping(p2, listOf(other.p2))
     }
+
     override fun createLinks(mapper: ExpressionMapper) {}
 
     override fun getOrder(): Int = 3
@@ -173,6 +196,11 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
 
     override fun getRepr() = StringBuilder("ray AA")
     override fun toString(): String = "ray ${super.toString()}"
+
+    override fun rename(pointPointer: PointPointer) {
+        p1 = pointPointer.getIdentical(p1)
+        p2 = pointPointer.getIdentical(p2)
+    }
 }
 
 class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
@@ -192,7 +220,7 @@ class ArcNotation(p1: String, p2: String, val circle: String) : Point2Notation(p
     override fun toString(): String = "arc ${super.toString()} of $circle"
 }
 
-class IdentNotation(private val text: String) : RelatableNotation() {
+class IdentNotation(private var text: String) : RelatableNotation(), Renamable {
     override fun getOrder(): Int = 7
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -205,7 +233,12 @@ class IdentNotation(private val text: String) : RelatableNotation() {
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
         mapper.mergeMapping(text, listOf((other as IdentNotation).text))
     }
+
     override fun createLinks(mapper: ExpressionMapper) {}
+
+    override fun rename(pointPointer: PointPointer) {
+        text = pointPointer.getIdentical(text)
+    }
 }
 
 class NumNotation(val number: Number) : Notation() {
