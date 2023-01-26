@@ -7,7 +7,7 @@ import Utils.sortLine
 import pipeline.interpreter.ExpressionMapper
 
 interface Renamable {
-    fun rename(pointPointer: PointPointer)
+    fun rename(pointAndCirclePointer: PointAndCirclePointer)
 }
 
 /**
@@ -104,10 +104,10 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
         mapper.addLink(p1, p3)
     }
 
-    override fun rename(pointPointer: PointPointer) {
-        p1 = pointPointer.getIdentical(p1)
-        p2 = pointPointer.getIdentical(p2)
-        p3 = pointPointer.getIdentical(p3)
+    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
+        p1 = pointAndCirclePointer.getIdentical(p1)
+        p2 = pointAndCirclePointer.getIdentical(p2)
+        p3 = pointAndCirclePointer.getIdentical(p3)
         sortAngle(this)
     }
 }
@@ -149,9 +149,9 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation(), Renamab
     fun toSegmentNotation() = SegmentNotation(p1, p2)
     open fun toLine() = this
 
-    override fun rename(pointPointer: PointPointer) {
-        p1 = pointPointer.getIdentical(p1)
-        p2 = pointPointer.getIdentical(p2)
+    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
+        p1 = pointAndCirclePointer.getIdentical(p1)
+        p2 = pointAndCirclePointer.getIdentical(p2)
         sortLine(this)
     }
 }
@@ -197,9 +197,9 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun getRepr() = StringBuilder("ray AA")
     override fun toString(): String = "ray ${super.toString()}"
 
-    override fun rename(pointPointer: PointPointer) {
-        p1 = pointPointer.getIdentical(p1)
-        p2 = pointPointer.getIdentical(p2)
+    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
+        p1 = pointAndCirclePointer.getIdentical(p1)
+        p2 = pointAndCirclePointer.getIdentical(p2)
     }
 }
 
@@ -212,12 +212,16 @@ class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun toString(): String = "$p1$p2"
 }
 
-class ArcNotation(p1: String, p2: String, val circle: String) : Point2Notation(p1, p2) {
+class ArcNotation(p1: String, p2: String, var circle: String) : Point2Notation(p1, p2) {
     override fun getOrder(): Int = 4
     override fun toLine() = Point2Notation(p1, p2)
     override fun getRepr() = StringBuilder("arc AA")
     override fun rename(mapper: ExpressionMapper) = ArcNotation(mapper.get(p1), mapper.get(p2), mapper.get(circle))
     override fun toString(): String = "arc ${super.toString()} of $circle"
+    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
+        super.rename(pointAndCirclePointer)
+        circle = pointAndCirclePointer.getIdentical(circle)
+    }
 }
 
 class IdentNotation(private var text: String) : RelatableNotation(), Renamable {
@@ -236,8 +240,8 @@ class IdentNotation(private var text: String) : RelatableNotation(), Renamable {
 
     override fun createLinks(mapper: ExpressionMapper) {}
 
-    override fun rename(pointPointer: PointPointer) {
-        text = pointPointer.getIdentical(text)
+    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
+        text = pointAndCirclePointer.getIdentical(text)
     }
 }
 

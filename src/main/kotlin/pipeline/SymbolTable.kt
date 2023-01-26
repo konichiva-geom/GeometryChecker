@@ -1,16 +1,40 @@
 import Utils.sortAngle
-import entity.*
-import expr.*
+import entity.AngleRelations
+import entity.ArcRelations
+import entity.CircleRelations
+import entity.EntityRelations
+import entity.LineRelations
+import entity.LinearRelations
+import entity.PointRelations
+import entity.RayRelations
+import entity.SegmentRelations
+import expr.ArcNotation
+import expr.IdentNotation
+import expr.Notation
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointAndCirclePointer
+import expr.PointNotation
+import expr.RayNotation
+import expr.SegmentNotation
 import relations.Vector
 import relations.VectorContainer
+import kotlin.reflect.KClass
 
 interface PointCollection {
     fun getPointsInCollection(): Set<String>
+
+    /**
+     * Points, that if are same, collections are same
+     */
+    fun getKeyPoints(): Set<String>
     fun addPoints(added: List<String>)
 }
 
 data class LinePointCollection(val points: MutableSet<String>) : PointCollection {
     override fun getPointsInCollection(): Set<String> = points
+    override fun getKeyPoints() = points
+
     override fun addPoints(added: List<String>) {
         points.addAll(added)
     }
@@ -51,9 +75,12 @@ open class SymbolTable {
     private val angleVectors = VectorContainer<Point3Notation>()
     private val arcToAngleMap = mutableMapOf<ArcPointCollection, Point3Notation>()
 
+    val pointAndCirclePointer = PointAndCirclePointer()
+
     fun addSegmentVector(notation: SegmentNotation, vector: Vector) {
-        segmentVectors.vectors[notation] = vector
+        //segmentVectors.vectors[notation] = vector
     }
+
     fun addArcVector(notation: ArcNotation, vector: Vector) {}
     fun addAngleVector(notation: Point3Notation, vector: Vector) {
     }
@@ -74,6 +101,7 @@ open class SymbolTable {
                 }
                 val rayRelations = RayRelations()
                 val collection = RayPointCollection(notation.p1, mutableSetOf(notation.p2))
+                pointAndCirclePointer.addSubscribers(collection, *notation.getLetters().toTypedArray())
                 rays[collection] = rayRelations
                 return collection to rayRelations
             }
@@ -103,21 +131,37 @@ open class SymbolTable {
                 arcs[collection] = res
                 return collection to res
             }
+
             is Point2Notation -> {
-                for ((collection, line) in lines) {
-                    if (pointsContain(notation.p1, collection.points) && pointsContain(notation.p2, collection.points))
-                        return collection to line
-                }
-                val lineRelations = LineRelations()
-                val collection =
-                    LinePointCollection(notation.getLetters().toMutableSet())
-                lines[collection] = lineRelations
-                return collection to lineRelations
+                return getKeyValueForLinear(
+                    notation, lines as MutableMap<PointCollection, LineRelations>,
+                    { collection: PointCollection -> (collection as LinePointCollection).points },
+                    LineRelations::class
+                )
             }
 
             is Point3Notation -> return notation to getAngle(notation)
             else -> throw SpoofError(notation.toString())
         }
+    }
+
+    private fun <T : LinearRelations> getKeyValueForLinear(
+        notation: Point2Notation,
+        map: MutableMap<PointCollection, T>,
+        pointLambda: (pointCollection: PointCollection) -> Set<String>,
+        linearClass: KClass<T>
+    ): Pair<PointCollection, T> {
+        for ((collection, line) in map) {
+            if (pointsContain(notation.p1, pointLambda(collection))
+                && pointsContain(notation.p2, pointLambda(collection))
+            )
+                return collection to line
+        }
+        val lineRelations = linearClass.constructors.first().call()
+        val collection =
+            LinePointCollection(notation.getLetters().toMutableSet())
+        map[collection] = lineRelations
+        return collection to lineRelations
     }
 
     fun setRelationByNotation(relations: EntityRelations, notation: Notation) {
