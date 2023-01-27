@@ -2,7 +2,6 @@ package relations
 
 import SymbolTable
 import SystemFatalError
-import Utils
 import Utils.addOrCreate
 import Utils.signToLambda
 import expr.ArcNotation
@@ -113,7 +112,7 @@ class Vector(
         fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
             if (notation is NumNotation)
                 return Vector(mutableMapOf(0 to notation.number.toFloat()))
-            val res = Vector(Utils.PrimeGetter.getNext())
+            val res = Vector(0)
             when (notation) {
                 is ArcNotation -> {
                     //symbolTable.

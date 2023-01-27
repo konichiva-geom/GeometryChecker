@@ -1,5 +1,6 @@
 package expr
 
+import SpoofError
 import Utils.max
 import Utils.min
 import Utils.sortAngle
@@ -8,6 +9,7 @@ import pipeline.interpreter.ExpressionMapper
 
 interface Renamable {
     fun rename(pointAndCirclePointer: PointAndCirclePointer)
+    fun checkValidityAfterRename()
 }
 
 /**
@@ -22,7 +24,7 @@ interface Renamable {
  * Point3: 6
  * Ident: 7
  */
-abstract class Notation : Expr, Comparable<Expr> {
+abstract class Notation : Expr, Comparable<Expr>, Renamable {
     abstract fun getOrder(): Int
     fun compareOrSame(other: Expr): Int? {
         if (other is Notation && other.getOrder() != this.getOrder())
@@ -41,45 +43,28 @@ abstract class Notation : Expr, Comparable<Expr> {
     override fun hashCode(): Int = toString().hashCode()
 
     override fun toString(): String = getLetters().joinToString(separator = "")
+
+    // TODO rewrite in case [RectangleNotation] is created
+    override fun checkValidityAfterRename() {
+        if (getLetters().size == 3 && getLetters().toSet().size != 3) {
+            val names = if (getLetters()[0] == getLetters()[1]) mutableListOf(1, 2, getLetters()[0])
+            else if (getLetters()[0] == getLetters()[1]) mutableListOf(1, 3, getLetters()[0])
+            else mutableListOf(2, 3, getLetters()[1])
+            throw SpoofError(
+                "Cannot use notation with same points. %{first} and %{second} points equal to %{point}",
+                "first" to names[0], "second" to names[1], "point" to names[2]
+            )
+        } else if (getLetters().size == 2 && getLetters().size == 1)
+            throw SpoofError(
+                "Cannot use notation with same points. %{first} and %{second} points equal to %{point}",
+                "first" to getLetters()[0], "second" to getLetters()[1], "point" to getLetters()[0]
+            )
+    }
 }
 
 abstract class RelatableNotation : Notation()
 
-// class CoeffNotation(val coeff: Float, val notation: Notation) : Notation() {
-//     override fun getOrder(): Int = 4
-//
-//     override fun compareTo(other: expr.Expr): Int {
-//         TODO("Not yet implemented")
-//     }
-//
-//     override fun getLetters(): List<String> {
-//         TODO("Not yet implemented")
-//     }
-// }
-
-// class MulNotation(private val elems: List<Notation>) : Notation() {
-//     override fun compareTo(other: expr.Expr): Int {
-//         // return super.compareOrSame(other) ?: {
-//         // }
-//         TODO("")
-//     }
-//
-//     override fun getOrder(): Int = 5
-//
-//     override fun toString(): String = elems.joinToString(separator = "*")
-// }
-
-// class DivNotation(val top: Notation, val bottom: Notation) : Notation() {
-//     override fun getOrder(): Int = 6
-//
-//     override fun toString(): String = "$top/$bottom"
-//
-//     override fun compareTo(other: expr.Expr): Int {
-//         TODO("Not yet implemented")
-//     }
-// }
-
-class Point3Notation(var p1: String, var p2: String, var p3: String) : RelatableNotation(), Renamable {
+class Point3Notation(var p1: String, var p2: String, var p3: String) : RelatableNotation() {
     init {
         sortAngle(this)
     }
@@ -112,7 +97,7 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     }
 }
 
-open class Point2Notation(p1: String, p2: String) : RelatableNotation(), Renamable {
+open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     var p1: String
     var p2: String
 
@@ -156,7 +141,7 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation(), Renamab
     }
 }
 
-class PointNotation(val p: String) : RelatableNotation() {
+class PointNotation(var p: String) : RelatableNotation() {
     override fun getOrder(): Int = 1
 
     override fun compareTo(other: Expr): Int {
@@ -165,6 +150,10 @@ class PointNotation(val p: String) : RelatableNotation() {
 
     override fun getRepr() = StringBuilder("A")
     override fun rename(mapper: ExpressionMapper) = PointNotation(mapper.get(p))
+    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
+        p = pointAndCirclePointer.getIdentical(p)
+    }
+
     override fun toString(): String = p
     override fun getLetters(): MutableList<String> = mutableListOf(p)
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
@@ -224,7 +213,7 @@ class ArcNotation(p1: String, p2: String, var circle: String) : Point2Notation(p
     }
 }
 
-class IdentNotation(private var text: String) : RelatableNotation(), Renamable {
+class IdentNotation(private var text: String) : RelatableNotation() {
     override fun getOrder(): Int = 7
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -253,6 +242,8 @@ class NumNotation(val number: Number) : Notation() {
 
     override fun getRepr() = StringBuilder("0")
     override fun rename(mapper: ExpressionMapper) = NumNotation(number)
+    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {}
+
     override fun toString(): String = number.toString()
     override fun getLetters(): MutableList<String> = mutableListOf()
 

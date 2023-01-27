@@ -1,12 +1,12 @@
 package pipeline.interpreter
 
-import TestFactory.interpret
+import TestFactory.passTask
 import kotlin.test.Test
 
 internal class TheoremTest {
     @Test
     fun testEqualSidedTriangles() {
-        interpret(
+        passTask(
             """
             description:
                 new U; new V; new W    //    U       X
@@ -29,7 +29,7 @@ internal class TheoremTest {
      */
     @Test
     fun testEqualSidedTrianglesWithCommonPoints() {
-        interpret(
+        passTask(
             """
             description:
                 new W                  //   W---X

@@ -7,11 +7,18 @@ import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
-import expr.*
+import expr.Creation
+import expr.Expr
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointCreation
+import expr.PointNotation
+import expr.TheoremUse
 import inference.InferenceProcessor
 import relations.Relation
 
 // TODO interpreter is becoming a pipeline too. Maybe convert it to pipeline and move part of its logic to a separate class
+// TODO before each line should run PointPointer.rename. In theorems too
 class Interpreter(val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
     private val symbolTable = SymbolTable()
@@ -25,7 +32,8 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
         interpretDescription(tree.item[0].t2!!, tree.children[0].children[1])
         if (tree.item[2].t2 != null)
             interpretSolution(tree.item[2].t2!!, tree.children[2].children[1])
-        interpretProve(tree.item[1].t2!!, tree.children[1].children[1])
+        if (tree.item[1].t2 != null)
+            interpretProve(tree.item[1].t2!!, tree.children[1].children[1])
     }
 
     private fun validatePointInitialization(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {

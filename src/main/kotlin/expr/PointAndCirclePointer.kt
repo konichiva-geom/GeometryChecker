@@ -16,11 +16,11 @@ class PointAndCirclePointer {
     /**
      * map of renamed collections when key point becomes equal to a smaller point lexicographically
      */
-    private val subscribers = mutableMapOf<String, MutableSet<PointCollection>>()
+    private val subscribers = mutableMapOf<String, MutableSet<PointCollection<*>>>()
 
     fun getIdentical(point: String) = points[point]!!
 
-    fun addSubscribers(pointCollection: PointCollection, vararg points: String) {
+    fun addSubscribers(pointCollection: PointCollection<*>, vararg points: String) {
         points.forEach { subscribers.addToOrCreateSet(it, pointCollection) }
     }
 }

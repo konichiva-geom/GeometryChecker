@@ -19,38 +19,41 @@ import expr.RayNotation
 import expr.SegmentNotation
 import relations.Vector
 import relations.VectorContainer
-import kotlin.reflect.KClass
 
-interface PointCollection {
+interface PointCollection<T : Notation> {
     fun getPointsInCollection(): Set<String>
 
     /**
-     * Points, that if are same, collections are same
+     * Check that notation can be transformed into this collection
      */
-    fun getKeyPoints(): Set<String>
+    fun isFromNotation(notation: T): Boolean
     fun addPoints(added: List<String>)
 }
 
-data class LinePointCollection(val points: MutableSet<String>) : PointCollection {
+data class LinePointCollection(val points: MutableSet<String>) : PointCollection<Point2Notation> {
     override fun getPointsInCollection(): Set<String> = points
-    override fun getKeyPoints() = points
+    override fun isFromNotation(notation: Point2Notation) = points.containsAll(notation.getLetters())
 
     override fun addPoints(added: List<String>) {
         points.addAll(added)
     }
 }
 
-data class RayPointCollection(val start: String, val points: MutableSet<String>) : PointCollection {
+data class RayPointCollection(var start: String, val points: MutableSet<String>) : PointCollection<RayNotation> {
     override fun getPointsInCollection(): Set<String> = setOf(start) + points
+    override fun isFromNotation(notation: RayNotation) = notation.p1 == start && points.contains(notation.p2)
+
     override fun addPoints(added: List<String>) {
         // TODO is it bad if added point is [start]?
         points.addAll(added)
     }
 }
 
-open class SegmentPointCollection(val bounds: Set<String>, val points: MutableSet<String> = mutableSetOf()) :
-    PointCollection {
+open class SegmentPointCollection(val bounds: MutableSet<String>, val points: MutableSet<String> = mutableSetOf()) :
+    PointCollection<SegmentNotation> {
     override fun getPointsInCollection(): Set<String> = bounds + points
+    override fun isFromNotation(notation: SegmentNotation) = bounds.containsAll(notation.getLetters())
+
     override fun addPoints(added: List<String>) {
         // TODO is it bad if added point is in [bounds]?
         points.addAll(added)
@@ -59,8 +62,21 @@ open class SegmentPointCollection(val bounds: Set<String>, val points: MutableSe
     override fun toString(): String = "${bounds.joinToString(separator = "")}:$points"
 }
 
-class ArcPointCollection(bounds: Set<String>, points: MutableSet<String> = mutableSetOf(), val circle: String) :
-    SegmentPointCollection(bounds, points)
+class ArcPointCollection(
+    val bounds: MutableSet<String>,
+    val points: MutableSet<String> = mutableSetOf(),
+    var circle: String
+) :
+    PointCollection<ArcNotation> {
+    override fun getPointsInCollection() = bounds + points
+
+    override fun addPoints(added: List<String>) {
+        points.addAll(added)
+    }
+
+    override fun isFromNotation(notation: ArcNotation) = bounds.containsAll(notation.getLetters())
+        && notation.circle == circle
+}
 
 open class SymbolTable {
     private val points = mutableMapOf<String, PointRelations>()
@@ -94,74 +110,49 @@ open class SymbolTable {
     fun getKeyValueByNotation(notation: Notation): Pair<Any, EntityRelations> {
         when (notation) {
             is PointNotation -> return notation.p to getPoint(notation)
-            is RayNotation -> {
-                for ((collection, ray) in rays) {
-                    if (pointsEqual(collection.start, notation.p1) && pointsContain(notation.p2, collection.points))
-                        return collection to ray
-                }
-                val rayRelations = RayRelations()
-                val collection = RayPointCollection(notation.p1, mutableSetOf(notation.p2))
-                pointAndCirclePointer.addSubscribers(collection, *notation.getLetters().toTypedArray())
-                rays[collection] = rayRelations
-                return collection to rayRelations
-            }
-            is SegmentNotation -> {
-                for ((collection, segment) in segments) {
-                    if (pointsContain(notation.p1, collection.bounds) && pointsContain(notation.p2, collection.bounds))
-                        return collection to segment
-                }
-                val segmentRelations = SegmentRelations()
-                val collection =
-                    SegmentPointCollection(notation.getLetters().toMutableSet(), notation.getLetters().toMutableSet())
-                segments[collection] = segmentRelations
-                return collection to segmentRelations
-            }
-            is ArcNotation -> {
-                for ((collection, value) in arcs) {
-                    if (pointsContain(notation.p1, collection.bounds) && pointsContain(notation.p2, collection.bounds))
-                        return collection to value
-                }
-                val res = ArcRelations()
-                val collection =
-                    ArcPointCollection(
-                        notation.getLetters().toMutableSet(),
-                        notation.getLetters().toMutableSet(),
-                        notation.circle
-                    )
-                arcs[collection] = res
-                return collection to res
-            }
+            is RayNotation -> return getKeyValueForLinear<RayRelations, RayNotation, RayPointCollection>(
+                notation,
+                rays as MutableMap<PointCollection<RayNotation>, RayRelations>,
+                arrayOf(notation.p1, mutableSetOf(notation.p2))
+            )
 
-            is Point2Notation -> {
-                return getKeyValueForLinear(
-                    notation, lines as MutableMap<PointCollection, LineRelations>,
-                    { collection: PointCollection -> (collection as LinePointCollection).points },
-                    LineRelations::class
-                )
-            }
+            is SegmentNotation -> return getKeyValueForLinear<SegmentRelations, SegmentNotation, SegmentPointCollection>(
+                notation,
+                segments as MutableMap<PointCollection<SegmentNotation>, SegmentRelations>,
+                arrayOf(notation.getLetters().toMutableSet(), mutableSetOf<String>())
+            )
+
+            is ArcNotation -> return getKeyValueForLinear<ArcRelations, ArcNotation, ArcPointCollection>(
+                notation,
+                arcs as MutableMap<PointCollection<ArcNotation>, ArcRelations>,
+                arrayOf(notation.getLetters().toMutableSet(), mutableSetOf<String>(), notation.circle)
+            )
+
+            is Point2Notation -> return getKeyValueForLinear<LineRelations, Point2Notation, LinePointCollection>(
+                notation,
+                lines as MutableMap<PointCollection<Point2Notation>, LineRelations>,
+                arrayOf(notation.getLetters().toMutableSet())
+            )
 
             is Point3Notation -> return notation to getAngle(notation)
             else -> throw SpoofError(notation.toString())
         }
     }
 
-    private fun <T : LinearRelations> getKeyValueForLinear(
-        notation: Point2Notation,
-        map: MutableMap<PointCollection, T>,
-        pointLambda: (pointCollection: PointCollection) -> Set<String>,
-        linearClass: KClass<T>
-    ): Pair<PointCollection, T> {
+    private inline fun <reified T : LinearRelations, reified N : Notation, reified C : PointCollection<N>> getKeyValueForLinear(
+        notation: N,
+        map: MutableMap<PointCollection<N>, T>,
+        constructorArgs: Array<Any>
+    ): Pair<PointCollection<N>, T> {
         for ((collection, line) in map) {
-            if (pointsContain(notation.p1, pointLambda(collection))
-                && pointsContain(notation.p2, pointLambda(collection))
-            )
+            if (collection.isFromNotation(notation))
                 return collection to line
         }
-        val lineRelations = linearClass.constructors.first().call()
-        val collection =
-            LinePointCollection(notation.getLetters().toMutableSet())
-        map[collection] = lineRelations
-        return collection to lineRelations
+        val linearRelations = T::class.constructors.first().call()
+        val collection = C::class.constructors.first()
+            .call(*constructorArgs)
+        map[collection] = linearRelations
+        return collection to linearRelations
     }
 
     fun setRelationByNotation(relations: EntityRelations, notation: Notation) {
@@ -193,7 +184,7 @@ open class SymbolTable {
         resetLinear(rays, notation, newRelations)
     }
 
-    private fun <T : PointCollection, R : EntityRelations> resetLinear(
+    private fun <T : PointCollection<*>, R : EntityRelations> resetLinear(
         linearCollection: MutableMap<T, R>,
         notation: Point2Notation,
         newRelations: R
@@ -217,7 +208,7 @@ open class SymbolTable {
     fun getPointSetNotationByNotation(notation: Notation): Set<String> {
         return when (notation) {
             is PointNotation -> setOf(notation.p)
-            is Point2Notation -> (getKeyValueByNotation(notation).first as PointCollection).getPointsInCollection()
+            is Point2Notation -> (getKeyValueByNotation(notation).first as PointCollection<*>).getPointsInCollection()
             is Point3Notation -> setOf(notation.p1, notation.p2, notation.p3)
             is IdentNotation -> getCircle(notation).points
             else -> throw SpoofError(notation.toString())
@@ -289,7 +280,7 @@ open class SymbolTable {
                 return value
         }
         val res = ArcRelations()
-        arcs[ArcPointCollection(notation.getLetters().toSet(), circle = notation.circle)] = res
+        arcs[ArcPointCollection(notation.getLetters().toMutableSet(), circle = notation.circle)] = res
         return res
     }
 

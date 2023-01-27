@@ -1,10 +1,10 @@
-import TestFactory.interpret
+import TestFactory.passTask
 import kotlin.test.Test
 
 class RelationTest {
     @Test
     fun testInRelationTrivial() {
-        interpret(
+        passTask(
             """
             description: 
                 new A;new B;
@@ -21,7 +21,8 @@ class RelationTest {
 
     @Test
     fun testParallelRelation() {
-        interpret("""
+        passTask(
+            """
             description:
                 new A;new B;new C; new D
                 line AD parallel BC
@@ -31,7 +32,8 @@ class RelationTest {
                 ray DA || line CB
             solution:
 
-        """.trimIndent())
+        """.trimIndent()
+        )
     }
 
 //    @Test

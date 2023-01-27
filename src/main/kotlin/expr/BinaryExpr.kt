@@ -47,7 +47,7 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
             else arcCollection.points.addAll((collection as SegmentPointCollection).getPointsInCollection())
         }
         val pointList = if (left is PointNotation) listOf(left.p) else (left as Point2Notation).getLetters()
-        val collection = symbolTable.getKeyByNotation(right as Point2Notation) as PointCollection
+        val collection = symbolTable.getKeyByNotation(right as Point2Notation) as PointCollection<*>
         collection.addPoints(pointList)
     }
 }

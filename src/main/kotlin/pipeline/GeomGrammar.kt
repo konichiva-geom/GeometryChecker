@@ -11,6 +11,7 @@ import com.github.h0tk3y.betterParse.combinators.or
 import com.github.h0tk3y.betterParse.combinators.separatedTerms
 import com.github.h0tk3y.betterParse.combinators.times
 import com.github.h0tk3y.betterParse.combinators.unaryMinus
+import com.github.h0tk3y.betterParse.combinators.zeroOrMore
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parser
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
@@ -116,7 +117,7 @@ object GeomGrammar : Grammar<Any>() {
     //endregion
 
     // angle, segment, arc
-    private val relatableNotation by (angle map {
+    private val relatableNotation: Parser<Expr> by (angle map {
         Point3Notation(it[0].text, it[1].text, it[2].text)
     }) or (linear map {
         SegmentNotation(it.first, it.second)
@@ -243,12 +244,12 @@ object GeomGrammar : Grammar<Any>() {
 
     override val rootParser: Parser<Any> by
     // theorem parser
-    oneOrMore(thDef) or
-            // solution parser
-            (3 times block map { it }) or
-            // inference parser
-            (-optional(statementSeparator) and separatedTerms(
-                inferenceStatement,
-                statementSeparator
-            ) and -optional(statementSeparator))
+    -zeroOrMore(statementSeparator) and oneOrMore(thDef) or
+        // solution parser
+        (-zeroOrMore(statementSeparator) and (3 times block map { it })) or
+        // inference parser
+        (-optional(statementSeparator) and separatedTerms(
+            inferenceStatement,
+            statementSeparator
+        ) and -optional(statementSeparator))
 }
