@@ -19,6 +19,7 @@ import inference.Inference
 import toRange
 import toViewable
 
+@Suppress("UNCHECKED_CAST")
 open class Parser {
     fun parseInference(code: String): SyntaxTree<List<Inference>> {
         return parse(code) as SyntaxTree<List<Inference>>
@@ -72,7 +73,7 @@ open class Parser {
                     else err.tokenMismatch.text.substring(0, realTokenEnd)
                     throw PosError(
                         err.tokenMismatch.offset..
-                                (err.tokenMismatch.offset + realToken.length),
+                            (err.tokenMismatch.offset + realToken.length),
                         "Tokenization error. No token for %{token}", "token" to realToken
                     )
                 }
@@ -85,7 +86,6 @@ open class Parser {
         }
         return res
     }
-
 
     /**
      * Trying to find problem token, with a hypothesis:

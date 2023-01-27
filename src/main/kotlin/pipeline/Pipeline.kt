@@ -12,6 +12,7 @@ import java.io.File
 /**
  * Builder-like class that is responsible for all API operations (also a facade)
  */
+@Suppress("UNCHECKED_CAST")
 class Pipeline {
     val parser = Parser()
     val inferenceProcessor = InferenceProcessor()
@@ -29,6 +30,10 @@ class Pipeline {
     fun addTheorems(theorems: String): Pipeline {
         interpreter.theoremParser.addTheorems(theorems)
         return this
+    }
+
+    fun addInference(code: String) {
+        inferenceProcessor.setInference(parser.parseInference(code).item)
     }
 
     fun addInferenceFromFile(path: String) {
@@ -61,11 +66,7 @@ class Pipeline {
     fun interpret(): Pipeline {
         if (!this::tree.isInitialized)
             throw SpoofError("Parse code before interpreting")
-        //try {
         interpreter.interpret(tree as SyntaxTree<List<Tuple2<Any, List<Expr>?>>>)
-        //} catch (e: PosError) {
-       //     throw PosError(e.range, e.msg + "\n${code.substring(e.range)}\n", *e.args)
-       // }
         return this
     }
 }

@@ -46,6 +46,7 @@ import pipeline.interpreter.Signature
 import pipeline.interpreter.TheoremBody
 import toRange
 
+@Suppress("UNCHECKED_CAST", "UNUSED")
 object GeomGrammar : Grammar<Any>() {
     // region entity prefix tokens
     private val ray by literalToken("ray")
@@ -78,7 +79,7 @@ object GeomGrammar : Grammar<Any>() {
     private val shortParallelToken by literalToken("||")
     private val inToken by literalToken("in")
     private val relationToken by intersectsToken or shortIntersectsToken or inToken or
-            perpendicularToken or shortPerpendicularToken or parallelToken or shortParallelToken
+        perpendicularToken or shortPerpendicularToken or parallelToken or shortParallelToken
     //endregion
 
     //region comparison tokens
@@ -162,7 +163,7 @@ object GeomGrammar : Grammar<Any>() {
     }
 
     private val relation: Parser<Expr> by notation and relationToken and notation or
-            (negationToken and parser(GeomGrammar::relation)) map {
+        (negationToken and parser(GeomGrammar::relation)) map {
         if (it is Tuple3<*, *, *>) {
             Utils.getBinaryRelationByString((it as Tuple3<Notation, TokenMatch, Notation>))
         } else {
@@ -207,7 +208,7 @@ object GeomGrammar : Grammar<Any>() {
         theoremUsage or /*inference or*/ binaryStatement, statementSeparator
     ) map { it }
     private val block by ident and -colon and -statementSeparator and -optional(statementSeparator) and
-            optional(blockContent) and -optional(statementSeparator) map { Tuple2(it.t1.text, it.t2) }
+        optional(blockContent) and -optional(statementSeparator) map { Tuple2(it.t1.text, it.t2) }
 
     private val returnStatement by -returnToken and args map { it }
     private val thStatement by theoremUsage or relation or comparison
@@ -215,7 +216,7 @@ object GeomGrammar : Grammar<Any>() {
     private val thBlock by -optional(statementSeparator) and (separatedTerms(
         thStatement, statementSeparator
     ) and optional(-statementSeparator and returnStatement) or returnStatement) and
-            -optional(statementSeparator) map {
+        -optional(statementSeparator) map {
         // only return statement
         if (it is ArrayList<*>)
             TheoremBody(emptyList(), it as List<Expr>)
@@ -226,7 +227,7 @@ object GeomGrammar : Grammar<Any>() {
     }
 
     private val thDef by -thDefStart and zeroArgsOrMoreInvocation and
-            -colon and thBlock map { Pair(it.t1, it.t2) }
+        -colon and thBlock map { Pair(it.t1, it.t2) }
 
     private val inferenceArgs by separatedTerms(
         (anyToken and notation) or binaryStatement,

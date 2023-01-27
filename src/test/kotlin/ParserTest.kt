@@ -1,12 +1,19 @@
+import TestFactory.failInference
 import TestFactory.failTask
+import TestFactory.passInference
 import TestFactory.passTask
 import kotlin.test.Test
 
 class ParserTest {
     // region inference
     @Test
+    fun parseInference() {
+        passInference("A in AB, any C => AB == AB")
+    }
+
+    @Test
     fun failAnyExprAtTheRight() {
-        failTask("any A => any B", "any expressions are not allowed at the right side of the inference")
+        failInference("any A => any B", "any expressions are not allowed at the right side of the inference")
     }
     // endregion
 

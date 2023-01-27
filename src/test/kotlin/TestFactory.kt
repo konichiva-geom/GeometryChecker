@@ -5,8 +5,12 @@ import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
 object TestFactory {
+    // false for slightly faster tests
     private const val PRINT_ERRORS = true
 
+    /**
+     * Using [pipeline.Parser.parseSolution] for inference and theorems, it runs successfully
+     */
     private fun interpret(code: String): SymbolTable {
         val pipeline = Pipeline()
         pipeline.addTheoremsFromFile().parse(code).interpret()
@@ -58,6 +62,32 @@ object TestFactory {
         )
     }
 
+    fun passInference(code: String) {
+        Pipeline().addInference(code)
+    }
+
+    fun failInference(
+        code: String,
+        expected: String,
+        print: Boolean = PRINT_ERRORS
+    ) {
+        val exception = assertFails {
+            Pipeline().addInference(code)
+        }
+        if (print) println(exception.message!!)
+        assertTrue(exception.message!!.contains(expected))
+    }
+
+    fun failTask(
+        code: String, expected: String, print: Boolean = PRINT_ERRORS
+    ) {
+        val exception = assertFails {
+            interpret(code)
+        }
+        if (print) println(exception.message!!)
+        assertTrue(exception.message!!.contains(expected))
+    }
+
     fun failBlock(code: String, expected: String) {
         failDescription(code, expected)
         failProve(code, expected)
@@ -73,16 +103,6 @@ object TestFactory {
             solution:;
         """, expected
         )
-    }
-
-    fun failTask(
-        code: String, expected: String, print: Boolean = PRINT_ERRORS
-    ) {
-        val exception = assertFails {
-            interpret(code)
-        }
-        if (print) println(exception.message!!)
-        assertTrue(exception.message!!.contains(expected))
     }
 
     fun failProve(code: String, expected: String) {

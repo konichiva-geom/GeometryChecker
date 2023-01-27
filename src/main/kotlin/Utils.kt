@@ -15,6 +15,7 @@ import expr.PointNotation
 import java.io.File
 
 object Utils {
+    const val SHOULD_CATCH = true
     const val THEOREMS_PATH = "examples/theorems.txt"
 
     private val lambdas = mutableListOf({ a: Float, b: Float -> a + b },
@@ -34,12 +35,15 @@ object Utils {
         lambdas[3] to "/"
     )
 
-    fun catchWithArgs(block: () -> Any, vararg args: Pair<String, Any>): Any {
-        try {
-            return block()
-        } catch (e: Exception) {
-            throw SpoofError(e.message!!, *args)
-        }
+    fun catchWithRangeAndArgs(block: () -> Any, range: IntRange, vararg args: Pair<String, Any>): Any {
+        return if (SHOULD_CATCH)
+            try {
+                block()
+            } catch (e: SpoofError) {
+                throw PosError(range, e.msg, *e.args, *args)
+            }
+        else
+            block()
     }
 
     fun sortLine(notation: Point2Notation): Point2Notation {
@@ -60,11 +64,11 @@ object Utils {
      * Create relation binary expression
      */
     fun getBinaryRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
-        try {
+        return catchWithRangeAndArgs({
             val first = tuple.t1
             val operator = tuple.t2.text
             val second = tuple.t3
-            return when (operator) {
+            when (operator) {
                 "in" -> {
                     checkNotNumber(first, operator)
                     checkNotNumber(second, operator)
@@ -88,19 +92,20 @@ object Utils {
                     checkNotAngle(second, operator)
                     BinaryIntersects(first, second)
                 }
+
                 "parallel", "||" -> {
                     checkLinear(first, second, operator)
                     BinaryParallel(first as Point2Notation, second as Point2Notation)
                 }
+
                 "perpendicular", "⊥" -> {
                     checkLinear(first, second, operator)
                     BinaryPerpendicular(first as Point2Notation, second as Point2Notation)
                 }
-                else -> throw Exception("Unknown comparison")
+
+                else -> throw SystemFatalError("Unknown comparison")
             }
-        } catch (spoof: SpoofError) {
-            throw PosError(tuple.t2.toRange(), spoof.msg)
-        }
+        }, tuple.t2.toRange()) as BinaryExpr
     }
 
     private fun checkNoGreaterOrder(first: Notation, second: Notation) {

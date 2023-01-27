@@ -1,8 +1,8 @@
 package pipeline.interpreter
 
-import PosError
 import SpoofError
 import SymbolTable
+import Utils.catchWithRangeAndArgs
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
@@ -42,11 +42,9 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
             if (tuple.t2 == null)
                 continue
             for ((j, expr) in tuple.t2!!.withIndex()) {
-                try {
+                catchWithRangeAndArgs({
                     validatePointInitialization(expr, tempTable)
-                } catch (e: SpoofError) {
-                    throw PosError(tree.children[i].children[1].children[j].range, e.msg, *e.args)
-                }
+                }, tree.children[i].children[1].children[j].range)
             }
         }
         tempTable.clear()
@@ -85,37 +83,32 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     }
 
     private fun interpretDescription(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
-        for ((i, expr) in block.withIndex()) {
-            //  try {
-            when (expr) {
-                is TheoremUse -> interpretTheoremUse(expr)
-                is Relation -> {
-                    expr.make(symbolTable)
-                    inferenceProcessor.processInference(expr, symbolTable)
+        for ((i, expr) in block.withIndex())
+            catchWithRangeAndArgs({
+                when (expr) {
+                    is TheoremUse -> interpretTheoremUse(expr)
+                    is Relation -> {
+                        expr.make(symbolTable)
+                        inferenceProcessor.processInference(expr, symbolTable)
+                    }
+
+                    is Creation -> expr.create(symbolTable)
+                    else -> {
+                    }
                 }
-                is Creation -> expr.create(symbolTable)
-                else -> {
-                }
-            }
-            // } catch (e: SpoofError) {
-            //     throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
-            // }
-        }
+            }, syntaxTree.children[i].range)
     }
 
     private fun interpretSolution(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
-        for ((i, expr) in block.withIndex()) {
-            //  try {
-            when (expr) {
-                is TheoremUse -> interpretTheoremUse(expr)
-                is Relation -> throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
-                is Creation -> expr.create(symbolTable)
-                else -> throw SpoofError("Unexpected expression in solution. Use theorems or creation statements")
-            }
-            // } catch (e: SpoofError) {
-            //      throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
-            //  }
-        }
+        for ((i, expr) in block.withIndex())
+            catchWithRangeAndArgs({
+                when (expr) {
+                    is TheoremUse -> interpretTheoremUse(expr)
+                    is Relation -> throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
+                    is Creation -> expr.create(symbolTable)
+                    else -> throw SpoofError("Unexpected expression in solution. Use theorems or creation statements")
+                }
+            }, syntaxTree.children[i].range)
     }
 
     private fun interpretTheoremUse(expr: TheoremUse) {
@@ -128,8 +121,8 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     }
 
     private fun interpretProve(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
-        for ((i, expr) in block.withIndex()) {
-            try {
+        for ((i, expr) in block.withIndex())
+            catchWithRangeAndArgs({
                 when (expr) {
                     is Relation -> theoremParser.check(expr, symbolTable)
                     else -> {
@@ -138,9 +131,6 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
                         else throw SpoofError("Expected relation to check")
                     }
                 }
-            } catch (e: SpoofError) {
-                throw PosError(syntaxTree.children[i].range, e.msg, *e.args)
-            }
-        }
+            }, syntaxTree.children[i].range)
     }
 }

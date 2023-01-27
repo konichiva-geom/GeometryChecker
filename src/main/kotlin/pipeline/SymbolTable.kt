@@ -107,6 +107,7 @@ open class SymbolTable {
 
     fun getKeyByNotation(notation: Notation): Any = getKeyValueByNotation(notation).first
 
+    @Suppress("UNCHECKED_CAST")
     fun getKeyValueByNotation(notation: Notation): Pair<Any, EntityRelations> {
         when (notation) {
             is PointNotation -> return notation.p to getPoint(notation)
