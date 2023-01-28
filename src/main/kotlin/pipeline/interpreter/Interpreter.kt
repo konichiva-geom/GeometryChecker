@@ -7,13 +7,7 @@ import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
-import expr.Creation
-import expr.Expr
-import expr.Point2Notation
-import expr.Point3Notation
-import expr.PointCreation
-import expr.PointNotation
-import expr.TheoremUse
+import expr.*
 import inference.InferenceProcessor
 import relations.Relation
 
@@ -48,6 +42,13 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
             }
         }
         tempTable.clear()
+    }
+
+    private fun rename(expr: Expr) {
+        if (expr is Renamable)
+            expr.rename(symbolTable.pointAndCirclePointer)
+        for (child in expr.getChildren())
+            rename(child)
     }
 
     private fun validatePointInitialization(expr: Expr, tempTable: SymbolTable) {
@@ -86,10 +87,14 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
         for ((i, expr) in block.withIndex())
             catchWithRangeAndArgs({
                 when (expr) {
-                    is TheoremUse -> interpretTheoremUse(expr)
+                    is TheoremUse -> {
+                        interpretTheoremUse(expr)
+                        rename(expr)
+                    }
                     is Relation -> {
                         expr.make(symbolTable)
                         inferenceProcessor.processInference(expr, symbolTable)
+                        rename(expr)
                     }
 
                     is Creation -> expr.create(symbolTable)
