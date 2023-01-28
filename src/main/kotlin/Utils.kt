@@ -163,6 +163,13 @@ object Utils {
             this[key] = this[key]!! + element
     }
 
+    fun <R> MutableMap<R, Int>.addOrCreate(key: R, element: Int) {
+        if (this[key] == null)
+            this[key] = element
+        else
+            this[key] = this[key]!! + element
+    }
+
     object NameGenerator {
         private var index = 0
 
@@ -173,6 +180,6 @@ object Utils {
      * Returns next prime number for comparison vectors
      */
     object PrimeGetter {
-        val primes = File("src/main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
+        val primes = File("src/db.main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
     }
 }
