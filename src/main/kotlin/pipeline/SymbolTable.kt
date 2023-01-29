@@ -10,9 +10,9 @@ open class SymbolTable {
     val lines = mutableMapOf<LinePointCollection, LineRelations>()
     val rays = mutableMapOf<RayPointCollection, RayRelations>()
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
-    private val angles = mutableMapOf<Point3Notation, AngleRelations>()
-    private val circles = mutableMapOf<IdentNotation, CircleRelations>()
-    private val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
+    val angles = mutableMapOf<Point3Notation, AngleRelations>()
+    val circles = mutableMapOf<IdentNotation, CircleRelations>()
+    val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
 
     private val segmentVectors = VectorContainer<SegmentPointCollection>()
     private val angleVectors = VectorContainer<Point3Notation>()
@@ -37,12 +37,15 @@ open class SymbolTable {
     @Suppress("UNCHECKED_CAST")
     fun getKeyValueByNotation(notation: Notation): Pair<Any, EntityRelations> {
         when (notation) {
-            is PointNotation -> return notation.p to getPoint(notation)
+            is PointNotation ->
+                return notation.p to getPoint(notation)
+
             is RayNotation -> return getKeyValueForLinear<RayRelations, RayNotation, RayPointCollection>(
                 notation,
                 rays as MutableMap<PointCollection<RayNotation>, RayRelations>,
                 arrayOf(notation.p1, mutableSetOf(notation.p2))
             )
+
             is SegmentNotation -> return getKeyValueForLinear<SegmentRelations, SegmentNotation, SegmentPointCollection>(
                 notation,
                 segments as MutableMap<PointCollection<SegmentNotation>, SegmentRelations>,
@@ -70,6 +73,8 @@ open class SymbolTable {
         map: MutableMap<PointCollection<N>, T>,
         constructorArgs: Array<Any>
     ): Pair<PointCollection<N>, T> {
+        // have to iterate over all collection, because if we find by key, we can't take the key
+        // e.g. can find by RayCollection("A", ("B")), but key is RayCollection("A", ("B", "C"))
         for ((collection, line) in map) {
             if (collection.isFromNotation(notation))
                 return collection to line
@@ -79,6 +84,8 @@ open class SymbolTable {
         val collection = C::class.constructors.first().call(*constructorArgs)
         map[collection] = linearRelations
         pointAndCirclePointer.addSubscribers(collection, *notation.getLetters().toTypedArray())
+        if (notation is ArcNotation)
+            pointAndCirclePointer.addSubscribers(collection, notation.circle)
 
         return collection to linearRelations
     }
@@ -200,6 +207,7 @@ open class SymbolTable {
         if (angles[notation] != null)
             return angles[notation]!!
         angles[notation] = AngleRelations()
+        pointAndCirclePointer.addSubscribers(notation, *notation.getLetters().toTypedArray())
         return angles[notation]!!
     }
 

@@ -1,6 +1,7 @@
 package entity
 
 import SymbolTable
+import SystemFatalError
 import expr.Notation
 import expr.PointNotation
 import expr.RayNotation
@@ -22,8 +23,11 @@ class SegmentRelations : LinearRelations() {
 
 class PointRelations : EntityRelations() {
     val unknown = mutableSetOf<String>()
-    override fun merge(other: Notation, symbolTable: SymbolTable) {
-        unknown.addAll(symbolTable.getPoint(other as PointNotation).unknown)
+    override fun merge(other: Notation, symbolTable: SymbolTable) = throw SystemFatalError("Use mergePoints instead")
+
+    fun mergePoints(self: PointNotation, other: PointNotation, symbolTable: SymbolTable) {
+        unknown.addAll(symbolTable.getPoint(other).unknown)
         symbolTable.resetPoint(this, other)
+        symbolTable.pointAndCirclePointer.renameSubscribersAndPointer(other.p, self.p, symbolTable)
     }
 }

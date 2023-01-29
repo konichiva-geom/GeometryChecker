@@ -1,8 +1,8 @@
 package expr
 
 import SymbolTable
-import relations.Vector
 import pipeline.interpreter.ExpressionMapper
+import relations.Vector
 import kotlin.reflect.KClass
 
 /**
@@ -61,8 +61,12 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     }
 
     override fun make(symbolTable: SymbolTable) {
-        if (left is Notation && right is Notation)
-            symbolTable.getRelationsByNotation(left).merge(right, symbolTable)
+        if (left is Notation && right is Notation) {
+            if (left is PointNotation)
+                symbolTable.getPoint(left.p).mergePoints(left, right as PointNotation, symbolTable)
+            else
+                symbolTable.getRelationsByNotation(left).merge(right, symbolTable)
+        }
     }
 }
 
@@ -90,7 +94,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun make(symbolTable: SymbolTable) {
         if (left is PointNotation && right is PointNotation) {
             val point = symbolTable.getPoint(left.p)
-            point.merge(right, symbolTable)
+            point.merge(right, symbolTable) // FIXME it's wrong
             return
         }
         TODO("Not yet implemented")

@@ -7,7 +7,14 @@ import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
-import expr.*
+import expr.Creation
+import expr.Expr
+import expr.Point2Notation
+import expr.Point3Notation
+import expr.PointCreation
+import expr.PointNotation
+import expr.Renamable
+import expr.TheoremUse
 import inference.InferenceProcessor
 import relations.Relation
 
@@ -16,6 +23,7 @@ import relations.Relation
 class Interpreter(val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
     private val symbolTable = SymbolTable()
+    private var addedRelation = false
 
     fun interpret(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
         checkHeaders(
@@ -24,6 +32,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
         )
         validatePointInitialization(tree)
         interpretDescription(tree.item[0].t2!!, tree.children[0].children[1])
+        addedRelation = false
         if (tree.item[2].t2 != null)
             interpretSolution(tree.item[2].t2!!, tree.children[2].children[1])
         if (tree.item[1].t2 != null)
@@ -45,8 +54,10 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     }
 
     private fun rename(expr: Expr) {
-        if (expr is Renamable)
-            expr.rename(symbolTable.pointAndCirclePointer)
+        if (expr is Renamable) {
+            expr.renameAndRemap(symbolTable)
+            expr.checkValidityAfterRename()
+        }
         for (child in expr.getChildren())
             rename(child)
     }
@@ -86,20 +97,24 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     private fun interpretDescription(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex())
             catchWithRangeAndArgs({
+                if (addedRelation) {
+                    addedRelation = false
+                    rename(expr)
+                }
                 when (expr) {
                     is TheoremUse -> {
                         interpretTheoremUse(expr)
-                        rename(expr)
+                        addedRelation = true
                     }
+
                     is Relation -> {
                         expr.make(symbolTable)
                         inferenceProcessor.processInference(expr, symbolTable)
-                        rename(expr)
+                        addedRelation = true
                     }
 
                     is Creation -> expr.create(symbolTable)
-                    else -> {
-                    }
+                    else -> throw SpoofError("Unexpected expression in description")
                 }
             }, syntaxTree.children[i].range)
     }
@@ -107,6 +122,10 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     private fun interpretSolution(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex())
             catchWithRangeAndArgs({
+                if (addedRelation) {
+                    addedRelation = false
+                    rename(expr)
+                }
                 when (expr) {
                     is TheoremUse -> interpretTheoremUse(expr)
                     is Relation -> throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
@@ -128,6 +147,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     private fun interpretProve(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex())
             catchWithRangeAndArgs({
+                rename(expr)
                 when (expr) {
                     is Relation -> theoremParser.check(expr, symbolTable)
                     else -> {

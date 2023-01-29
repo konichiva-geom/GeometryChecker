@@ -1,14 +1,22 @@
 package expr
 
 import SpoofError
+import SymbolTable
 import Utils.max
 import Utils.min
 import Utils.sortAngle
 import Utils.sortLine
+import entity.AngleRelations
+import entity.CircleRelations
 import pipeline.interpreter.ExpressionMapper
 
 interface Renamable {
-    fun rename(pointAndCirclePointer: PointAndCirclePointer)
+    /**
+     * Remove key from map, rename key and put it back into map.
+     * This procedure will put it into cell corresponding to its new hashcode,
+     * just renaming won't work
+     */
+    fun renameAndRemap(symbolTable: SymbolTable)
     fun checkValidityAfterRename()
 }
 
@@ -89,11 +97,20 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
         mapper.addLink(p1, p3)
     }
 
-    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
-        p1 = pointAndCirclePointer.getIdentical(p1)
-        p2 = pointAndCirclePointer.getIdentical(p2)
-        p3 = pointAndCirclePointer.getIdentical(p3)
+    override fun renameAndRemap(symbolTable: SymbolTable) {
+        var relations: AngleRelations? = null
+        if (symbolTable.angles[this] != null) {
+            relations = symbolTable.angles[this]
+            symbolTable.angles.remove(this)
+        }
+
+        p1 = symbolTable.pointAndCirclePointer.getIdentical(p1)
+        p2 = symbolTable.pointAndCirclePointer.getIdentical(p2)
+        p3 = symbolTable.pointAndCirclePointer.getIdentical(p3)
         sortAngle(this)
+
+        if (relations != null)
+            symbolTable.angles[this] = relations
     }
 }
 
@@ -134,9 +151,9 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     fun toSegmentNotation() = SegmentNotation(p1, p2)
     open fun toLine() = this
 
-    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
-        p1 = pointAndCirclePointer.getIdentical(p1)
-        p2 = pointAndCirclePointer.getIdentical(p2)
+    override fun renameAndRemap(symbolTable: SymbolTable) {
+        p1 = symbolTable.pointAndCirclePointer.getIdentical(p1)
+        p2 = symbolTable.pointAndCirclePointer.getIdentical(p2)
         sortLine(this)
     }
 }
@@ -150,8 +167,8 @@ class PointNotation(var p: String) : RelatableNotation() {
 
     override fun getRepr() = StringBuilder("A")
     override fun rename(mapper: ExpressionMapper) = PointNotation(mapper.get(p))
-    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
-        p = pointAndCirclePointer.getIdentical(p)
+    override fun renameAndRemap(symbolTable: SymbolTable) {
+        p = symbolTable.pointAndCirclePointer.getIdentical(p)
     }
 
     override fun toString(): String = p
@@ -186,9 +203,9 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun getRepr() = StringBuilder("ray AA")
     override fun toString(): String = "ray ${super.toString()}"
 
-    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
-        p1 = pointAndCirclePointer.getIdentical(p1)
-        p2 = pointAndCirclePointer.getIdentical(p2)
+    override fun renameAndRemap(symbolTable: SymbolTable) {
+        p1 = symbolTable.pointAndCirclePointer.getIdentical(p1)
+        p2 = symbolTable.pointAndCirclePointer.getIdentical(p2)
     }
 }
 
@@ -207,9 +224,9 @@ class ArcNotation(p1: String, p2: String, var circle: String) : Point2Notation(p
     override fun getRepr() = StringBuilder("arc AA")
     override fun rename(mapper: ExpressionMapper) = ArcNotation(mapper.get(p1), mapper.get(p2), mapper.get(circle))
     override fun toString(): String = "arc ${super.toString()} of $circle"
-    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
-        super.rename(pointAndCirclePointer)
-        circle = pointAndCirclePointer.getIdentical(circle)
+    override fun renameAndRemap(symbolTable: SymbolTable) {
+        super.renameAndRemap(symbolTable)
+        circle = symbolTable.pointAndCirclePointer.getIdentical(circle)
     }
 }
 
@@ -229,8 +246,17 @@ class IdentNotation(private var text: String) : RelatableNotation() {
 
     override fun createLinks(mapper: ExpressionMapper) {}
 
-    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {
-        text = pointAndCirclePointer.getIdentical(text)
+    override fun renameAndRemap(symbolTable: SymbolTable) {
+        var circleRelations: CircleRelations? = null
+        if (symbolTable.circles[this] != null) {
+            circleRelations = symbolTable.circles[this]
+            symbolTable.circles.remove(this)
+        }
+
+        text = symbolTable.pointAndCirclePointer.getIdentical(text)
+
+        if (circleRelations != null)
+            symbolTable.circles[this] = circleRelations
     }
 }
 
@@ -242,7 +268,7 @@ class NumNotation(val number: Number) : Notation() {
 
     override fun getRepr() = StringBuilder("0")
     override fun rename(mapper: ExpressionMapper) = NumNotation(number)
-    override fun rename(pointAndCirclePointer: PointAndCirclePointer) {}
+    override fun renameAndRemap(symbolTable: SymbolTable) {}
 
     override fun toString(): String = number.toString()
     override fun getLetters(): MutableList<String> = mutableListOf()

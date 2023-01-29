@@ -149,11 +149,18 @@ object Utils {
         return if (t1!! < t2) t1 else t2
     }
 
-    fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key: R, element: T) {
+    fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key: R, vararg elements: T) {
         if (this[key] == null)
-            this[key] = mutableSetOf(element)
+            this[key] = mutableSetOf(*elements)
         else
-            this[key]!!.add(element)
+            this[key]!!.addAll(elements.toList())
+    }
+
+    fun <T> MutableMap<T, MutableSet<T>>.addToOrCreateSetWithSameKeysValues(key: T, vararg elements: T) {
+        if (this[key] == null)
+            this[key] = mutableSetOf(*elements)
+        else
+            this[key]!!.addAll(elements.toList())
     }
 
     fun <R> MutableMap<R, Float>.addOrCreate(key: R, element: Float) {
@@ -169,6 +176,11 @@ object Utils {
         else
             this[key] = this[key]!! + element
     }
+
+    /**
+     * It is guaranteed that String is not empty, no IndexOutOfBoundsException
+     */
+    fun String.isPoint(): Boolean = substring(0, 1).uppercase() == substring(0, 1)
 
     object NameGenerator {
         private var index = 0

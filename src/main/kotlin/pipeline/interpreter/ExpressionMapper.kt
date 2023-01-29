@@ -1,7 +1,7 @@
 package pipeline.interpreter
 
 import SpoofError
-import Utils.addToOrCreateSet
+import Utils.addToOrCreateSetWithSameKeysValues
 import expr.Expr
 import expr.Notation
 
@@ -56,8 +56,8 @@ class ExpressionMapper {
     }
 
     fun addLink(first: String, second: String) {
-        links.addToOrCreateSet(first, second)
-        links.addToOrCreateSet(second, first)
+        links.addToOrCreateSetWithSameKeysValues(first, second)
+        links.addToOrCreateSetWithSameKeysValues(second, first)
     }
 
     fun createLinks(call: Expr, definition: Expr) {

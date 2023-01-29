@@ -1,5 +1,6 @@
 package expr
 
+import SymbolTable
 import Utils.addToOrCreateSet
 import pipeline.PointCollection
 
@@ -16,7 +17,7 @@ class PointAndCirclePointer {
     /**
      * map of renamed collections when key point becomes equal to a smaller point lexicographically
      */
-    private val subscribers = mutableMapOf<String, MutableSet<PointCollection<*>>>()
+    private val subscribers = mutableMapOf<String, MutableSet<Any>>()
 
     fun getIdentical(point: String) = points[point]!!
 
@@ -26,5 +27,24 @@ class PointAndCirclePointer {
 
     fun addSubscribers(pointCollection: PointCollection<*>, vararg points: String) {
         points.forEach { subscribers.addToOrCreateSet(it, pointCollection) }
+    }
+
+    fun addSubscribers(notation: Notation, vararg points: String) {
+        points.forEach { subscribers.addToOrCreateSet(it, notation) }
+    }
+
+    /**
+     * Works for points and circles
+     */
+    fun renameSubscribersAndPointer(prev: String, current: String, symbolTable: SymbolTable) {
+        points[prev] = current
+        if (subscribers[prev] != null) {
+            subscribers[prev]!!.forEach {
+                (it as Renamable).renameAndRemap(symbolTable)
+            }
+            subscribers.addToOrCreateSet(current, *subscribers[prev]!!.toTypedArray())
+            subscribers[prev]!!.clear()
+            subscribers.remove(prev)
+        }
     }
 }
