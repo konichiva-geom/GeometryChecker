@@ -4,7 +4,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 
-
 class CompressionTest {
     @Test
     fun testDifferentCompressions() {
@@ -18,6 +17,7 @@ class CompressionTest {
             """
             русский текст
             english text
+            中文文本
             symbols: !@#$%^&*()—♫♣◘∩""⊥
         """
         )
