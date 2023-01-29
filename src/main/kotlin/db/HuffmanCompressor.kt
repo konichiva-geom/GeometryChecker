@@ -1,63 +1,18 @@
 package db
 
+import SystemFatalError
 import Utils.addOrCreate
-import Utils.max
 import java.util.*
 
 fun makeBinaryCodes(root: HuffmanNode?, binaryCode: MutableList<Boolean>, map: MutableMap<Char, BitList>) {
     if (root == null)
         return
     if ((root.left == null) && (root.right == null)) {
-        map[root.char] = binaryCode.toBitList()
+        map[root.char] = BitList.fromBooleanList(binaryCode)
         return
     }
     makeBinaryCodes(root.left, (binaryCode + false).toMutableList(), map)
     makeBinaryCodes(root.right, (binaryCode + true).toMutableList(), map)
-}
-
-class BitList {
-    val set = BitSet()
-    var size = 0
-
-    operator fun get(index: Int): Boolean = set[index]
-
-    operator fun set(index: Int, value: Boolean) {
-        size = max(size, index + 1)
-        set[index] = value
-    }
-
-    fun add(value: Boolean) {
-        set[size++] = value
-    }
-
-    fun clear() {
-        set.clear()
-        size = 0
-    }
-
-    fun addBitList(other: BitList) {
-        for (i in 0 until other.size) {
-            this[this.size] = other[i]
-        }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is BitList)
-            return false
-        return size == other.size && set == other.set
-    }
-
-    override fun hashCode(): Int {
-        return set.hashCode() + (size * 31).hashCode()
-    }
-}
-
-fun MutableList<Boolean>.toBitList(): BitList {
-    val res = BitList()
-    for ((i, v) in this.withIndex()) {
-        res[i] = v
-    }
-    return res
 }
 
 class HuffmanNode(val frequency: Int, val char: Char, val left: HuffmanNode? = null, val right: HuffmanNode? = null) {
@@ -72,42 +27,39 @@ class HuffmanNode(val frequency: Int, val char: Char, val left: HuffmanNode? = n
     }
 }
 
-class MyComparator : Comparator<HuffmanNode> {
-    override fun compare(x: HuffmanNode, y: HuffmanNode): Int {
-        return x.frequency - y.frequency
-    }
-}
-
 fun compress(code: String): Map<Char, BitList> {
+    if (code.isEmpty())
+        throw SystemFatalError("Nothing to compress")
     val frequencies = mutableMapOf<Char, Int>()
-    for (c in code)
-        frequencies.addOrCreate(c, 1)
-    val q = PriorityQueue(frequencies.size, MyComparator())
+    for (char in code)
+        frequencies.addOrCreate(char, 1)
+    val queue = PriorityQueue(frequencies.size, Comparator<HuffmanNode> { x, y -> x.frequency - y.frequency })
     for ((char, frequency) in frequencies) {
-        q.add(HuffmanNode(frequency, char, null, null))
+        queue.add(HuffmanNode(frequency, char, null, null))
     }
-    var root: HuffmanNode? = null
-    while (q.size > 1) {
-        val x = q.peek()
-        q.poll()
-        val y = q.peek()
-        q.poll()
-        val f = HuffmanNode(x.frequency + y.frequency, '-', x, y)
-        root = f
-        q.add(f)
+
+    var root: HuffmanNode = queue.peek()
+    while (queue.size > 1) {
+        val left = queue.peek()
+        queue.poll()
+        val right = queue.peek()
+        queue.poll()
+        root = HuffmanNode(left.frequency + right.frequency, '-', left, right)
+        queue.add(root)
     }
     val map = mutableMapOf<Char, BitList>()
     makeBinaryCodes(root, mutableListOf(), map)
-
+    if (map.size == 1) {
+        map.values.first().add(true)
+    }
     return map
 }
 
-fun encode(code: String, map: Map<Char, BitList>): BitList {
+fun encode(code: String, map: Map<Char, BitList>): Pair<ByteArray, Int> {
     val res = BitList()
-    for (char in code) {
+    for (char in code)
         res.addBitList(map[char]!!)
-    }
-    return res
+    return res.toByteArray()
 }
 
 fun decode(encoded: BitList, map: Map<BitList, Char>): String {
@@ -125,16 +77,29 @@ fun decode(encoded: BitList, map: Map<BitList, Char>): String {
 }
 
 fun main() {
+    val bL = BitList.fromString("0100000110")
+    val ba = bL.toByteArray()
+    val a = bL.set.toByteArray()
+    val g = BitSet.valueOf(a)
+    val res = BitList.fromByteArray(ba.first, ba.second)
     val map = compress(TEXT)
 
     val bitList = encode(TEXT, map)
-    println(bitList)
-    val decoded = decode(bitList, map.entries.associateBy({ it.value }) { it.key })
-    println(decoded)
+    val decoded =
+        decode(BitList.fromByteArray(bitList.first, bitList.second), map.entries.associateBy({ it.value }) { it.key })
 
-    println(TEXT.toByteArray().size)
-    println(bitList.set.toByteArray().size)
+    println(decoded)
+//    println(TEXT.toByteArray().size)
+//    println(bitList.set.toByteArray().size)
+//    println(map.entries.joinToString(separator = ",") { "${it.key}:${it.value}" }.toByteArray().size)
+//    println(map.toList().sortedBy { it.second }.joinToString(separator = "\n"))
 }
+
+/**
+ * maybe create universal map for theorems, problems and solutions (or 3 maps for all cases)
+ * then maps won't be saved for each table row, therefore compressing even more
+ */
+val map = mutableMapOf<Char, BitList>()
 
 const val TEXT = """th equal_sided_triangles_i(AB == A1B1, BC == B1C1, ABC == A1B1C1):
     check(A != B)
