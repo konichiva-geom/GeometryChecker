@@ -1,7 +1,7 @@
 package expr
 
-import PointCollection
 import Utils.addToOrCreateSet
+import pipeline.PointCollection
 
 /**
  * Maps to equal point (or circle) with the least lexicographical order
@@ -19,6 +19,10 @@ class PointAndCirclePointer {
     private val subscribers = mutableMapOf<String, MutableSet<PointCollection<*>>>()
 
     fun getIdentical(point: String) = points[point]!!
+
+    fun addPoint(point: String) {
+        points[point] = point
+    }
 
     fun addSubscribers(pointCollection: PointCollection<*>, vararg points: String) {
         points.forEach { subscribers.addToOrCreateSet(it, pointCollection) }

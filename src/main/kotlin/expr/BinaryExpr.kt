@@ -1,12 +1,12 @@
 package expr
 
-import PointCollection
-import SegmentPointCollection
 import SpoofError
 import SymbolTable
 import Utils
 import com.github.h0tk3y.betterParse.utils.Tuple4
 import entity.LineRelations
+import pipeline.PointCollection
+import pipeline.SegmentPointCollection
 import pipeline.interpreter.ExpressionMapper
 import relations.Relation
 
