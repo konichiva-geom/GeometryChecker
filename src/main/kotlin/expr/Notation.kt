@@ -8,7 +8,7 @@ import Utils.sortAngle
 import Utils.sortLine
 import entity.AngleRelations
 import entity.CircleRelations
-import pipeline.interpreter.ExpressionMapper
+import pipeline.interpreter.IdentMapper
 
 interface Renamable {
     /**
@@ -44,8 +44,8 @@ abstract class Notation : Expr, Comparable<Expr>, Renamable {
 
     abstract fun getLetters(): MutableList<String>
 
-    abstract fun mergeMapping(mapper: ExpressionMapper, other: Notation)
-    abstract fun createLinks(mapper: ExpressionMapper)
+    abstract fun mergeMapping(mapper: IdentMapper, other: Notation)
+    abstract fun createLinks(mapper: IdentMapper)
 
     override fun equals(other: Any?): Boolean = toString() == other.toString()
     override fun hashCode(): Int = toString().hashCode()
@@ -82,18 +82,18 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun compareTo(other: Expr): Int = super.compareOrSame(other) ?: toString().compareTo(other.toString())
 
     override fun getRepr() = StringBuilder("AAA")
-    override fun mapIdents(mapper: ExpressionMapper) = Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
+    override fun mapIdents(mapper: IdentMapper) = Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
     override fun toString(): String = "$p1$p2$p3"
 
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2, p3)
-    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
+    override fun mergeMapping(mapper: IdentMapper, other: Notation) {
         other as Point3Notation
         mapper.mergeMapping(p1, listOf(other.p1, other.p3))
         mapper.mergeMapping(p3, listOf(other.p1, other.p3))
         mapper.mergeMapping(p2, listOf(other.p2))
     }
 
-    override fun createLinks(mapper: ExpressionMapper) {
+    override fun createLinks(mapper: IdentMapper) {
         mapper.addLink(p1, p3)
     }
 
@@ -104,9 +104,9 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
             symbolTable.angles.remove(this)
         }
 
-        p1 = symbolTable.identRenamer.getIdentical(p1)
-        p2 = symbolTable.identRenamer.getIdentical(p2)
-        p3 = symbolTable.identRenamer.getIdentical(p3)
+        p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
+        p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
+        p3 = symbolTable.equalIdentRenamer.getIdentical(p3)
         sortAngle(this)
 
         if (relations != null)
@@ -134,16 +134,16 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("line AA")
-    override fun mapIdents(mapper: ExpressionMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
+    override fun mapIdents(mapper: IdentMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
     override fun toString(): String = "line $p1$p2"
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2)
-    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
+    override fun mergeMapping(mapper: IdentMapper, other: Notation) {
         other as Point2Notation
         mapper.mergeMapping(p1, other.getLetters())
         mapper.mergeMapping(p2, other.getLetters())
     }
 
-    override fun createLinks(mapper: ExpressionMapper) {
+    override fun createLinks(mapper: IdentMapper) {
         mapper.addLink(p1, p2)
     }
 
@@ -152,8 +152,8 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     open fun toLine() = this
 
     override fun renameAndRemap(symbolTable: SymbolTable) {
-        p1 = symbolTable.identRenamer.getIdentical(p1)
-        p2 = symbolTable.identRenamer.getIdentical(p2)
+        p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
+        p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
         sortLine(this)
     }
 }
@@ -166,19 +166,19 @@ class PointNotation(var p: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("A")
-    override fun mapIdents(mapper: ExpressionMapper) = PointNotation(mapper.get(p))
+    override fun mapIdents(mapper: IdentMapper) = PointNotation(mapper.get(p))
     override fun renameAndRemap(symbolTable: SymbolTable) {
-        p = symbolTable.identRenamer.getIdentical(p)
+        p = symbolTable.equalIdentRenamer.getIdentical(p)
     }
 
     override fun toString(): String = p
     override fun getLetters(): MutableList<String> = mutableListOf(p)
-    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
+    override fun mergeMapping(mapper: IdentMapper, other: Notation) {
         other as PointNotation
         mapper.mergeMapping(p, listOf(other.p))
     }
 
-    override fun createLinks(mapper: ExpressionMapper) {}
+    override fun createLinks(mapper: IdentMapper) {}
 }
 
 class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
@@ -187,25 +187,25 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
         this.p2 = p2
     }
 
-    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
+    override fun mergeMapping(mapper: IdentMapper, other: Notation) {
         other as RayNotation
         mapper.mergeMapping(p1, listOf(other.p1))
         mapper.mergeMapping(p2, listOf(other.p2))
     }
 
-    override fun createLinks(mapper: ExpressionMapper) {}
+    override fun createLinks(mapper: IdentMapper) {}
 
     override fun getOrder(): Int = 3
 
     override fun toLine() = Point2Notation(p1, p2)
-    override fun mapIdents(mapper: ExpressionMapper) = RayNotation(mapper.get(p1), mapper.get(p2))
+    override fun mapIdents(mapper: IdentMapper) = RayNotation(mapper.get(p1), mapper.get(p2))
 
     override fun getRepr() = StringBuilder("ray AA")
     override fun toString(): String = "ray ${super.toString()}"
 
     override fun renameAndRemap(symbolTable: SymbolTable) {
-        p1 = symbolTable.identRenamer.getIdentical(p1)
-        p2 = symbolTable.identRenamer.getIdentical(p2)
+        p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
+        p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
     }
 }
 
@@ -214,7 +214,7 @@ class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
 
     override fun toLine() = Point2Notation(p1, p2)
     override fun getRepr() = StringBuilder("AA")
-    override fun mapIdents(mapper: ExpressionMapper) = SegmentNotation(mapper.get(p1), mapper.get(p2))
+    override fun mapIdents(mapper: IdentMapper) = SegmentNotation(mapper.get(p1), mapper.get(p2))
     override fun toString(): String = "$p1$p2"
 }
 
@@ -222,11 +222,11 @@ class ArcNotation(p1: String, p2: String, var circle: String) : Point2Notation(p
     override fun getOrder(): Int = 4
     override fun toLine() = Point2Notation(p1, p2)
     override fun getRepr() = StringBuilder("arc AA")
-    override fun mapIdents(mapper: ExpressionMapper) = ArcNotation(mapper.get(p1), mapper.get(p2), mapper.get(circle))
+    override fun mapIdents(mapper: IdentMapper) = ArcNotation(mapper.get(p1), mapper.get(p2), mapper.get(circle))
     override fun toString(): String = "arc ${super.toString()} of $circle"
     override fun renameAndRemap(symbolTable: SymbolTable) {
         super.renameAndRemap(symbolTable)
-        circle = symbolTable.identRenamer.getIdentical(circle)
+        circle = symbolTable.equalIdentRenamer.getIdentical(circle)
     }
 }
 
@@ -237,14 +237,14 @@ class IdentNotation(private var text: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("c")
-    override fun mapIdents(mapper: ExpressionMapper) = IdentNotation(mapper.get(text))
+    override fun mapIdents(mapper: IdentMapper) = IdentNotation(mapper.get(text))
     override fun toString(): String = text
     override fun getLetters(): MutableList<String> = mutableListOf(text)
-    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
+    override fun mergeMapping(mapper: IdentMapper, other: Notation) {
         mapper.mergeMapping(text, listOf((other as IdentNotation).text))
     }
 
-    override fun createLinks(mapper: ExpressionMapper) {}
+    override fun createLinks(mapper: IdentMapper) {}
 
     override fun renameAndRemap(symbolTable: SymbolTable) {
         var circleRelations: CircleRelations? = null
@@ -253,7 +253,7 @@ class IdentNotation(private var text: String) : RelatableNotation() {
             symbolTable.circles.remove(this)
         }
 
-        text = symbolTable.identRenamer.getIdentical(text)
+        text = symbolTable.equalIdentRenamer.getIdentical(text)
 
         if (circleRelations != null)
             symbolTable.circles[this] = circleRelations
@@ -267,12 +267,12 @@ class NumNotation(val number: Number) : Notation() {
     }
 
     override fun getRepr() = StringBuilder("0")
-    override fun mapIdents(mapper: ExpressionMapper) = NumNotation(number)
+    override fun mapIdents(mapper: IdentMapper) = NumNotation(number)
     override fun renameAndRemap(symbolTable: SymbolTable) {}
 
     override fun toString(): String = number.toString()
     override fun getLetters(): MutableList<String> = mutableListOf()
 
-    override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {}
-    override fun createLinks(mapper: ExpressionMapper) {}
+    override fun mergeMapping(mapper: IdentMapper, other: Notation) {}
+    override fun createLinks(mapper: IdentMapper) {}
 }

@@ -11,7 +11,7 @@ import pipeline.PointCollection
  * Then, we found out that A == C. And we access segment AC for the first time. It is actually same as AB, but we don't
  * know that. And there was no way to figure it out without IdentRenamer.
  */
-class IdentRenamer {
+class EqualIdentRenamer {
     private val points = mutableMapOf<String, String>()
 
     /**

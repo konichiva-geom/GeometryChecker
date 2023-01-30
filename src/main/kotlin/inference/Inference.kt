@@ -3,7 +3,7 @@ package inference
 import SymbolTable
 import expr.AnyExpr
 import expr.Expr
-import pipeline.interpreter.ExpressionMapper
+import pipeline.interpreter.IdentMapper
 
 /**
  * Convert result of expressions from inference.txt
@@ -28,7 +28,7 @@ open class Inference(
     /**
      * Process inference by first mapping all the letters from the newly added expression
      */
-    open fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: ExpressionMapper) {
+    open fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: IdentMapper) {
         val searchedRepr = newlyAddedExpr.getRepr().toString()
         val foundExpr = fromSideExpressions.first { it.getRepr().toString() == searchedRepr }
         mapper.createLinks(newlyAddedExpr, foundExpr)
@@ -50,7 +50,7 @@ class DoubleSidedInference(
         toSideExpressions.retainAll { it !is AnyExpr }
     }
 
-    override fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: ExpressionMapper) {
+    override fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: IdentMapper) {
         val searchedRepr = newlyAddedExpr.getRepr().toString()
         toSideExpressions.filter { it.getRepr().toString() == searchedRepr }.forEach {
             mapper.traverseExpr(newlyAddedExpr, it)
@@ -62,7 +62,7 @@ class DoubleSidedInference(
     fun processSide(
         newlyAddedExpr: Expr,
         symbolTable: SymbolTable,
-        mapper: ExpressionMapper,
+        mapper: IdentMapper,
         isToSide: Boolean = true
     ) {
         val searchedRepr = newlyAddedExpr.getRepr().toString()

@@ -2,12 +2,12 @@ package inference
 
 import SymbolTable
 import expr.Expr
-import pipeline.interpreter.ExpressionMapper
+import pipeline.interpreter.IdentMapper
 
 class InferenceProcessor {
     private val inferenceSets = mutableMapOf<String, MutableSet<Inference>>()
     private val doubleInferenceSets = mutableMapOf<String, MutableSet<Pair<Inference, Boolean>>>()
-    private val mapper = ExpressionMapper()
+    private val mapper = IdentMapper()
 
     /**
      * Check all inferences for this expression

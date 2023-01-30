@@ -28,6 +28,6 @@ class PointRelations : EntityRelations() {
     fun mergePoints(self: PointNotation, other: PointNotation, symbolTable: SymbolTable) {
         unknown.addAll(symbolTable.getPoint(other).unknown)
         symbolTable.resetPoint(this, other)
-        symbolTable.identRenamer.renameSubscribersAndPointer(other.p, self.p, symbolTable)
+        symbolTable.equalIdentRenamer.renameSubscribersAndPointer(other.p, self.p, symbolTable)
     }
 }

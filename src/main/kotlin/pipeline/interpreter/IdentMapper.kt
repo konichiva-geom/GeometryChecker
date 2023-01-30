@@ -11,7 +11,7 @@ import expr.Notation
  * Previously was mapping one point uniquely to other, but two different points can be mapped to same one,
  * e.g we use *equal_sided_triangles* for triangles with common points: ABC and BCD.
  */
-class ExpressionMapper {
+class IdentMapper {
     val mappings = mutableMapOf<String, MutableSet<String>>()
     private val links = mutableMapOf<String, MutableSet<String>>()
 

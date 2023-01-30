@@ -41,7 +41,7 @@ data class Signature(val name: String, val args: List<Expr>) {
 
 class TheoremParser : Parser() {
     private val theorems = mutableMapOf<Signature, TheoremBody>()
-    private val signatureMapper = ExpressionMapper()
+    private val signatureMapper = IdentMapper()
 
     fun clearTheorems() {
         theorems.clear()

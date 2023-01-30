@@ -7,7 +7,7 @@ import com.github.h0tk3y.betterParse.utils.Tuple4
 import entity.LineRelations
 import pipeline.PointCollection
 import pipeline.SegmentPointCollection
-import pipeline.interpreter.ExpressionMapper
+import pipeline.interpreter.IdentMapper
 import relations.Relation
 
 abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
@@ -23,7 +23,7 @@ abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
  */
 class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
     override fun getRepr(): StringBuilder = left.getRepr().append(" in ").append(right.getRepr())
-    override fun mapIdents(mapper: ExpressionMapper) =
+    override fun mapIdents(mapper: IdentMapper) =
         BinaryIn(left.mapIdents(mapper) as Notation, right.mapIdents(mapper) as Notation)
 
     override fun toString(): String {
@@ -64,7 +64,7 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
     private lateinit var intersectionValue: Any // two circles intersect by array of points
     override fun getReturnValue(): Any = intersectionValue
     override fun getRepr(): StringBuilder = left.getRepr().append(" intersects ").append(right.getRepr())
-    override fun mapIdents(mapper: ExpressionMapper) =
+    override fun mapIdents(mapper: IdentMapper) =
         BinaryIntersects(left.mapIdents(mapper) as Notation, right.mapIdents(mapper) as Notation)
 
     override fun toString(): String {
@@ -103,7 +103,7 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
  */
 class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder = left.getRepr().append(" parallel ").append(right.getRepr())
-    override fun mapIdents(mapper: ExpressionMapper) =
+    override fun mapIdents(mapper: IdentMapper) =
         BinaryParallel(left.mapIdents(mapper) as Point2Notation, right.mapIdents(mapper) as Point2Notation)
 
     override fun toString(): String {
@@ -133,7 +133,7 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
  */
 class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder = left.getRepr().append(" perpendicular ").append(right.getRepr())
-    override fun mapIdents(mapper: ExpressionMapper) =
+    override fun mapIdents(mapper: IdentMapper) =
         BinaryPerpendicular(left.mapIdents(mapper) as Point2Notation, right.mapIdents(mapper) as Point2Notation)
 
     override fun toString(): String {
