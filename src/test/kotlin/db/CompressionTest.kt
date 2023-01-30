@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 
-class CompressionTest {
+internal class CompressionTest {
     @Test
     fun testDifferentCompressions() {
         testCompress("1")

@@ -1,5 +1,6 @@
 package pipeline
 
+import GeomGrammar
 import PosError
 import SpoofError
 import Utils

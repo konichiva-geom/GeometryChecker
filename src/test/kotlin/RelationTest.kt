@@ -1,7 +1,7 @@
 import TestFactory.passTask
 import kotlin.test.Test
 
-class RelationTest {
+internal class RelationTest {
     @Test
     fun testInRelationTrivial() {
         passTask(

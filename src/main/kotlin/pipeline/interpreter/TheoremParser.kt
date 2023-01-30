@@ -7,7 +7,7 @@ import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
 import expr.Expr
 import expr.TheoremUse
-import pipeline.GeomGrammar
+import GeomGrammar
 import pipeline.Parser
 import relations.Relation
 

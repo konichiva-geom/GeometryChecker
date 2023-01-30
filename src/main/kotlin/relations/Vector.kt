@@ -4,9 +4,7 @@ import SymbolTable
 import SystemFatalError
 import Utils.addOrCreate
 import Utils.signToLambda
-import expr.ArcNotation
 import expr.Notation
-import expr.NumNotation
 
 class Vector(
     private val value: MutableMap<Int, Float>
@@ -60,7 +58,7 @@ class Vector(
     }
 
     fun multiplyBy(coeff: Float) {
-        for((key, number) in value) {
+        for ((key, number) in value) {
             value[key] = number * coeff
         }
     }
@@ -105,20 +103,17 @@ class Vector(
         return 0
     }
 
+    override fun toString(): String {
+        return value.toString()
+    }
+
     companion object {
         /**
          * Create vector and add it to the symbol table
          */
         fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
-            if (notation is NumNotation)
-                return Vector(mutableMapOf(0 to notation.number.toFloat()))
-            val res = Vector(0)
-            when (notation) {
-                is ArcNotation -> {
-                    //symbolTable.
-                }
-            }
-            return res
+
+            return symbolTable.getOrCreateVector(notation)
         }
     }
 }

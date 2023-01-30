@@ -207,6 +207,6 @@ object Utils {
      * Returns next prime number for comparison vectors
      */
     object PrimeGetter {
-        val primes = File("src/db.main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
+        val primes = File("src/main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
     }
 }

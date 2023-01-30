@@ -14,6 +14,14 @@ class VectorContainer<T> {
         currentIndex--
     }
 
+    fun getOrCreate(key: T): Vector {
+        if (vectors[key] != null)
+            return vectors[key]!!
+        val res = Vector(getNext())
+        vectors[key] = res
+        return res
+    }
+
     /**
      * Substitute [nullified] index in all vectors
      */

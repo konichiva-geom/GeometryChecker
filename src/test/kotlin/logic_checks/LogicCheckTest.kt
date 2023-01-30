@@ -4,7 +4,7 @@ import TestFactory.failDescription
 import TestFactory.passTask
 import kotlin.test.Test
 
-class LogicCheckTest {
+internal class LogicCheckTest {
     @Test
     fun failEqualPointsInNotation() {
         failDescription(

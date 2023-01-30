@@ -236,4 +236,24 @@ open class SymbolTable {
 
         equalIdentRenamer.clear()
     }
+
+    fun getOrCreateVector(notation: Notation): Vector {
+        when (notation) {
+            is NumNotation -> return Vector(mutableMapOf(0 to notation.number.toFloat()))
+            is ArcNotation -> {
+                val angle = arcToAngleMap[ArcPointCollection(
+                    notation.getLetters().toMutableSet(), circle = notation.circle
+                )] ?: throw SpoofError("Angle for arc %{arc} not specified", "arc" to notation)
+                return angleVectors.getOrCreate(angle)
+            }
+            is Point3Notation -> return angleVectors.getOrCreate(notation)
+            is SegmentNotation -> return segmentVectors.getOrCreate(
+                SegmentPointCollection(
+                    notation.getLetters().toMutableSet()
+                )
+            )
+            else -> throw SpoofError("Unexpected notation %{notation} in arithmetic expression",
+                "notation" to notation)
+        }
+    }
 }

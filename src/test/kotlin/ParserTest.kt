@@ -4,7 +4,7 @@ import TestFactory.passInference
 import TestFactory.passTask
 import kotlin.test.Test
 
-class ParserTest {
+internal class ParserTest {
     // region inference
     @Test
     fun parseInference() {

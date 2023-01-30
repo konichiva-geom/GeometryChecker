@@ -1,5 +1,6 @@
 package expr
 
+import SpoofError
 import SymbolTable
 import pipeline.interpreter.IdentMapper
 import relations.Vector
@@ -24,7 +25,7 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: String) :
     }
 
     override fun make(symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+        createVectors(symbolTable)
     }
 
     fun createVectors(symbolTable: SymbolTable): Vector {
@@ -33,17 +34,46 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: String) :
         return leftVector.merge(rightVector, op)
     }
 
-    private fun createVector(expr: Expr, symbolTable: SymbolTable): Vector {
-        return if (expr is ArithmeticBinaryExpr)
-            expr.createVectors(symbolTable)
-        else Vector.fromNotation(symbolTable, expr as Notation)
-    }
-
     fun getType(): KClass<out Expr> {
         if (left is Notation)
             return left::class
         return (left as ArithmeticBinaryExpr).getType()
     }
+}
+
+private fun createVector(expr: Expr, symbolTable: SymbolTable): Vector {
+    return if (expr is ArithmeticBinaryExpr)
+        expr.createVectors(symbolTable)
+    else Vector.fromNotation(symbolTable, expr as Notation)
+}
+
+private fun extractEntityNotation(expr: Expr): Notation? {
+    if (expr is Notation)
+        return if (expr is NumNotation) null else expr
+    expr as BinaryExpr
+    val left = extractEntityNotation(expr.left)
+    if (left != null)
+        return left
+    val right = extractEntityNotation(expr.right)
+    if (right != null)
+        return right
+    return null
+}
+
+class ParenthesesExpr(val expr: Expr) : Expr {
+    override fun getChildren(): List<Expr> = listOf(expr)
+
+    override fun getRepr(): StringBuilder = StringBuilder("($expr)")
+
+    override fun mapIdents(mapper: IdentMapper): Expr {
+        TODO("Not yet implemented")
+    }
+
+    override fun compareTo(other: Expr): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun toString(): String = "($expr)"
 }
 
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
@@ -67,6 +97,12 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             else
                 symbolTable.getRelationsByNotation(left).merge(right, symbolTable)
         }
+        else if (left is ArithmeticBinaryExpr || right is ArithmeticBinaryExpr) {
+            // TODO convert arithmetic expr to vector by walking a tree recursively
+            val leftVector = createVector(left, symbolTable)
+            val rightVector = createVector(right, symbolTable)
+            val notation = extractEntityNotation(this)
+        } else throw SpoofError("Expected notations and arithmetic operations in equal relation")
     }
 }
 
