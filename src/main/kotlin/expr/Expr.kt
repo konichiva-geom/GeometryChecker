@@ -5,19 +5,6 @@ import SystemFatalError
 import pipeline.interpreter.IdentMapper
 import pipeline.interpreter.Signature
 
-/**
- * Expression that returns some value, e.g. [BinaryIntersects] returns point, or segment, or something else
- */
-interface Returnable {
-    fun getReturnValue(): Any
-}
-/**
- * Interface for creation (points, circles)
- */
-interface Creation {
-    fun create(symbolTable: SymbolTable)
-}
-
 interface Expr : Comparable<Expr> {
     fun getChildren(): List<Expr>
 

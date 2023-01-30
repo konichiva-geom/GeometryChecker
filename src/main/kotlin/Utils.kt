@@ -1,3 +1,6 @@
+import com.github.h0tk3y.betterParse.lexer.CharToken
+import com.github.h0tk3y.betterParse.lexer.LiteralToken
+import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.utils.Tuple3
 import expr.ArcNotation
@@ -175,6 +178,18 @@ object Utils {
             this[key] = element
         else
             this[key] = this[key]!! + element
+    }
+
+    fun Token.toViewable(): String {
+        return when (this) {
+            is LiteralToken -> "'${this.text}'"
+            is CharToken -> "'${this.text}'"
+            else -> "${this.name!!}:Token"
+        }
+    }
+
+    fun TokenMatch.toRange(): IntRange {
+        return IntRange(offset, length + offset - 1)
     }
 
     /**

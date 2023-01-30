@@ -23,33 +23,3 @@ open class SpoofError(var msg: String, vararg val args: Pair<String, Any>) : Exc
         return sb.toString()
     }
 }
-
-/**
- * Error that happens at position in code
- * @property range position at which an error happened
- */
-class PosError(val range: IntRange, msg: String, vararg args: Pair<String, Any>) : SpoofError(msg, *args) {
-    override val message: String
-        get() = super.message + " at $range"
-}
-
-/**
- * This error means that there is some fatal flaw in the design.
- * When it happens in the production code, it sends a message to dev mail.
- */
-class SystemFatalError(private val msg: String) : Exception() {
-    override val message: String
-        get() = "Something really bad happened X(. Sending message to devs.\n$msg"
-}
-
-fun Token.toViewable(): String {
-    return when (this) {
-        is LiteralToken -> "'${this.text}'"
-        is CharToken -> "'${this.text}'"
-        else -> "${this.name!!}:Token"
-    }
-}
-
-fun TokenMatch.toRange(): IntRange {
-    return IntRange(offset, length + offset - 1)
-}

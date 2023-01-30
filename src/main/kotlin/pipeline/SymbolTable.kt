@@ -229,8 +229,11 @@ open class SymbolTable {
         angles.clear()
         circles.clear()
         arcs.clear()
+
         arcToAngleMap.clear()
         angleVectors.vectors.clear()
         segmentVectors.vectors.clear()
+
+        equalIdentRenamer.clear()
     }
 }

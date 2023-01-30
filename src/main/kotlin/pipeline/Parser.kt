@@ -3,21 +3,16 @@ package pipeline
 import PosError
 import SpoofError
 import Utils
+import Utils.toRange
+import Utils.toViewable
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
-import com.github.h0tk3y.betterParse.parser.AlternativesFailure
-import com.github.h0tk3y.betterParse.parser.MismatchedToken
-import com.github.h0tk3y.betterParse.parser.NoMatchingToken
-import com.github.h0tk3y.betterParse.parser.ParseException
-import com.github.h0tk3y.betterParse.parser.UnexpectedEof
-import com.github.h0tk3y.betterParse.parser.UnparsedRemainder
+import com.github.h0tk3y.betterParse.parser.*
 import com.github.h0tk3y.betterParse.st.LiftToSyntaxTreeOptions
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import expr.Expr
 import inference.Inference
-import toRange
-import toViewable
 
 @Suppress("UNCHECKED_CAST")
 open class Parser {
@@ -73,7 +68,7 @@ open class Parser {
                     else err.tokenMismatch.text.substring(0, realTokenEnd)
                     throw PosError(
                         err.tokenMismatch.offset..
-                            (err.tokenMismatch.offset + realToken.length),
+                                (err.tokenMismatch.offset + realToken.length),
                         "Tokenization error. No token for %{token}", "token" to realToken
                     )
                 }

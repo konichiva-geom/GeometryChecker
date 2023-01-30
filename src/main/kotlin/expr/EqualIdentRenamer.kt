@@ -47,4 +47,9 @@ class EqualIdentRenamer {
             subscribers.remove(prev)
         }
     }
+
+    fun clear() {
+        points.clear()
+        subscribers.clear()
+    }
 }

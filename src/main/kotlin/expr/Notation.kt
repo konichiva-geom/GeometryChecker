@@ -10,16 +10,6 @@ import entity.AngleRelations
 import entity.CircleRelations
 import pipeline.interpreter.IdentMapper
 
-interface Renamable {
-    /**
-     * Remove key from map, rename key and put it back into map.
-     * This procedure will put it into cell corresponding to its new hashcode,
-     * just renaming won't work
-     */
-    fun renameAndRemap(symbolTable: SymbolTable)
-    fun checkValidityAfterRename()
-}
-
 /**
  * Represents some structure of points (angle, line e.t.c) or te name of a circle
  * Order:
