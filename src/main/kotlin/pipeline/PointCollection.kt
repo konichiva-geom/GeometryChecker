@@ -4,9 +4,9 @@ import SpoofError
 import SymbolTable
 import entity.EntityRelations
 import expr.ArcNotation
+import expr.IdentRenamer
 import expr.Notation
 import expr.Point2Notation
-import expr.PointAndCirclePointer
 import expr.RayNotation
 import expr.Renamable
 import expr.SegmentNotation
@@ -31,8 +31,8 @@ interface PointCollection<T : Notation> : Renamable {
     }
 }
 
-fun renamePointSet(set: MutableSet<String>, pointAndCirclePointer: PointAndCirclePointer) {
-    val newPoints = set.map { pointAndCirclePointer.getIdentical(it) }
+fun renamePointSet(set: MutableSet<String>, identRenamer: IdentRenamer) {
+    val newPoints = set.map { identRenamer.getIdentical(it) }
     set.clear(); set.addAll(newPoints)
 }
 
@@ -47,7 +47,7 @@ class LinePointCollection(val points: MutableSet<String>) : PointCollection<Poin
     override fun renameAndRemap(symbolTable: SymbolTable) {
         val lineRelations = getRelations(symbolTable.lines)
 
-        renamePointSet(points, symbolTable.pointAndCirclePointer)
+        renamePointSet(points, symbolTable.identRenamer)
 
         if (lineRelations != null)
             symbolTable.lines[this] = lineRelations
@@ -81,8 +81,8 @@ class RayPointCollection(var start: String, val points: MutableSet<String>) : Po
     override fun renameAndRemap(symbolTable: SymbolTable) {
         val rayRelations = getRelations(symbolTable.rays)
 
-        renamePointSet(points, symbolTable.pointAndCirclePointer)
-        start = symbolTable.pointAndCirclePointer.getIdentical(start)
+        renamePointSet(points, symbolTable.identRenamer)
+        start = symbolTable.identRenamer.getIdentical(start)
 
         if (rayRelations != null)
             symbolTable.rays[this] = rayRelations
@@ -130,8 +130,8 @@ open class SegmentPointCollection(val bounds: MutableSet<String>, val points: Mu
     override fun renameAndRemap(symbolTable: SymbolTable) {
         val segmentRelations = getRelations(symbolTable.segments)
 
-        renamePointSet(bounds, symbolTable.pointAndCirclePointer)
-        renamePointSet(points, symbolTable.pointAndCirclePointer)
+        renamePointSet(bounds, symbolTable.identRenamer)
+        renamePointSet(points, symbolTable.identRenamer)
 
         if (segmentRelations != null)
             symbolTable.segments[this] = segmentRelations
@@ -170,9 +170,9 @@ class ArcPointCollection(
     override fun renameAndRemap(symbolTable: SymbolTable) {
         val arcRelations = getRelations(symbolTable.arcs)
 
-        renamePointSet(bounds, symbolTable.pointAndCirclePointer)
-        renamePointSet(points, symbolTable.pointAndCirclePointer)
-        circle = symbolTable.pointAndCirclePointer.getIdentical(circle)
+        renamePointSet(bounds, symbolTable.identRenamer)
+        renamePointSet(points, symbolTable.identRenamer)
+        circle = symbolTable.identRenamer.getIdentical(circle)
 
         if (arcRelations != null)
             symbolTable.arcs[this] = arcRelations

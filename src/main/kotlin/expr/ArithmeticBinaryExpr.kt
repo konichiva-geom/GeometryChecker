@@ -12,8 +12,8 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: String) :
     BinaryExpr(left, right) {
 
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " $op ")
-    override fun rename(mapper: ExpressionMapper) =
-        ArithmeticBinaryExpr(left.rename(mapper), right.rename(mapper), op)
+    override fun mapIdents(mapper: ExpressionMapper) =
+        ArithmeticBinaryExpr(left.mapIdents(mapper), right.mapIdents(mapper), op)
 
     override fun toString(): String {
         return "$left $op $right"
@@ -48,7 +48,7 @@ class ArithmeticBinaryExpr(left: Expr, right: Expr, private val op: String) :
 
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " == ")
-    override fun rename(mapper: ExpressionMapper) = BinaryEquals(left.rename(mapper), right.rename(mapper))
+    override fun mapIdents(mapper: ExpressionMapper) = BinaryEquals(left.mapIdents(mapper), right.mapIdents(mapper))
 
     override fun toString(): String {
         return "$left == $right"
@@ -72,7 +72,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
-    override fun rename(mapper: ExpressionMapper) = BinaryNotEquals(left.rename(mapper), right.rename(mapper))
+    override fun mapIdents(mapper: ExpressionMapper) = BinaryNotEquals(left.mapIdents(mapper), right.mapIdents(mapper))
     override fun toString(): String {
         return "$left != $right"
     }
@@ -103,7 +103,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " > ")
-    override fun rename(mapper: ExpressionMapper) = BinaryGreater(left.rename(mapper), right.rename(mapper))
+    override fun mapIdents(mapper: ExpressionMapper) = BinaryGreater(left.mapIdents(mapper), right.mapIdents(mapper))
     override fun toString(): String {
         return "$left > $right"
     }
@@ -119,7 +119,7 @@ class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " >= ")
-    override fun rename(mapper: ExpressionMapper) = BinaryGEQ(left.rename(mapper), right.rename(mapper))
+    override fun mapIdents(mapper: ExpressionMapper) = BinaryGEQ(left.mapIdents(mapper), right.mapIdents(mapper))
 
     override fun toString(): String {
         return "$left >= $right"

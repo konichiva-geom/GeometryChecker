@@ -23,13 +23,18 @@ interface Expr : Comparable<Expr> {
 
     fun getRepr(): StringBuilder
 
-    fun rename(mapper: ExpressionMapper): Expr
+    /**
+     * Create a new instance where all idents are mapped with [mapper]
+     *
+     * Used for theorem and inference interpreting
+     */
+    fun mapIdents(mapper: ExpressionMapper): Expr
 }
 
 class AnyExpr(val notation: Notation) : Expr {
     override fun getChildren(): List<Expr> = listOf(notation)
     override fun getRepr(): StringBuilder = notation.getRepr().insert(0, "any ")
-    override fun rename(mapper: ExpressionMapper) = AnyExpr(notation.rename(mapper) as Notation)
+    override fun mapIdents(mapper: ExpressionMapper) = AnyExpr(notation.mapIdents(mapper) as Notation)
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -44,11 +49,11 @@ class AnyExpr(val notation: Notation) : Expr {
 class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
     override fun getChildren(): List<Expr> = signature.args + output
     override fun getRepr(): StringBuilder = throw SystemFatalError("Unexpected getRepr() for TheoremUse")
-    override fun rename(mapper: ExpressionMapper): Expr {
-        throw SystemFatalError("Unexpected rename() for TheoremUse")
+    override fun mapIdents(mapper: ExpressionMapper): Expr {
+        throw SystemFatalError("Unexpected rename() for TheoremUse. Remove this exception if theorems are called inside theorems")
         TheoremUse(
-            Signature(signature.name, signature.args.map { it.rename(mapper) }),
-            output.map { it.rename(mapper) }
+            Signature(signature.name, signature.args.map { it.mapIdents(mapper) }),
+            output.map { it.mapIdents(mapper) }
         )
     }
 
@@ -60,7 +65,7 @@ class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
 class PrefixNot(private val expr: Expr) : Expr {
     override fun getChildren(): List<Expr> = listOf(expr)
     override fun getRepr(): StringBuilder = expr.getRepr().insert(0, "not ")
-    override fun rename(mapper: ExpressionMapper) = PrefixNot(expr.rename(mapper))
+    override fun mapIdents(mapper: ExpressionMapper) = PrefixNot(expr.mapIdents(mapper))
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -77,7 +82,7 @@ class PointCreation(private val name: String) : Expr, Creation {
     }
 
     override fun getRepr(): StringBuilder = StringBuilder("new A")
-    override fun rename(mapper: ExpressionMapper) = PointCreation(mapper.get(name))
+    override fun mapIdents(mapper: ExpressionMapper) = PointCreation(mapper.get(name))
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -95,7 +100,7 @@ class CircleCreation(private val name: String) : Expr, Creation {
     }
 
     override fun getRepr(): StringBuilder = StringBuilder("new c")
-    override fun rename(mapper: ExpressionMapper) = PointCreation(mapper.get(name))
+    override fun mapIdents(mapper: ExpressionMapper) = PointCreation(mapper.get(name))
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")

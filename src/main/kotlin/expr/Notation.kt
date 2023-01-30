@@ -82,7 +82,7 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun compareTo(other: Expr): Int = super.compareOrSame(other) ?: toString().compareTo(other.toString())
 
     override fun getRepr() = StringBuilder("AAA")
-    override fun rename(mapper: ExpressionMapper) = Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
+    override fun mapIdents(mapper: ExpressionMapper) = Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
     override fun toString(): String = "$p1$p2$p3"
 
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2, p3)
@@ -104,9 +104,9 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
             symbolTable.angles.remove(this)
         }
 
-        p1 = symbolTable.pointAndCirclePointer.getIdentical(p1)
-        p2 = symbolTable.pointAndCirclePointer.getIdentical(p2)
-        p3 = symbolTable.pointAndCirclePointer.getIdentical(p3)
+        p1 = symbolTable.identRenamer.getIdentical(p1)
+        p2 = symbolTable.identRenamer.getIdentical(p2)
+        p3 = symbolTable.identRenamer.getIdentical(p3)
         sortAngle(this)
 
         if (relations != null)
@@ -134,7 +134,7 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("line AA")
-    override fun rename(mapper: ExpressionMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
+    override fun mapIdents(mapper: ExpressionMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
     override fun toString(): String = "line $p1$p2"
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2)
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
@@ -152,8 +152,8 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     open fun toLine() = this
 
     override fun renameAndRemap(symbolTable: SymbolTable) {
-        p1 = symbolTable.pointAndCirclePointer.getIdentical(p1)
-        p2 = symbolTable.pointAndCirclePointer.getIdentical(p2)
+        p1 = symbolTable.identRenamer.getIdentical(p1)
+        p2 = symbolTable.identRenamer.getIdentical(p2)
         sortLine(this)
     }
 }
@@ -166,9 +166,9 @@ class PointNotation(var p: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("A")
-    override fun rename(mapper: ExpressionMapper) = PointNotation(mapper.get(p))
+    override fun mapIdents(mapper: ExpressionMapper) = PointNotation(mapper.get(p))
     override fun renameAndRemap(symbolTable: SymbolTable) {
-        p = symbolTable.pointAndCirclePointer.getIdentical(p)
+        p = symbolTable.identRenamer.getIdentical(p)
     }
 
     override fun toString(): String = p
@@ -198,14 +198,14 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun getOrder(): Int = 3
 
     override fun toLine() = Point2Notation(p1, p2)
-    override fun rename(mapper: ExpressionMapper) = RayNotation(mapper.get(p1), mapper.get(p2))
+    override fun mapIdents(mapper: ExpressionMapper) = RayNotation(mapper.get(p1), mapper.get(p2))
 
     override fun getRepr() = StringBuilder("ray AA")
     override fun toString(): String = "ray ${super.toString()}"
 
     override fun renameAndRemap(symbolTable: SymbolTable) {
-        p1 = symbolTable.pointAndCirclePointer.getIdentical(p1)
-        p2 = symbolTable.pointAndCirclePointer.getIdentical(p2)
+        p1 = symbolTable.identRenamer.getIdentical(p1)
+        p2 = symbolTable.identRenamer.getIdentical(p2)
     }
 }
 
@@ -214,7 +214,7 @@ class SegmentNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
 
     override fun toLine() = Point2Notation(p1, p2)
     override fun getRepr() = StringBuilder("AA")
-    override fun rename(mapper: ExpressionMapper) = SegmentNotation(mapper.get(p1), mapper.get(p2))
+    override fun mapIdents(mapper: ExpressionMapper) = SegmentNotation(mapper.get(p1), mapper.get(p2))
     override fun toString(): String = "$p1$p2"
 }
 
@@ -222,11 +222,11 @@ class ArcNotation(p1: String, p2: String, var circle: String) : Point2Notation(p
     override fun getOrder(): Int = 4
     override fun toLine() = Point2Notation(p1, p2)
     override fun getRepr() = StringBuilder("arc AA")
-    override fun rename(mapper: ExpressionMapper) = ArcNotation(mapper.get(p1), mapper.get(p2), mapper.get(circle))
+    override fun mapIdents(mapper: ExpressionMapper) = ArcNotation(mapper.get(p1), mapper.get(p2), mapper.get(circle))
     override fun toString(): String = "arc ${super.toString()} of $circle"
     override fun renameAndRemap(symbolTable: SymbolTable) {
         super.renameAndRemap(symbolTable)
-        circle = symbolTable.pointAndCirclePointer.getIdentical(circle)
+        circle = symbolTable.identRenamer.getIdentical(circle)
     }
 }
 
@@ -237,7 +237,7 @@ class IdentNotation(private var text: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("c")
-    override fun rename(mapper: ExpressionMapper) = IdentNotation(mapper.get(text))
+    override fun mapIdents(mapper: ExpressionMapper) = IdentNotation(mapper.get(text))
     override fun toString(): String = text
     override fun getLetters(): MutableList<String> = mutableListOf(text)
     override fun mergeMapping(mapper: ExpressionMapper, other: Notation) {
@@ -253,7 +253,7 @@ class IdentNotation(private var text: String) : RelatableNotation() {
             symbolTable.circles.remove(this)
         }
 
-        text = symbolTable.pointAndCirclePointer.getIdentical(text)
+        text = symbolTable.identRenamer.getIdentical(text)
 
         if (circleRelations != null)
             symbolTable.circles[this] = circleRelations
@@ -267,7 +267,7 @@ class NumNotation(val number: Number) : Notation() {
     }
 
     override fun getRepr() = StringBuilder("0")
-    override fun rename(mapper: ExpressionMapper) = NumNotation(number)
+    override fun mapIdents(mapper: ExpressionMapper) = NumNotation(number)
     override fun renameAndRemap(symbolTable: SymbolTable) {}
 
     override fun toString(): String = number.toString()

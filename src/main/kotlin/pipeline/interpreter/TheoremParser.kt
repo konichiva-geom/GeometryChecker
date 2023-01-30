@@ -75,17 +75,17 @@ class TheoremParser : Parser() {
         // TODO map mappings to body
         for (expr in theoremBody.body) {
             when (expr) {
-                is Relation -> (expr.rename(signatureMapper) as Relation).make(symbolTable)
+                is Relation -> (expr.mapIdents(signatureMapper) as Relation).make(symbolTable)
                 is TheoremUse -> {
                     if (expr.signature.name == "check")
-                        check(expr.signature.args.map { it.rename(signatureMapper) }, symbolTable)
+                        check(expr.signature.args.map { it.mapIdents(signatureMapper) }, symbolTable)
                     else throw SpoofError("Expected relation to check")
                 }
             }
         }
         if (theoremBody.ret.isNotEmpty()) {
             for (expr in theoremBody.ret)
-                (expr.rename(signatureMapper) as Relation).make(symbolTable)
+                (expr.mapIdents(signatureMapper) as Relation).make(symbolTable)
         }
         signatureMapper.clear()
     }

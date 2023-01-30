@@ -18,7 +18,7 @@ open class SymbolTable {
     private val angleVectors = VectorContainer<Point3Notation>()
     private val arcToAngleMap = mutableMapOf<ArcPointCollection, Point3Notation>()
 
-    val pointAndCirclePointer = PointAndCirclePointer()
+    val identRenamer = IdentRenamer()
 
     fun addSegmentVector(notation: SegmentNotation, vector: Vector) {
         //segmentVectors.vectors[notation] = vector
@@ -83,9 +83,9 @@ open class SymbolTable {
         val linearRelations = T::class.constructors.first().call()
         val collection = C::class.constructors.first().call(*constructorArgs)
         map[collection] = linearRelations
-        pointAndCirclePointer.addSubscribers(collection, *notation.getLetters().toTypedArray())
+        identRenamer.addSubscribers(collection, *notation.getLetters().toTypedArray())
         if (notation is ArcNotation)
-            pointAndCirclePointer.addSubscribers(collection, notation.circle)
+            identRenamer.addSubscribers(collection, notation.circle)
 
         return collection to linearRelations
     }
@@ -163,7 +163,7 @@ open class SymbolTable {
         if (points[notation.p] != null)
             throw SpoofError("Point %{name} already defined", "name" to notation.p)
         points[notation.p] = PointRelations()
-        pointAndCirclePointer.addPoint(notation.p)
+        identRenamer.addPoint(notation.p)
         return points[notation.p]!!
     }
 
@@ -207,7 +207,7 @@ open class SymbolTable {
         if (angles[notation] != null)
             return angles[notation]!!
         angles[notation] = AngleRelations()
-        pointAndCirclePointer.addSubscribers(notation, *notation.getLetters().toTypedArray())
+        identRenamer.addSubscribers(notation, *notation.getLetters().toTypedArray())
         return angles[notation]!!
     }
 
