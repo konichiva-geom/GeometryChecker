@@ -6,10 +6,10 @@ import error.SpoofError
 import utils.ExtensionUtils.addToOrCreateSetWithSameKeysValues
 
 /**
- * Responsible for mapping points in theorem bodies and pipeline.inference expressions.
+ * Responsible for mapping points in theorem bodies and inference expressions.
  *
  * Previously was mapping one point uniquely to other, but two different points can be mapped to same one,
- * e.g we use *equal_sided_triangles* for triangles with common points: ABC and BCD.
+ * e.g. we use *equal_sided_triangles* for triangles with common points: ABC and BCD.
  */
 class IdentMapper {
     val mappings = mutableMapOf<String, MutableSet<String>>()
@@ -18,7 +18,7 @@ class IdentMapper {
     fun get(pointOrIdent: String) = mappings[pointOrIdent]!!.first()
 
     /**
-     * On pipeline.inference there might be ambiguous mappings
+     * On inference there might be ambiguous mappings
      * This method chooses first mapping and makes all mappings unique
      *
      */
@@ -43,7 +43,7 @@ class IdentMapper {
                     "letter" to key
                 )
             mappings[key] = res.toMutableSet()
-            // if one mapping is unique, then it is removed from all other mappings
+            // if one mapping is unique, then it is removed from all the other mappings
             if (res.size == 1)
                 removeFromLinks(key, res.first())
         }

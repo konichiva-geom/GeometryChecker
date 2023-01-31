@@ -9,6 +9,7 @@ import entity.relation.Relation
 import error.SpoofError
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
+import utils.NameGenerator
 import utils.Utils
 
 abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
@@ -89,7 +90,7 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
         val intersection = leftSet.intersect(rightSet)
         intersectionValue = if (intersection.isNotEmpty())
             PointNotation(intersection.first())
-        else PointNotation(Utils.NameGenerator.getName())
+        else PointNotation(NameGenerator.getName())
         if (intersection.map { symbolTable.getPoint(it) }.toSet().size > 1)
             throw SpoofError(
                 "This task is incorrect. There can be only one intersection point between two lines, " +

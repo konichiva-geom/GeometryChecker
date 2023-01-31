@@ -1,7 +1,5 @@
 package pipeline.interpreter
 
-import com.github.h0tk3y.betterParse.lexer.LiteralToken
-import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import entity.Renamable
@@ -26,12 +24,10 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     private var addedRelation = false
 
     fun interpret(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
-        checkHeaders(
-            tree.item as List<Tuple2<String, *>>,
-            TokenMatch(LiteralToken("", ""), 0, "", 0, tree.range.count(), 0, 0)
-        )
+        checkHeaders(tree.item as List<Tuple2<String, *>>)
         validatePointInitialization(tree)
-        interpretDescription(tree.item[0].t2!!, tree.children[0].children[1])
+        if (tree.item[0].t2 != null)
+            interpretDescription(tree.item[0].t2!!, tree.children[0].children[1])
         addedRelation = false
         if (tree.item[2].t2 != null)
             interpretSolution(tree.item[2].t2!!, tree.children[2].children[1])
@@ -82,13 +78,13 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
         }
     }
 
-    private fun checkHeaders(blocks: List<Tuple2<String, *>>, allMatch: TokenMatch) {
+    private fun checkHeaders(blocks: List<Tuple2<String, *>>) {
         if (blocks[0].t1 != "description"
             || blocks[1].t1 != "prove"
             || blocks[2].t1 != "solution"
         )
             throw SpoofError(
-                "Expected structure: %{expected}got: %{got}",
+                "Expected structure: %{expected} got: %{got}",
                 "expected" to "\ndescription:\n\t...\nprove:\n\t...\nsolution:\n\t...\n",
                 "got" to "\n${blocks[0].t1}:\n\t...\n${blocks[1].t1}:\n\t...\n${blocks[2].t1}:\n\t..."
             )
@@ -153,7 +149,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
                     else -> {
                         if (expr is TheoremUse && expr.signature.name == "check")
                             theoremParser.check(expr.signature.args, symbolTable)
-                        else throw SpoofError("Expected relation to check")
+                        else throw SpoofError("Expected relation to check in prove block")
                     }
                 }
             }, syntaxTree.children[i].range)

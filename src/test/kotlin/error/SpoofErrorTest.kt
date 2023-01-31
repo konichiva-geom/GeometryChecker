@@ -1,6 +1,5 @@
 package error
 
-import SpoofError
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails

@@ -14,6 +14,10 @@ object ExtensionUtils {
             this[key]!!.addAll(elements.toList())
     }
 
+    /**
+     * TODO this method is equal to [MutableMap<R, MutableSet<T>>.addOrCreateSet] above. It exists because there is a compilation error in usage
+     * if compilation error can be avoided, then should replace this method usages to [MutableMap<R, MutableSet<T>>.addOrCreateSet]
+     */
     fun <T> MutableMap<T, MutableSet<T>>.addToOrCreateSetWithSameKeysValues(key: T, vararg elements: T) {
         if (this[key] == null)
             this[key] = mutableSetOf(*elements)
