@@ -1,11 +1,12 @@
-import Utils.sortAngle
+package pipeline
+
 import entity.expr.notation.*
 import entity.point_collection.*
 import entity.relation.*
-import expr.*
-import pipeline.EqualIdentRenamer
+import error.SpoofError
 import math.Vector
 import math.VectorContainer
+import utils.Utils.sortAngle
 
 open class SymbolTable {
     private val points = mutableMapOf<String, PointRelations>()
@@ -148,7 +149,7 @@ open class SymbolTable {
             is Point2Notation -> (getKeyValueByNotation(notation).first as PointCollection<*>).getPointsInCollection()
             is Point3Notation -> setOf(notation.p1, notation.p2, notation.p3)
             is IdentNotation -> getCircle(notation).points
-            else -> throw SpoofError(notation.toString())
+            else -> throw SpoofError("Unexpected notation: %{notation}", "notation" to notation)
         }
     }
 
@@ -254,8 +255,10 @@ open class SymbolTable {
                     notation.getLetters().toMutableSet()
                 )
             )
-            else -> throw SpoofError("Unexpected notation %{notation} in arithmetic expression",
-                "notation" to notation)
+            else -> throw SpoofError(
+                "Unexpected notation %{notation} in arithmetic expression",
+                "notation" to notation
+            )
         }
     }
 }

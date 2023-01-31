@@ -1,6 +1,6 @@
 package entity.relation
 
-import SymbolTable
+import pipeline.SymbolTable
 
 /*
 Creating and checking the existence of a relation. For expr

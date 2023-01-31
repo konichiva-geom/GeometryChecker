@@ -1,6 +1,6 @@
 package entity.expr.notation
 
-import SymbolTable
+import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 class ArcNotation(p1: String, p2: String, var circle: String) : Point2Notation(p1, p2) {

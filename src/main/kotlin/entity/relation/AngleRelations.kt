@@ -1,8 +1,8 @@
 package entity.relation
 
-import SymbolTable
 import entity.expr.notation.Notation
 import entity.expr.notation.Point3Notation
+import pipeline.SymbolTable
 
 class AngleRelations : EntityRelations() {
     override fun merge(other: Notation, symbolTable: SymbolTable) {

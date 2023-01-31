@@ -1,11 +1,10 @@
-package expr
+package entity.expr
 
-import SymbolTable
-import SystemFatalError
-import entity.expr.Creation
 import entity.expr.notation.IdentNotation
 import entity.expr.notation.Notation
 import entity.expr.notation.PointNotation
+import error.SystemFatalError
+import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 import pipeline.interpreter.Signature
 

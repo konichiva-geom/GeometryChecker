@@ -1,12 +1,17 @@
-import ExtensionUtils.toRange
+package utils
+
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.utils.Tuple3
+import entity.expr.*
 import entity.expr.notation.*
-import expr.*
+import error.PosError
+import error.SpoofError
+import error.SystemFatalError
 import math.Fraction
 import math.div
 import math.minus
 import math.times
+import utils.ExtensionUtils.toRange
 import java.io.File
 
 object Utils {

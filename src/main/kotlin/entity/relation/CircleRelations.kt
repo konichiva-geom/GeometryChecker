@@ -1,8 +1,8 @@
 package entity.relation
 
-import SymbolTable
 import entity.expr.notation.IdentNotation
 import entity.expr.notation.Notation
+import pipeline.SymbolTable
 
 class CircleRelations : EntityRelations() {
     val points = mutableSetOf<String>()

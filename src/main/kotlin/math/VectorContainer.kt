@@ -1,7 +1,7 @@
 package math
 
-import ExtensionUtils.addOrCreate
-import Utils.PrimeGetter.primes
+import utils.ExtensionUtils.addOrCreate
+import utils.Utils.PrimeGetter.primes
 
 class VectorContainer<T> {
     val vectors = mutableMapOf<T, Vector>()

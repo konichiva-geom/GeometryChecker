@@ -1,8 +1,8 @@
 package entity.relation
 
-import SymbolTable
 import entity.expr.notation.Notation
 import entity.expr.notation.Point2Notation
+import pipeline.SymbolTable
 
 open class LineRelations : LinearRelations() {
     // not using relations objects, because when they merge, one of them gets deleted

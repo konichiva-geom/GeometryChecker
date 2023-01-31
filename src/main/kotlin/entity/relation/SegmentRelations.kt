@@ -1,8 +1,8 @@
 package entity.relation
 
-import SymbolTable
 import entity.expr.notation.Notation
 import entity.expr.notation.SegmentNotation
+import pipeline.SymbolTable
 
 class SegmentRelations : LinearRelations() {
     override fun merge(other: Notation, symbolTable: SymbolTable) {

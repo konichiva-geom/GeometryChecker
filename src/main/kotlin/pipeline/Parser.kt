@@ -1,19 +1,19 @@
 package pipeline
 
-import ExtensionUtils.toRange
-import ExtensionUtils.toViewable
 import GeomGrammar
-import MathUtils.min
-import PosError
-import SpoofError
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.*
 import com.github.h0tk3y.betterParse.st.LiftToSyntaxTreeOptions
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
 import com.github.h0tk3y.betterParse.utils.Tuple2
-import expr.Expr
+import entity.expr.Expr
+import error.PosError
+import error.SpoofError
 import pipeline.inference.Inference
+import utils.ExtensionUtils.toRange
+import utils.ExtensionUtils.toViewable
+import utils.MathUtils.min
 
 @Suppress("UNCHECKED_CAST")
 open class Parser {

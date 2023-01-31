@@ -1,8 +1,8 @@
 package entity.point_collection
 
-import SpoofError
-import SymbolTable
 import entity.expr.notation.ArcNotation
+import error.SpoofError
+import pipeline.SymbolTable
 
 class ArcPointCollection(
     val bounds: MutableSet<String>,
@@ -33,7 +33,7 @@ class ArcPointCollection(
     }
 
     override fun isFromNotation(notation: ArcNotation) = bounds.containsAll(notation.getLetters())
-        && notation.circle == circle
+            && notation.circle == circle
 
     override fun equals(other: Any?): Boolean {
         if (other !is ArcPointCollection)

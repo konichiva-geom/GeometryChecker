@@ -1,3 +1,5 @@
+package error
+
 /**
  * Error that happens at position in code
  * @property range position at which an error happened

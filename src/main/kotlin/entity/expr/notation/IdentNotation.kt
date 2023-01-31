@@ -1,8 +1,8 @@
 package entity.expr.notation
 
-import SymbolTable
+import entity.expr.Expr
 import entity.relation.CircleRelations
-import expr.Expr
+import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 class IdentNotation(private var text: String) : RelatableNotation() {

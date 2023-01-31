@@ -1,3 +1,5 @@
+package error
+
 /**
  * This error means that there is some fatal flaw in the design.
  * When it happens in the production code, it sends a message to dev mail.

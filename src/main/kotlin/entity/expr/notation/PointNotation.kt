@@ -1,7 +1,7 @@
 package entity.expr.notation
 
-import SymbolTable
-import expr.Expr
+import entity.expr.Expr
+import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 class PointNotation(var p: String) : RelatableNotation() {

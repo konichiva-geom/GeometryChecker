@@ -1,7 +1,7 @@
 package entity.relation
 
-import SymbolTable
 import entity.expr.notation.Notation
+import pipeline.SymbolTable
 
 abstract class LinearRelations : EntityRelations() {
     // points not in linear

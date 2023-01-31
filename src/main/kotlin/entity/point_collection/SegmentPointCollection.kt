@@ -1,8 +1,8 @@
 package entity.point_collection
 
-import SpoofError
-import SymbolTable
 import entity.expr.notation.SegmentNotation
+import error.SpoofError
+import pipeline.SymbolTable
 
 open class SegmentPointCollection(val bounds: MutableSet<String>, val points: MutableSet<String> = mutableSetOf()) :
     PointCollection<SegmentNotation> {

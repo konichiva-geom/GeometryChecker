@@ -1,6 +1,6 @@
 package math
 
-import MathUtils.LCM
+import utils.MathUtils.LCM
 
 /**
  * Class for calculation without rounding errors.
@@ -25,9 +25,9 @@ operator fun Fraction.minus(other: Fraction): Fraction {
     return FractionFactory.create(first - second, lcm)
 }
 
-operator fun Fraction.times(other: Fraction) =  FractionFactory.create(this[0] * other[0], this[1] * other[1])
+operator fun Fraction.times(other: Fraction) = FractionFactory.create(this[0] * other[0], this[1] * other[1])
 
-operator fun Fraction.div(other: Fraction) =  FractionFactory.create(this[0] * other[1], this[1] * other[0])
+operator fun Fraction.div(other: Fraction) = FractionFactory.create(this[0] * other[1], this[1] * other[0])
 
 fun Fraction.compareTo(other: Fraction): Int {
     val (first, second, _) = toCommonDenominator(this, other)

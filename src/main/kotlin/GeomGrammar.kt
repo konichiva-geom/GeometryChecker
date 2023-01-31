@@ -1,4 +1,3 @@
-import ExtensionUtils.toRange
 import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parser
@@ -8,13 +7,16 @@ import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
+import entity.expr.*
 import entity.expr.notation.*
-import expr.*
+import error.PosError
 import math.FractionFactory
 import pipeline.inference.DoubleSidedInference
 import pipeline.inference.Inference
 import pipeline.interpreter.Signature
 import pipeline.interpreter.TheoremBody
+import utils.ExtensionUtils.toRange
+import utils.Utils
 
 @Suppress("UNCHECKED_CAST", "UNUSED")
 object GeomGrammar : Grammar<Any>() {

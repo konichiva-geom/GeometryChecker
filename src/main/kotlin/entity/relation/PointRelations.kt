@@ -1,9 +1,9 @@
 package entity.relation
 
-import SymbolTable
-import SystemFatalError
 import entity.expr.notation.Notation
 import entity.expr.notation.PointNotation
+import error.SystemFatalError
+import pipeline.SymbolTable
 
 class PointRelations : EntityRelations() {
     val unknown = mutableSetOf<String>()

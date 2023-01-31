@@ -1,22 +1,22 @@
 package pipeline.interpreter
 
-import SpoofError
-import SymbolTable
-import Utils.catchWithRangeAndArgs
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
+import entity.Renamable
 import entity.expr.Creation
-import expr.Expr
+import entity.expr.Expr
+import entity.expr.PointCreation
+import entity.expr.TheoremUse
 import entity.expr.notation.Point2Notation
 import entity.expr.notation.Point3Notation
-import expr.PointCreation
 import entity.expr.notation.PointNotation
-import entity.Renamable
-import expr.TheoremUse
-import pipeline.inference.InferenceProcessor
 import entity.relation.Relation
+import error.SpoofError
+import pipeline.SymbolTable
+import pipeline.inference.InferenceProcessor
+import utils.Utils.catchWithRangeAndArgs
 
 // TODO interpreter is becoming a pipeline too. Maybe convert it to pipeline and move part of its logic to a separate class
 // TODO before each line should run PointPointer.rename. In theorems too

@@ -1,8 +1,8 @@
 package entity.point_collection
 
-import SpoofError
-import SymbolTable
 import entity.expr.notation.RayNotation
+import error.SpoofError
+import pipeline.SymbolTable
 
 class RayPointCollection(var start: String, val points: MutableSet<String>) : PointCollection<RayNotation> {
     override fun getPointsInCollection(): Set<String> = setOf(start) + points

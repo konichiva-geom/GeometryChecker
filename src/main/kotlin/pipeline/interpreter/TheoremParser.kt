@@ -1,15 +1,15 @@
 package pipeline.interpreter
 
-import SpoofError
-import SymbolTable
+import GeomGrammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
-import expr.Expr
-import expr.TheoremUse
-import GeomGrammar
-import pipeline.Parser
+import entity.expr.Expr
+import entity.expr.TheoremUse
 import entity.relation.Relation
+import error.SpoofError
+import pipeline.Parser
+import pipeline.SymbolTable
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
     override fun toString(): String {
@@ -100,7 +100,7 @@ class TheoremParser : Parser() {
             if (rel !is Relation)
                 throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
             if (!rel.check(symbolTable))
-                throw SpoofError("Relation ${rel} unknown")
+                throw SpoofError("Relation $rel unknown")
         }
     }
 

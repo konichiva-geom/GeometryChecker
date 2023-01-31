@@ -1,12 +1,12 @@
 package pipeline
 
-import SpoofError
-import Utils.THEOREMS_PATH
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
-import expr.Expr
+import entity.expr.Expr
+import error.SpoofError
 import pipeline.inference.InferenceProcessor
 import pipeline.interpreter.Interpreter
+import utils.Utils.THEOREMS_PATH
 import java.io.File
 
 /**

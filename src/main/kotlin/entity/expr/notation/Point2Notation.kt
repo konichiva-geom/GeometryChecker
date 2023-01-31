@@ -1,8 +1,10 @@
 package entity.expr.notation
 
-import SymbolTable
-import expr.Expr
+import entity.expr.Expr
+import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
+import utils.MathUtils
+import utils.Utils
 
 open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     var p1: String

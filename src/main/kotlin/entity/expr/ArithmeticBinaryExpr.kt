@@ -1,14 +1,14 @@
-package expr
+package entity.expr
 
-import SpoofError
-import SymbolTable
 import entity.expr.notation.Notation
 import entity.expr.notation.NumNotation
 import entity.expr.notation.PointNotation
-import pipeline.interpreter.IdentMapper
+import error.SpoofError
 import math.Vector
 import math.fromNotation
 import math.mergeWith
+import pipeline.SymbolTable
+import pipeline.interpreter.IdentMapper
 import kotlin.reflect.KClass
 
 /**
@@ -101,8 +101,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 symbolTable.getPoint(left.p).mergePoints(left, right as PointNotation, symbolTable)
             else
                 symbolTable.getRelationsByNotation(left).merge(right, symbolTable)
-        }
-        else if (left is ArithmeticBinaryExpr || right is ArithmeticBinaryExpr) {
+        } else if (left is ArithmeticBinaryExpr || right is ArithmeticBinaryExpr) {
             // TODO convert arithmetic expr to vector by walking a tree recursively
             val leftVector = createVector(left, symbolTable)
             val rightVector = createVector(right, symbolTable)

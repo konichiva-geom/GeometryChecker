@@ -1,9 +1,10 @@
 package entity.expr.notation
 
-import SymbolTable
+import entity.expr.Expr
 import entity.relation.AngleRelations
-import expr.Expr
+import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
+import utils.Utils
 
 class Point3Notation(var p1: String, var p2: String, var p3: String) : RelatableNotation() {
     init {

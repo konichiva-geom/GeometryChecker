@@ -1,10 +1,9 @@
 package pipeline
 
-import ExtensionUtils.addToOrCreateSet
-import SymbolTable
 import entity.Renamable
 import entity.expr.notation.Notation
 import entity.point_collection.PointCollection
+import utils.ExtensionUtils.addToOrCreateSet
 
 /**
  * Maps to equal point (or circle) with the least lexicographical order

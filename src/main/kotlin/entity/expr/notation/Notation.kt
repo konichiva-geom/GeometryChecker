@@ -1,8 +1,8 @@
 package entity.expr.notation
 
-import SpoofError
 import entity.Renamable
-import expr.Expr
+import entity.expr.Expr
+import error.SpoofError
 import pipeline.interpreter.IdentMapper
 
 /**

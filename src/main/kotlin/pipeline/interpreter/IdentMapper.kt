@@ -1,9 +1,9 @@
 package pipeline.interpreter
 
-import ExtensionUtils.addToOrCreateSetWithSameKeysValues
-import SpoofError
-import expr.Expr
+import entity.expr.Expr
 import entity.expr.notation.Notation
+import error.SpoofError
+import utils.ExtensionUtils.addToOrCreateSetWithSameKeysValues
 
 /**
  * Responsible for mapping points in theorem bodies and pipeline.inference expressions.

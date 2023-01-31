@@ -1,9 +1,9 @@
 package entity.point_collection
 
+import entity.Renamable
+import entity.expr.notation.Notation
 import entity.relation.EntityRelations
 import pipeline.EqualIdentRenamer
-import entity.expr.notation.Notation
-import entity.Renamable
 
 interface PointCollection<T : Notation> : Renamable {
     fun getPointsInCollection(): Set<String>

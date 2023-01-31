@@ -1,8 +1,8 @@
 package entity.point_collection
 
-import SpoofError
-import SymbolTable
 import entity.expr.notation.Point2Notation
+import error.SpoofError
+import pipeline.SymbolTable
 
 class LinePointCollection(val points: MutableSet<String>) : PointCollection<Point2Notation> {
     override fun getPointsInCollection(): Set<String> = points

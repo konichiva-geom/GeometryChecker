@@ -1,16 +1,16 @@
 package math
 
-import ExtensionUtils.addOrCreate
-import SpoofError
-import SymbolTable
-import SystemFatalError
-import Utils.signToLambda
+import entity.expr.ArithmeticBinaryExpr
+import entity.expr.Expr
+import entity.expr.ParenthesesExpr
 import entity.expr.notation.Notation
 import entity.expr.notation.NumNotation
-import expr.ArithmeticBinaryExpr
-import expr.Expr
-import expr.ParenthesesExpr
+import error.SpoofError
+import error.SystemFatalError
+import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
+import utils.ExtensionUtils.addOrCreate
+import utils.Utils.signToLambda
 
 typealias Vector = MutableMap<Int, Fraction>
 
@@ -159,15 +159,15 @@ fun MutableMap<Notation, Fraction>.mergeNotationMap(
 }
 
 fun exprToVector(expr: Expr, symbolTable: SymbolTable): MutableMap<Notation, Fraction> {
-    when (expr) {
-        is ParenthesesExpr -> return exprToVector(expr.expr, symbolTable)
+    return when (expr) {
+        is ParenthesesExpr -> exprToVector(expr.expr, symbolTable)
         is ArithmeticBinaryExpr -> {
             val left = exprToVector(expr.left, symbolTable)
             val right = exprToVector(expr.right, symbolTable)
-            return mutableMapOf()
+            mutableMapOf()
         }
-        is NumNotation -> return mutableMapOf(NumNotation(FractionFactory.create(0, 0)) to FractionFactory.create(0, 1))
-        is Notation -> return mutableMapOf(expr to FractionFactory.one())
+        is NumNotation -> mutableMapOf(NumNotation(FractionFactory.create(0, 0)) to FractionFactory.create(0, 1))
+        is Notation -> mutableMapOf(expr to FractionFactory.one())
         else -> throw SpoofError("")
     }
 }

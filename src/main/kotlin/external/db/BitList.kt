@@ -1,6 +1,6 @@
 package external.db
 
-import MathUtils.max
+import utils.MathUtils.max
 import java.util.*
 
 class BitList(val set: BitSet = BitSet(), var size: Int = 0) : Comparable<BitList> {

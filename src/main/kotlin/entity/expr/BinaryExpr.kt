@@ -1,16 +1,15 @@
-package expr
+package entity.expr
 
-import SpoofError
-import SymbolTable
-import Utils
 import com.github.h0tk3y.betterParse.utils.Tuple4
-import entity.expr.Returnable
 import entity.expr.notation.*
-import entity.relation.LineRelations
 import entity.point_collection.PointCollection
 import entity.point_collection.SegmentPointCollection
-import pipeline.interpreter.IdentMapper
+import entity.relation.LineRelations
 import entity.relation.Relation
+import error.SpoofError
+import pipeline.SymbolTable
+import pipeline.interpreter.IdentMapper
+import utils.Utils
 
 abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
     override fun getChildren(): List<Expr> = listOf(left, right)
@@ -94,7 +93,7 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
         if (intersection.map { symbolTable.getPoint(it) }.toSet().size > 1)
             throw SpoofError(
                 "This task is incorrect. There can be only one intersection point between two lines, " +
-                    "but got a second one from: %{expr}",
+                        "but got a second one from: %{expr}",
                 "expr" to this
             )
     }
@@ -118,7 +117,7 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
     override fun check(symbolTable: SymbolTable): Boolean {
         val (_, lineRelations1, _, lineRelations2) = getLinesAndLineRelations(left, right, symbolTable)
         return lineRelations1.parallel.map { symbolTable.getLine(it) }.contains(lineRelations2)
-            || lineRelations2.parallel.map { symbolTable.getLine(it) }.contains(lineRelations1)
+                || lineRelations2.parallel.map { symbolTable.getLine(it) }.contains(lineRelations1)
     }
 
     override fun make(symbolTable: SymbolTable) {
@@ -145,7 +144,7 @@ class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryE
     override fun check(symbolTable: SymbolTable): Boolean {
         val (_, lineRelations1, _, lineRelations2) = getLinesAndLineRelations(left, right, symbolTable)
         return lineRelations1.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations2)
-            || lineRelations2.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations1)
+                || lineRelations2.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations1)
     }
 
     override fun make(symbolTable: SymbolTable) {

@@ -1,8 +1,8 @@
 package entity.relation
 
-import SymbolTable
 import entity.expr.notation.ArcNotation
 import entity.expr.notation.Notation
+import pipeline.SymbolTable
 
 class ArcRelations : LinearRelations() {
     val points = mutableSetOf<String>()
