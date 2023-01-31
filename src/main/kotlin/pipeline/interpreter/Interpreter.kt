@@ -7,16 +7,16 @@ import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
-import expr.Creation
+import entity.expr.Creation
 import expr.Expr
-import expr.Point2Notation
-import expr.Point3Notation
+import entity.expr.notation.Point2Notation
+import entity.expr.notation.Point3Notation
 import expr.PointCreation
-import expr.PointNotation
-import expr.Renamable
+import entity.expr.notation.PointNotation
+import entity.Renamable
 import expr.TheoremUse
-import inference.InferenceProcessor
-import relations.Relation
+import pipeline.inference.InferenceProcessor
+import entity.relation.Relation
 
 // TODO interpreter is becoming a pipeline too. Maybe convert it to pipeline and move part of its logic to a separate class
 // TODO before each line should run PointPointer.rename. In theorems too

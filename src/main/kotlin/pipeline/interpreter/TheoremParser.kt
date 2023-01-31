@@ -9,7 +9,7 @@ import expr.Expr
 import expr.TheoremUse
 import GeomGrammar
 import pipeline.Parser
-import relations.Relation
+import entity.relation.Relation
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
     override fun toString(): String {

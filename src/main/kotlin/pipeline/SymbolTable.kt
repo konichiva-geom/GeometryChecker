@@ -1,9 +1,11 @@
 import Utils.sortAngle
-import entity.*
+import entity.expr.notation.*
+import entity.point_collection.*
+import entity.relation.*
 import expr.*
-import pipeline.*
-import relations.Vector
-import relations.VectorContainer
+import pipeline.EqualIdentRenamer
+import math.Vector
+import math.VectorContainer
 
 open class SymbolTable {
     private val points = mutableMapOf<String, PointRelations>()
@@ -239,7 +241,7 @@ open class SymbolTable {
 
     fun getOrCreateVector(notation: Notation): Vector {
         when (notation) {
-            is NumNotation -> return Vector(mutableMapOf(0 to notation.number.toFloat()))
+            is NumNotation -> return mutableMapOf(0 to notation.number)
             is ArcNotation -> {
                 val angle = arcToAngleMap[ArcPointCollection(
                     notation.getLetters().toMutableSet(), circle = notation.circle

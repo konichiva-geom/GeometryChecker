@@ -1,7 +1,7 @@
-import com.github.h0tk3y.betterParse.lexer.CharToken
+import external.Spoof.changeAllIndicesInOrder
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.Token
-import com.github.h0tk3y.betterParse.lexer.TokenMatch
+
 val normalFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
 
 /**
@@ -11,15 +11,5 @@ val normalFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
  */
 open class SpoofError(var msg: String, vararg val args: Pair<String, Any>) : Exception() {
     override val message: String
-        get() = changeAllIndicesInOrder(msg)
-
-    private fun changeAllIndicesInOrder(text: String): String {
-        val regex = Regex("%\\{\\w+}")
-        val sb = StringBuilder(text)
-        val mapOfArgs = args.toMap()
-        regex.findAll(text).sortedBy { -it.range.first }
-            .map { Triple(it.range.first, it.range.last, it.value.substring(2, it.value.length - 1)) }
-            .forEach { sb.replace(it.first, it.second + 1, (mapOfArgs[it.third] ?: "<NOT_FOUND>").toString()) }
-        return sb.toString()
-    }
+        get() = changeAllIndicesInOrder(msg, args.toList())
 }

@@ -9,7 +9,7 @@ object TestFactory {
     private const val PRINT_ERRORS = true
 
     /**
-     * Using [pipeline.Parser.parseSolution] for inference and theorems, it runs successfully
+     * Using [pipeline.Parser.parseSolution] for pipeline.inference and theorems, it runs successfully
      */
     private fun interpret(code: String): SymbolTable {
         val pipeline = Pipeline()

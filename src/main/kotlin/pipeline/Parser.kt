@@ -1,11 +1,11 @@
 package pipeline
 
+import ExtensionUtils.toRange
+import ExtensionUtils.toViewable
 import GeomGrammar
+import MathUtils.min
 import PosError
 import SpoofError
-import Utils
-import Utils.toRange
-import Utils.toViewable
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.*
 import com.github.h0tk3y.betterParse.st.LiftToSyntaxTreeOptions
@@ -13,7 +13,7 @@ import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.st.liftToSyntaxTreeGrammar
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import expr.Expr
-import inference.Inference
+import pipeline.inference.Inference
 
 @Suppress("UNCHECKED_CAST")
 open class Parser {
@@ -43,7 +43,7 @@ open class Parser {
                 throw PosError(
                     IntRange(token.offset, token.input.length),
                     "Couldn't parse input, starting with: %{text}",
-                    "text" to token.input.substring(token.offset - 1, token.offset - 1 + Utils.min(20, remainderLength))
+                    "text" to token.input.substring(token.offset - 1, token.offset - 1 + min(20, remainderLength))
                 )
             }
             val tokens = getAllErrorTokens(e.errorResult as AlternativesFailure)

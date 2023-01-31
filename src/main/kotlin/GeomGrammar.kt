@@ -1,4 +1,4 @@
-import Utils.toRange
+import ExtensionUtils.toRange
 import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parser
@@ -8,9 +8,11 @@ import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
+import entity.expr.notation.*
 import expr.*
-import inference.DoubleSidedInference
-import inference.Inference
+import math.FractionFactory
+import pipeline.inference.DoubleSidedInference
+import pipeline.inference.Inference
 import pipeline.interpreter.Signature
 import pipeline.interpreter.TheoremBody
 
@@ -96,14 +98,14 @@ object GeomGrammar : Grammar<Any>() {
         Point2Notation(it.first, it.second)
     }) or
             (-ray and linear map { RayNotation(it.first, it.second) }) or relatableNotation or (number map {
-        NumNotation(it.text.toIntOrNull() ?: it.text.toFloatOrNull() ?: throw Exception("Not a number"))
+        NumNotation(FractionFactory.fromInt(it.text.toIntOrNull() ?: throw Exception("Not a number")))
     }) or (point map { PointNotation(it.text) }) or
             (ident map { IdentNotation(it.text) })
 
     private val arithmeticTerm by (number and relatableNotation map {
         ArithmeticBinaryExpr(
             NumNotation(
-                it.t1.text.toIntOrNull() ?: it.t1.text.toFloatOrNull() ?: throw Exception("Not a number")
+                FractionFactory.fromInt(it.t1.text.toIntOrNull() ?: throw Exception("Not a number"))
             ), it.t2, "*"
         )
     }) or notation or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar
@@ -174,7 +176,7 @@ object GeomGrammar : Grammar<Any>() {
     //endregion
 
     private val blockContent by separatedTerms(
-        theoremUsage or /*inference or*/ binaryStatement, statementSeparator
+        theoremUsage or /*pipeline.inference or*/ binaryStatement, statementSeparator
     ) map { it }
     private val block by ident and -colon and -statementSeparator and -optional(statementSeparator) and
             optional(blockContent) and -optional(statementSeparator) map { Tuple2(it.t1.text, it.t2) }
@@ -206,7 +208,10 @@ object GeomGrammar : Grammar<Any>() {
     private val inferenceStatement by inferenceArgs and (iffToken or inferToken) and inferenceArgs map { it ->
         if (it.t2.text == "=>") {
             if (it.t3.any { it is AnyExpr })
-                throw PosError(it.t2.toRange(), "any expressions are not allowed at the right side of the inference")
+                throw PosError(
+                    it.t2.toRange(),
+                    "any expressions are not allowed at the right side of the pipeline.inference"
+                )
             Inference(it.t1, it.t3)
         } else
             DoubleSidedInference(it.t1, it.t3)
@@ -217,7 +222,7 @@ object GeomGrammar : Grammar<Any>() {
     -zeroOrMore(statementSeparator) and oneOrMore(thDef) or
             // solution parser
             (-zeroOrMore(statementSeparator) and (3 times block map { it })) or
-            // inference parser
+            // pipeline.inference parser
             (-optional(statementSeparator) and separatedTerms(
                 inferenceStatement,
                 statementSeparator

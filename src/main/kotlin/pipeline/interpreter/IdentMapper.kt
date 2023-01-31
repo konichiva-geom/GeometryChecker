@@ -1,12 +1,12 @@
 package pipeline.interpreter
 
+import ExtensionUtils.addToOrCreateSetWithSameKeysValues
 import SpoofError
-import Utils.addToOrCreateSetWithSameKeysValues
 import expr.Expr
-import expr.Notation
+import entity.expr.notation.Notation
 
 /**
- * Responsible for mapping points in theorem bodies and inference expressions.
+ * Responsible for mapping points in theorem bodies and pipeline.inference expressions.
  *
  * Previously was mapping one point uniquely to other, but two different points can be mapped to same one,
  * e.g we use *equal_sided_triangles* for triangles with common points: ABC and BCD.
@@ -18,7 +18,7 @@ class IdentMapper {
     fun get(pointOrIdent: String) = mappings[pointOrIdent]!!.first()
 
     /**
-     * On inference there might be ambiguous mappings
+     * On pipeline.inference there might be ambiguous mappings
      * This method chooses first mapping and makes all mappings unique
      *
      */
