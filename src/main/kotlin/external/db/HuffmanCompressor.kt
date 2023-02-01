@@ -1,7 +1,8 @@
+// Used as a reference: https://gist.github.com/blogscot/fd28f3aa39f10c3f0950ae9401aacca7
 package external.db
 
 import error.SystemFatalError
-import utils.ExtensionUtils.addOrCreate
+import utils.ExtensionUtils.setOrCreate
 import java.util.*
 
 /**
@@ -26,7 +27,7 @@ fun compress(code: String): Map<Char, BitList> {
         throw SystemFatalError("Nothing to compress")
     val frequencies = mutableMapOf<Char, Int>()
     for (char in code)
-        frequencies.addOrCreate(char, 1)
+        frequencies.setOrCreate(char, 1)
     val queue = PriorityQueue(frequencies.size, Comparator<HuffmanNode> { x, y -> x.frequency - y.frequency })
     for ((char, frequency) in frequencies) {
         queue.add(HuffmanNode(frequency, char, null, null))

@@ -16,8 +16,6 @@ import pipeline.SymbolTable
 import pipeline.inference.InferenceProcessor
 import utils.Utils.catchWithRangeAndArgs
 
-// TODO interpreter is becoming a pipeline too. Maybe convert it to pipeline and move part of its logic to a separate class
-// TODO before each line should run PointPointer.rename. In theorems too
 class Interpreter(val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
     private val symbolTable = SymbolTable()

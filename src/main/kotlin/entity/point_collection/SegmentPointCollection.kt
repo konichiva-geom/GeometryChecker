@@ -10,7 +10,6 @@ open class SegmentPointCollection(val bounds: MutableSet<String>, val points: Mu
     override fun isFromNotation(notation: SegmentNotation) = bounds.containsAll(notation.getLetters())
 
     override fun addPoints(added: List<String>) {
-        // TODO is it bad if added point is in [bounds]?
         points.addAll(added)
     }
 

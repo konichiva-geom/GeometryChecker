@@ -1,7 +1,5 @@
 import pipeline.Pipeline
 
-// TODO check wolfram alpha paid how can he check geom, geogebra
-
 fun main() {
     val a = """description:
         new A

@@ -1,6 +1,6 @@
 package math
 
-import utils.MathUtils.LCM
+import utils.MathUtils.getLCM
 
 /**
  * Class for calculation without rounding errors.
@@ -9,7 +9,7 @@ import utils.MathUtils.LCM
 typealias Fraction = IntArray
 
 private fun toCommonDenominator(first: Fraction, second: Fraction): Triple<Int, Int, Int> {
-    val lcm = LCM(first[1], second[1])
+    val lcm = getLCM(first[1], second[1])
     val firstTerm = lcm / first[1] * first[0]
     val secondTerm = lcm / second[1] * second[0]
     return Triple(firstTerm, secondTerm, lcm)

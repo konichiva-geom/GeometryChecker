@@ -9,7 +9,6 @@ class RayPointCollection(var start: String, val points: MutableSet<String>) : Po
     override fun isFromNotation(notation: RayNotation) = notation.p1 == start && points.contains(notation.p2)
 
     override fun addPoints(added: List<String>) {
-        // TODO is it bad if added point is [start]?
         points.addAll(added)
     }
 

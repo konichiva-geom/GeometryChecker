@@ -3,7 +3,7 @@ package pipeline.interpreter
 import entity.expr.Expr
 import entity.expr.notation.Notation
 import error.SpoofError
-import utils.ExtensionUtils.addToOrCreateSetWithSameKeysValues
+import utils.ExtensionUtils.addToOrCreateSet
 
 /**
  * Responsible for mapping points in theorem bodies and inference expressions.
@@ -56,8 +56,8 @@ class IdentMapper {
     }
 
     fun addLink(first: String, second: String) {
-        links.addToOrCreateSetWithSameKeysValues(first, second)
-        links.addToOrCreateSetWithSameKeysValues(second, first)
+        links.addToOrCreateSet(first, second)
+        links.addToOrCreateSet(second, first)
     }
 
     fun createLinks(call: Expr, definition: Expr) {

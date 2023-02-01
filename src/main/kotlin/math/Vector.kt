@@ -9,7 +9,7 @@ import error.SpoofError
 import error.SystemFatalError
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
-import utils.ExtensionUtils.addOrCreate
+import utils.ExtensionUtils.setOrCreate
 import utils.Utils.signToLambda
 
 typealias Vector = MutableMap<Int, Fraction>
@@ -31,7 +31,7 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
                 val res = mutableMapOf<Int, Fraction>()
                 this.forEach { (thisKey, thisElement) ->
                     other.forEach { (otherKey, otherElement) ->
-                        res.addOrCreate(
+                        res.setOrCreate(
                             thisKey * otherKey,
                             thisElement * otherElement
                         )
@@ -109,20 +109,11 @@ fun fromInt(number: Int): Vector {
     return mutableMapOf(number to FractionFactory.one())
 }
 
-class NotationFraction(val nominator: MutableList<Notation>, val denominator: MutableList<Notation>) : Notation() {
-    override fun getOrder(): Int {
-        TODO("Not yet implemented")
-    }
+class NotationFraction(val nominator: MutableList<Notation>, val denominator: MutableList<Notation>) {}
 
-    override fun getLetters(): MutableList<String> {
-        TODO("Not yet implemented")
-    }
-
-    override fun mergeMapping(mapper: IdentMapper, other: Notation) {
-        TODO("Not yet implemented")
-    }
-
-    override fun createLinks(mapper: IdentMapper) {
+class ArithmeticExpr() : Expr {
+    val notationFractionMap = mutableMapOf<NotationFraction, Fraction>()
+    override fun getChildren(): List<Expr> {
         TODO("Not yet implemented")
     }
 
@@ -135,10 +126,6 @@ class NotationFraction(val nominator: MutableList<Notation>, val denominator: Mu
     }
 
     override fun compareTo(other: Expr): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun renameAndRemap(symbolTable: SymbolTable) {
         TODO("Not yet implemented")
     }
 

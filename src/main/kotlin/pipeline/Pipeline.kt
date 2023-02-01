@@ -14,13 +14,11 @@ import java.io.File
  */
 @Suppress("UNCHECKED_CAST")
 class Pipeline {
-    val parser = Parser()
-    val inferenceProcessor = InferenceProcessor()
+    private val parser = Parser()
+    private val inferenceProcessor = InferenceProcessor()
     val interpreter = Interpreter(inferenceProcessor)
-    lateinit var tree: SyntaxTree<Any>
-
-    // TODO: delete in production
-    lateinit var code: String
+    private lateinit var tree: SyntaxTree<Any>
+    private lateinit var code: String
 
     fun clearTheorems(): Pipeline {
         interpreter.theoremParser.clearTheorems()

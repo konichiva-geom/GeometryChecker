@@ -59,9 +59,6 @@ class TheoremParser : Parser() {
 
     fun getTheoremBodyBySignature(signature: Signature): TheoremBody {
         return theorems[signature] ?: throw SpoofError("Theorem %{name} not found", "name" to signature.name)
-        /* TODO if theorem not found, make search by distance and suggest other variants:
-        Theorem merge_projedvions not found, maybe you meant merge_projections(...)?
-        */
     }
 
     fun getSignature(call: Signature): Signature {
@@ -72,7 +69,6 @@ class TheoremParser : Parser() {
     fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody, symbolTable: SymbolTable) {
         traverseSignature(call, theoremSignature)
         println(signatureMapper.mappings)
-        // TODO map mappings to body
         for (expr in theoremBody.body) {
             when (expr) {
                 is Relation -> (expr.mapIdents(signatureMapper) as Relation).make(symbolTable)
