@@ -12,13 +12,17 @@ import entity.expr.notation.*
 import error.PosError
 import error.SpoofError
 import error.SystemFatalError
+import math.ArithmeticExpr
+import math.Fraction
 import math.FractionFactory
+import math.mergeWithOperation
 import pipeline.inference.DoubleSidedInference
 import pipeline.inference.Inference
 import pipeline.interpreter.Signature
 import pipeline.interpreter.TheoremBody
 import utils.ExtensionUtils.toRange
 import utils.Utils
+import utils.Utils.keyForArithmeticNumeric
 
 @Suppress("UNCHECKED_CAST", "UNUSED")
 object GeomGrammar : Grammar<Any>() {
@@ -91,47 +95,54 @@ object GeomGrammar : Grammar<Any>() {
     }
 
     // angle, segment, arc
-    private val relatableNotation: Parser<Expr> by (angle map {
+    private val relatableNotation: Parser<Notation> by (angle map {
         Point3Notation(it[0].text, it[1].text, it[2].text)
     }) or (linear map {
         SegmentNotation(it.first, it.second)
-    }) or (-arc and linear and -ofToken and ident map { ArcNotation(it.t1.first, it.t1.second, it.t2.text) })
+    }) or (-arc and linear and -ofToken and ident map {
+        ArcNotation(it.t1.first, it.t1.second, it.t2.text)
+    }) or (number map {
+        NumNotation(FractionFactory.fromInt(it.text.toIntOrNull() ?: throw Exception("Not a number")))
+    })
 
     // segment AB, A, ray DF
     private val notation by (line map {
         Point2Notation(it.first, it.second)
-    }) or
-            (-ray and linear map { RayNotation(it.first, it.second) }) or relatableNotation or (number map {
-        NumNotation(FractionFactory.fromInt(it.text.toIntOrNull() ?: throw Exception("Not a number")))
-    }) or (point map { PointNotation(it.text) }) or
-            (ident map { IdentNotation(it.text) })
+    }) or (-ray and linear map {
+        RayNotation(it.first, it.second)
+    }) or (relatableNotation map {
+        it
+    }) or (point map {
+        PointNotation(it.text)
+    }) or (ident map { IdentNotation(it.text) })
 
-    private val arithmeticTerm by (number and relatableNotation map {
-        ArithmeticBinaryExpr(
-            NumNotation(
-                FractionFactory.fromInt(it.t1.text.toIntOrNull() ?: throw Exception("Not a number"))
-            ), it.t2, "*"
-        )
-    }) or notation or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar
-            map { ParenthesesExpr(it) }) map { it }
+    private val arithmeticTerm: Parser<MutableMap<Notation, Fraction>> by (number and relatableNotation map {
+        if (it.t2 is NumNotation)
+            throw SpoofError("Unexpected 2 numbers in a row")
+        mutableMapOf(it.t2 to FractionFactory.fromInt(it.t1.text.toInt()))
+    }) or (notation map {
+        if (it is NumNotation)
+            mutableMapOf((keyForArithmeticNumeric as Notation) to it.number)
+        else
+            mutableMapOf((it as Notation) to FractionFactory.one())
+    }) or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar map { it })
 
-    private val divMulChain: Parser<Expr> by leftAssociative(arithmeticTerm, div or mul) { a, op, b ->
-        ArithmeticBinaryExpr(a, b, op.text)
-    }
+    private val divMulChain: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
+        arithmeticTerm, div or mul
+    ) { a, op, b -> createArithmeticMap(a, b, op.text) }
 
-    private val arithmeticExpression: Parser<Expr> by leftAssociative(
-        divMulChain,
-        plus or minus
-    ) { a, op, b -> ArithmeticBinaryExpr(a, b, op.text) }
+    private val arithmeticExpression: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
+        divMulChain, plus or minus
+    ) { a, op, b -> createArithmeticMap(a, b, op.text) }
 
     private val comparison by arithmeticExpression and compToken and arithmeticExpression map {
         when (it.t2.text) {
-            "==" -> BinaryEquals(it.t1, it.t3)
-            "!=" -> BinaryNotEquals(it.t1, it.t3)
-            ">" -> BinaryGreater(it.t1, it.t3)
-            "<" -> BinaryGreater(it.t3, it.t1)
-            ">=" -> BinaryGEQ(it.t1, it.t3)
-            "<=" -> BinaryGEQ(it.t3, it.t1)
+            "==" -> BinaryEquals(ArithmeticExpr(it.t1), ArithmeticExpr(it.t3))
+            "!=" -> BinaryNotEquals(ArithmeticExpr(it.t1), ArithmeticExpr(it.t3))
+            ">" -> BinaryGreater(ArithmeticExpr(it.t1), ArithmeticExpr(it.t3))
+            "<" -> BinaryGreater(ArithmeticExpr(it.t3), ArithmeticExpr(it.t1))
+            ">=" -> BinaryGEQ(ArithmeticExpr(it.t1), ArithmeticExpr(it.t3))
+            "<=" -> BinaryGEQ(ArithmeticExpr(it.t3), ArithmeticExpr(it.t1))
             else -> throw Exception("Unexpected comparison")
         }
     }
@@ -232,10 +243,32 @@ object GeomGrammar : Grammar<Any>() {
                 statementSeparator
             ) and -optional(statementSeparator))
 
+    private fun createArithmeticMap(
+        left: MutableMap<Notation, Fraction>,
+        right: MutableMap<Notation, Fraction>,
+        op: String
+    ): MutableMap<Notation, Fraction> {
+        when (op) {
+            "+", "-" -> return left.mergeWithOperation(right, op)
+            "*" -> {}
+            "/" -> {}
+        }
+        return mutableMapOf()
+    }
+
+    private fun mulBySingleElement(element: Notation, map: MutableMap<Notation, Fraction>) {
+//        if (element is NumNotation) {
+//            map.values.forEach { it.inPlaceMul(element.number) }
+//        } else if (element is NotationFraction) {
+//
+//        } else if ()
+    }
+
+
     /**
      * Create relation binary expression
      */
-    fun getBinaryRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
+    private fun getBinaryRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
         return Utils.catchWithRangeAndArgs({
             val first = tuple.t1
             val operator = tuple.t2.text

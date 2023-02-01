@@ -109,10 +109,27 @@ fun fromInt(number: Int): Vector {
     return mutableMapOf(number to FractionFactory.one())
 }
 
-class NotationFraction(val nominator: MutableList<Notation>, val denominator: MutableList<Notation>) {}
+class NotationFraction(val nominator: MutableList<Notation>, val denominator: MutableList<Notation>) : Notation() {
+    fun mulBy(other: Notation) {
+        when (other) {
+            is NotationFraction -> {
 
-class ArithmeticExpr() : Expr {
-    val notationFractionMap = mutableMapOf<NotationFraction, Fraction>()
+            }
+        }
+    }
+
+    override fun getOrder() = TODO("Not yet implemented")
+    override fun getLetters(): MutableList<String> = TODO("Not yet implemented")
+    override fun mergeMapping(mapper: IdentMapper, other: Notation) = TODO("Not yet implemented")
+    override fun createLinks(mapper: IdentMapper) = TODO("Not yet implemented")
+    override fun getRepr() = TODO("Not yet implemented")
+    override fun mapIdents(mapper: IdentMapper) = TODO("Not yet implemented")
+    override fun compareTo(other: Expr) = TODO("Not yet implemented")
+    override fun renameAndRemap(symbolTable: SymbolTable) = TODO("Not yet implemented")
+
+}
+
+class ArithmeticExpr(val notationFractionMap: MutableMap<Notation, Fraction>) : Expr {
     override fun getChildren(): List<Expr> {
         TODO("Not yet implemented")
     }

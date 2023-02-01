@@ -1,17 +1,16 @@
 package utils
 
+import entity.expr.notation.NumNotation
 import entity.expr.notation.Point2Notation
 import entity.expr.notation.Point3Notation
 import error.PosError
 import error.SpoofError
-import math.Fraction
-import math.div
-import math.minus
-import math.times
+import math.*
 
 object Utils {
     const val SHOULD_CATCH = true
     const val THEOREMS_PATH = "examples/theorems.txt"
+    val keyForArithmeticNumeric = NumNotation(FractionFactory.zero())
 
     private val lambdas = mutableListOf({ a: Fraction, b: Fraction -> a + b },
         { a: Fraction, b: Fraction -> a - b },

@@ -29,6 +29,15 @@ operator fun Fraction.times(other: Fraction) = FractionFactory.create(this[0] * 
 
 operator fun Fraction.div(other: Fraction) = FractionFactory.create(this[0] * other[1], this[1] * other[0])
 
+fun Fraction.inPlaceDiv(other: Fraction)  {
+    this[0] *= other[1]
+    this[1] *= other[0]
+}
+fun Fraction.inPlaceMul(other: Fraction)  {
+    this[0] *= other[0]
+    this[1] *= other[1]
+}
+
 fun Fraction.compareTo(other: Fraction): Int {
     val (first, second, _) = toCommonDenominator(this, other)
     return first.compareTo(second)
