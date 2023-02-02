@@ -1,8 +1,25 @@
 package utils
 
+import kotlin.jvm.internal.CallableReference
 import kotlin.math.abs
 
 object MathUtils {
+    inline fun <reified T> maxToMin(f: Any, vararg elements: T): Array<T> {
+        f as CallableReference
+        return elements
+            .toList()
+            .map { f.call(it) as Comparable<Any> to it }
+            .sortedBy { it.first }
+            .map { it.second }
+            .toTypedArray()
+    }
+
+    fun <T> maxToMin(f: Any, first: T, second: T): Pair<T, T> {
+        f as CallableReference
+        return if (f.call(first) as Comparable<Any> > f.call(second) as Comparable<Any>)
+            first to second else second to first
+    }
+
     fun <T : Comparable<T>?> max(t1: T, t2: T): T {
         return if (t1!! > t2) t1 else t2
     }

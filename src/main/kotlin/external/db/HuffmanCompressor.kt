@@ -2,7 +2,7 @@
 package external.db
 
 import error.SystemFatalError
-import utils.ExtensionUtils.setOrCreate
+import utils.ExtensionUtils.addOrCreate
 import java.util.*
 
 /**
@@ -27,7 +27,7 @@ fun compress(code: String): Map<Char, BitList> {
         throw SystemFatalError("Nothing to compress")
     val frequencies = mutableMapOf<Char, Int>()
     for (char in code)
-        frequencies.setOrCreate(char, 1)
+        frequencies.addOrCreate(char, 1)
     val queue = PriorityQueue(frequencies.size, Comparator<HuffmanNode> { x, y -> x.frequency - y.frequency })
     for ((char, frequency) in frequencies) {
         queue.add(HuffmanNode(frequency, char, null, null))

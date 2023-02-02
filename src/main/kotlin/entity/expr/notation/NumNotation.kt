@@ -2,6 +2,7 @@ package entity.expr.notation
 
 import entity.expr.Expr
 import math.Fraction
+import math.asString
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
@@ -15,7 +16,7 @@ class NumNotation(val number: Fraction) : Notation() {
     override fun mapIdents(mapper: IdentMapper) = NumNotation(number)
     override fun renameAndRemap(symbolTable: SymbolTable) {}
 
-    override fun toString(): String = number.toString()
+    override fun toString(): String = ""
     override fun getLetters(): MutableList<String> = mutableListOf()
 
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {}

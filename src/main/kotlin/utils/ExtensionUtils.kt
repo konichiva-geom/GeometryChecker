@@ -5,6 +5,7 @@ import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import math.Fraction
+import math.FractionFactory
 
 object ExtensionUtils {
     fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key: R, vararg elements: T) {
@@ -14,14 +15,18 @@ object ExtensionUtils {
             this[key]!!.addAll(elements.toList())
     }
 
-    fun <R> MutableMap<R, Fraction>.setOrCreate(key: R, element: Fraction) {
+    fun <R> MutableMap<R, Fraction>.addOrCreate(
+        key: R,
+        element: Fraction = FractionFactory.one()
+    ): MutableMap<R, Fraction> {
         if (this[key] == null)
             this[key] = element
         else
             this[key] = this[key]!! + element
+        return this
     }
 
-    fun <R> MutableMap<R, Int>.setOrCreate(key: R, element: Int) {
+    fun <R> MutableMap<R, Int>.addOrCreate(key: R, element: Int) {
         if (this[key] == null)
             this[key] = element
         else

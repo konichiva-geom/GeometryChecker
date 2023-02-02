@@ -8,8 +8,7 @@ import entity.expr.notation.NumNotation
 import error.SpoofError
 import error.SystemFatalError
 import pipeline.SymbolTable
-import pipeline.interpreter.IdentMapper
-import utils.ExtensionUtils.setOrCreate
+import utils.ExtensionUtils.addOrCreate
 import utils.Utils.signToLambda
 
 typealias Vector = MutableMap<Int, Fraction>
@@ -31,7 +30,7 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
                 val res = mutableMapOf<Int, Fraction>()
                 this.forEach { (thisKey, thisElement) ->
                     other.forEach { (otherKey, otherElement) ->
-                        res.setOrCreate(
+                        res.addOrCreate(
                             thisKey * otherKey,
                             thisElement * otherElement
                         )
@@ -107,45 +106,6 @@ fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
 
 fun fromInt(number: Int): Vector {
     return mutableMapOf(number to FractionFactory.one())
-}
-
-class NotationFraction(val nominator: MutableList<Notation>, val denominator: MutableList<Notation>) : Notation() {
-    fun mulBy(other: Notation) {
-        when (other) {
-            is NotationFraction -> {
-
-            }
-        }
-    }
-
-    override fun getOrder() = TODO("Not yet implemented")
-    override fun getLetters(): MutableList<String> = TODO("Not yet implemented")
-    override fun mergeMapping(mapper: IdentMapper, other: Notation) = TODO("Not yet implemented")
-    override fun createLinks(mapper: IdentMapper) = TODO("Not yet implemented")
-    override fun getRepr() = TODO("Not yet implemented")
-    override fun mapIdents(mapper: IdentMapper) = TODO("Not yet implemented")
-    override fun compareTo(other: Expr) = TODO("Not yet implemented")
-    override fun renameAndRemap(symbolTable: SymbolTable) = TODO("Not yet implemented")
-
-}
-
-class ArithmeticExpr(val notationFractionMap: MutableMap<Notation, Fraction>) : Expr {
-    override fun getChildren(): List<Expr> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getRepr(): StringBuilder {
-        TODO("Not yet implemented")
-    }
-
-    override fun mapIdents(mapper: IdentMapper): Expr {
-        TODO("Not yet implemented")
-    }
-
-    override fun compareTo(other: Expr): Int {
-        TODO("Not yet implemented")
-    }
-
 }
 
 fun MutableMap<Notation, Fraction>.mergeNotationMap(

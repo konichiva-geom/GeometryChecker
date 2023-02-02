@@ -12,15 +12,14 @@ import entity.expr.notation.*
 import error.PosError
 import error.SpoofError
 import error.SystemFatalError
-import math.ArithmeticExpr
-import math.Fraction
-import math.FractionFactory
-import math.mergeWithOperation
+import math.*
 import pipeline.inference.DoubleSidedInference
 import pipeline.inference.Inference
 import pipeline.interpreter.Signature
 import pipeline.interpreter.TheoremBody
+import utils.ExtensionUtils.addOrCreate
 import utils.ExtensionUtils.toRange
+import utils.MathUtils.maxToMin
 import utils.Utils
 import utils.Utils.keyForArithmeticNumeric
 
@@ -243,27 +242,97 @@ object GeomGrammar : Grammar<Any>() {
                 statementSeparator
             ) and -optional(statementSeparator))
 
-    private fun createArithmeticMap(
+    fun createArithmeticMap(
         left: MutableMap<Notation, Fraction>,
         right: MutableMap<Notation, Fraction>,
         op: String
     ): MutableMap<Notation, Fraction> {
         when (op) {
             "+", "-" -> return left.mergeWithOperation(right, op)
-            "*" -> {}
-            "/" -> {}
+            "*" -> {
+                val res = mutableMapOf<Notation, Fraction>()
+                for ((key, value) in left) {
+                    for ((key2, value2) in right) {
+                        val (max, min) = maxToMin(Notation::getOrder, key, key2)
+                        res[mulBy(max, min)] = value * value2
+                    }
+                }
+                return res
+            }
+            "/" -> {
+                return mutableMapOf(DivNotation(left, right) to FractionFactory.one())
+            }
         }
-        return mutableMapOf()
+        throw SpoofError("Unexpected operator")
     }
 
-    private fun mulBySingleElement(element: Notation, map: MutableMap<Notation, Fraction>) {
-//        if (element is NumNotation) {
-//            map.values.forEach { it.inPlaceMul(element.number) }
-//        } else if (element is NotationFraction) {
-//
-//        } else if ()
+    private fun mulBy(first: Notation, second: Notation): Notation {
+        if (first is DivNotation && second is DivNotation) {
+            return DivNotation(
+                createArithmeticMap(first.numerator, second.numerator, "*"),
+                createArithmeticMap(first.denominator, second.denominator, "*")
+            )
+        } else if (first is MulNotation && second is MulNotation) {
+            return MulNotation((first.elements + second.elements).toMutableList())
+        } else if (first is NumNotation && second is NumNotation) {
+            return first
+        } else if (first is DivNotation && second is MulNotation) {
+            return DivNotation(
+                first.numerator.entries.associate {
+                    val (max, min) = maxToMin(Notation::getOrder, it.key, second)
+                    mulBy(max, min) to it.value
+                }.toMutableMap(),
+                first.denominator.toMutableMap()
+            )
+        } else if (first is DivNotation && second is NumNotation) {
+            return DivNotation(first.numerator.toMutableMap(), first.denominator.toMutableMap())
+        } else if (first is DivNotation) {
+            return DivNotation(
+                first.numerator.toMutableMap().addOrCreate(second, FractionFactory.one()),
+                first.denominator.toMutableMap()
+            )
+        } else if (first is MulNotation && second is NumNotation) {
+            return MulNotation(first.elements.toMutableList())
+        } else if (first is MulNotation) {
+            return MulNotation((first.elements + second).toMutableList())
+        } else if (second is NumNotation) {
+            return first
+        } else {
+            return MulNotation(mutableListOf(first, second))
+        }
     }
 
+//    private fun divBy(first: Notation, second: MutableMap<Notation, Fraction>): Notation {
+//        if (second.size == 1) {
+//            when (second.keys.first()) {
+//                is NotationFraction -> {}
+//                is NumNotation -> {}
+//                else -> {
+//                    return NotationFraction(mutableListOf(first))
+//                }
+//            }
+//        }
+//        if (first is NotationFraction && second is NotationFraction) {
+//            // TODO:
+//            return NotationFraction(
+//                (first.numerator + second.numerator).toMutableList(),
+//                createArithmeticMap(first.denominator, second.denominator, "*")
+//            )
+//        } else if (first is NumNotation && second is NumNotation) {
+//            return first
+//        } else if (first is NotationFraction && second is NumNotation) {
+//            return NotationFraction(first.numerator.toMutableList(), first.denominator.toMutableMap())
+//        } else if (first is NotationFraction) {
+//            return NotationFraction(
+//                first.numerator.toMutableList(),
+//                first.denominator.toMutableMap().addOrCreate(second)
+//            )
+//        } else if (second is NumNotation) {
+//            return first // TODO no copying. Is it okay?
+//        } else {
+//            return NotationFraction(mutableListOf(first), mutableMapOf(second to FractionFactory.one()))
+//        }
+//    }
 
     /**
      * Create relation binary expression

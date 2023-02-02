@@ -4,6 +4,7 @@
 ### Dev questions
 1. SegmentPointCollection, ArcPointCollection addPoints(). is it bad if added point is in [bounds]?
 2. Similar for RayPointCollection:  is it bad if added point is [start]?
+3. How to work with sin, cos, and should we really cover it?
 
 ### Not development
 1. check wolfram alpha paid how can he check geom, geogebra

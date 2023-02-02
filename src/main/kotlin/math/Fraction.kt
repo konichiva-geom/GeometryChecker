@@ -29,11 +29,12 @@ operator fun Fraction.times(other: Fraction) = FractionFactory.create(this[0] * 
 
 operator fun Fraction.div(other: Fraction) = FractionFactory.create(this[0] * other[1], this[1] * other[0])
 
-fun Fraction.inPlaceDiv(other: Fraction)  {
+fun Fraction.inPlaceDiv(other: Fraction) {
     this[0] *= other[1]
     this[1] *= other[0]
 }
-fun Fraction.inPlaceMul(other: Fraction)  {
+
+fun Fraction.inPlaceMul(other: Fraction) {
     this[0] *= other[0]
     this[1] *= other[1]
 }
@@ -42,6 +43,19 @@ fun Fraction.compareTo(other: Fraction): Int {
     val (first, second, _) = toCommonDenominator(this, other)
     return first.compareTo(second)
 }
+
+fun Fraction.asString(): String {
+    if (this[1] != 1)
+        return "${this[0]}/${this[1]}"
+    return when (this[0]) {
+        0 -> "0"
+        1 -> ""
+        -1 -> "-"
+        else -> this[0].toString()
+    }
+}
+
+fun Fraction.isNegative() = this[0] < 0
 
 object FractionFactory {
     fun zero() = intArrayOf(0, 1)

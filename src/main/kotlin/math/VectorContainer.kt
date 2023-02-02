@@ -1,6 +1,6 @@
 package math
 
-import utils.ExtensionUtils.setOrCreate
+import utils.ExtensionUtils.addOrCreate
 import utils.PrimeGetter.primes
 
 class VectorContainer<T> {
@@ -31,7 +31,7 @@ class VectorContainer<T> {
             vector.remove(nullified)
             substitution.multiplyBy(coeff)
             for ((key, element) in substitution) {
-                vector.setOrCreate(key, element)
+                vector.addOrCreate(key, element)
             }
         }
         // if nullified is not maxCurrentIndex, swap it with maxCurrentIndex
