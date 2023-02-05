@@ -100,7 +100,6 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
                         interpretTheoremUse(expr)
                         addedRelation = true
                     }
-
                     is Relation -> {
                         expr.make(symbolTable)
                         inferenceProcessor.processInference(expr, symbolTable)

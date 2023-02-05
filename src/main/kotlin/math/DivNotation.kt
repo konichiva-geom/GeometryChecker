@@ -19,7 +19,7 @@ class DivNotation(val numerator: MutableMap<Notation, Fraction>, val denominator
 
     override fun toString(): String {
         if (denominator.isEmpty())
-            return getArithmeticToString(numerator)
+            return getArithmeticToString(numerator).toString()
         var numeratorString =
             if (numerator.size == 1) getArithmeticToString(numerator)
             else "(${getArithmeticToString(numerator)})"

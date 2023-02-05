@@ -171,9 +171,9 @@ object ArithmeticExpander {
             map[keyForArithmeticNumeric] = if (isNumerator) FractionFactory.zero() else FractionFactory.one()
     }
 
-    fun getArithmeticToString(map: MutableMap<Notation, Fraction>): String {
+    fun getArithmeticToString(map: MutableMap<Notation, Fraction>): StringBuilder {
         if (map.isEmpty())
-            return "0"
+            return StringBuilder("0")
         val res = StringBuilder()
         for ((notation, fraction) in map.entries.sortedBy { -it.key.getOrder() }) {
             if (fraction.isNegative())
@@ -183,6 +183,6 @@ object ArithmeticExpander {
         }
         if (res[0] == '+')
             res.deleteCharAt(0)
-        return res.toString()
+        return res
     }
 }

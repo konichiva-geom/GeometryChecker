@@ -1,11 +1,6 @@
 package math
 
-import entity.expr.ArithmeticBinaryExpr
-import entity.expr.Expr
-import entity.expr.ParenthesesExpr
 import entity.expr.notation.Notation
-import entity.expr.notation.NumNotation
-import error.SpoofError
 import error.SystemFatalError
 import pipeline.SymbolTable
 import utils.ExtensionUtils.addOrCreate
@@ -106,32 +101,4 @@ fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
 
 fun fromInt(number: Int): Vector {
     return mutableMapOf(number to FractionFactory.one())
-}
-
-fun MutableMap<Notation, Fraction>.mergeNotationMap(
-    other: MutableMap<Notation, Fraction>,
-    operation: String
-): MutableMap<Notation, Fraction> {
-    when (operation) {
-        "+", "-" -> return this.mergeWithOperation(other, operation)
-        "*" -> {
-            throw Exception("Not yet implemented")
-        }
-        "/" -> throw SystemFatalError("Divisions should be removed before interpretation")
-        else -> throw SystemFatalError("Unexpected operation")
-    }
-}
-
-fun exprToVector(expr: Expr, symbolTable: SymbolTable): MutableMap<Notation, Fraction> {
-    return when (expr) {
-        is ParenthesesExpr -> exprToVector(expr.expr, symbolTable)
-        is ArithmeticBinaryExpr -> {
-            val left = exprToVector(expr.left, symbolTable)
-            val right = exprToVector(expr.right, symbolTable)
-            mutableMapOf()
-        }
-        is NumNotation -> mutableMapOf(NumNotation(FractionFactory.create(0, 0)) to FractionFactory.create(0, 1))
-        is Notation -> mutableMapOf(expr to FractionFactory.one())
-        else -> throw SpoofError("")
-    }
 }

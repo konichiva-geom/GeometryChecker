@@ -9,11 +9,16 @@ class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr {
     override fun getChildren(): List<Expr> = map.keys.toList()
 
     override fun getRepr(): StringBuilder {
-        TODO("Not yet implemented")
+        return getArithmeticToString(map)
     }
 
     override fun mapIdents(mapper: IdentMapper): Expr {
-        TODO("Not yet implemented")
+        val res = mutableMapOf<Notation, Fraction>()
+
+        for ((notation, fraction) in map)
+            res[notation.mapIdents(mapper) as Notation] = fraction
+
+        return ArithmeticExpr(res)
     }
 
     override fun compareTo(other: Expr): Int {
@@ -21,6 +26,6 @@ class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr {
     }
 
     override fun toString(): String {
-        return getArithmeticToString(map)
+        return getArithmeticToString(map).toString()
     }
 }

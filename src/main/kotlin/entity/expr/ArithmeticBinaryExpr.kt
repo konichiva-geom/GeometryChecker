@@ -3,7 +3,8 @@ package entity.expr
 import entity.expr.notation.Notation
 import entity.expr.notation.NumNotation
 import entity.expr.notation.PointNotation
-import error.SpoofError
+import math.ArithmeticExpr
+import math.FractionFactory
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
@@ -46,20 +47,33 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     }
 
     override fun check(symbolTable: SymbolTable): Boolean {
-        return if (left::class == right::class && left is Notation && right is Notation)
-            symbolTable.getRelationsByNotation(left) == symbolTable.getRelationsByNotation(right)
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+        return if (isEntityEquals(left, right))
+            symbolTable.getRelationsByNotation(left.map.keys.first()) == symbolTable.getRelationsByNotation(right.map.keys.first())
         else false
     }
 
     override fun make(symbolTable: SymbolTable) {
-        if (left is Notation && right is Notation) {
-            if (left is PointNotation)
-                symbolTable.getPoint(left.p).mergePoints(left, right as PointNotation, symbolTable)
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+        if (isEntityEquals(left, right)) {
+            val leftNotation = left.map.keys.first()
+            if (leftNotation is PointNotation)
+                symbolTable.getPoint(leftNotation.p)
+                    .mergePoints(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
             else
-                symbolTable.getRelationsByNotation(left).merge(right, symbolTable)
-        } else throw SpoofError("Expected notations and arithmetic operations in equal relation")
+                symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
+        } else {
+
+        } //else throw SpoofError("Expected notations and arithmetic operations in equal relation")
     }
 }
+
+private fun isEntityEquals(left: ArithmeticExpr, right: ArithmeticExpr) =
+    left.map.size == 1 && right.map.size == 1
+            && left.map.values.first().contentEquals(FractionFactory.one())
+            && right.map.values.first().contentEquals(FractionFactory.one())
 
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
@@ -69,15 +83,21 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     }
 
     override fun check(symbolTable: SymbolTable): Boolean {
-        if (left is PointNotation && right is PointNotation) {
-            val leftPoint = symbolTable.getPoint(left)
-            val rightPoint = symbolTable.getPoint(right)
-            if (leftPoint == rightPoint)
-                return false
-            if (leftPoint.unknown.contains(right.p) || rightPoint.unknown.contains(left.p))
-                return false
-            return !(leftPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(rightPoint)
-                    || rightPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(leftPoint))
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+        if (isEntityEquals(left, right)) {
+            val leftNotation = left.map.keys.first()
+            val rightNotation = right.map.keys.first()
+            if (leftNotation is PointNotation && rightNotation is PointNotation) {
+                val leftPoint = symbolTable.getPoint(leftNotation)
+                val rightPoint = symbolTable.getPoint(rightNotation)
+                if (leftPoint == rightPoint)
+                    return false
+                if (leftPoint.unknown.contains(rightNotation.p) || rightPoint.unknown.contains(leftNotation.p))
+                    return false
+                return !(leftPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(rightPoint)
+                        || rightPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(leftPoint))
+            }
         }
         TODO("Not yet implemented")
     }
