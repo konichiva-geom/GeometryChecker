@@ -36,9 +36,9 @@ object MathUtils {
         return calcGCD(max(abs(first), abs(second)), min(abs(first), abs(second)))
     }
 
-    private tailrec fun calcGCD(first: Int, second: Int): Int {
+    private fun calcGCD(first: Int, second: Int): Int {
         if (second == 0)
             return first
-        return calcGCD(second, second % first)
+        return calcGCD(second, first % second)
     }
 }

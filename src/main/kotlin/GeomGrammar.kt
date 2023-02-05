@@ -17,6 +17,7 @@ import math.Fraction
 import math.FractionFactory
 import pipeline.ArithmeticExpander.createArithmeticMap
 import pipeline.ArithmeticExpander.mergeMapToDivNotation
+import pipeline.ArithmeticExpander.simplifyTwoMaps
 import pipeline.inference.DoubleSidedInference
 import pipeline.inference.Inference
 import pipeline.interpreter.Signature
@@ -130,17 +131,22 @@ object GeomGrammar : Grammar<Any>() {
 
     private val divMulChain: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
         arithmeticTerm, div or mul
-    ) { a, op, b -> createArithmeticMap(a, b, op.text) }
+    ) { a, op, b ->
+        createArithmeticMap(a, b, op.text) }
 
     private val arithmeticExpression: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
         divMulChain, plus or minus
-    ) { a, op, b -> createArithmeticMap(a, b, op.text) }
+    ) { a, op, b ->
+        createArithmeticMap(a, b, op.text) }
 
     private val comparison by arithmeticExpression and compToken and arithmeticExpression map {
         val divLeft = mergeMapToDivNotation(it.t1)
         val divRight = mergeMapToDivNotation(it.t3)
-        val left = ArithmeticExpr(createArithmeticMap(divLeft.numerator, divRight.denominator, "*"))
-        val right = ArithmeticExpr(createArithmeticMap(divRight.numerator, divLeft.denominator, "*"))
+        val leftMap = createArithmeticMap(divLeft.numerator, divRight.denominator, "*")
+        val rightMap = createArithmeticMap(divRight.numerator, divLeft.denominator, "*")
+        simplifyTwoMaps(leftMap, rightMap)
+        val left = ArithmeticExpr(leftMap)
+        val right = ArithmeticExpr(rightMap)
         when (it.t2.text) {
             "==" -> BinaryEquals(left, right)
             "!=" -> BinaryNotEquals(left, right)

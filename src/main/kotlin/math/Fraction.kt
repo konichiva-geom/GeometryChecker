@@ -1,5 +1,6 @@
 package math
 
+import utils.MathUtils.getGCD
 import utils.MathUtils.getLCM
 
 /**
@@ -14,6 +15,14 @@ private fun toCommonDenominator(first: Fraction, second: Fraction): Triple<Int, 
     val secondTerm = lcm / second[1] * second[0]
     return Triple(firstTerm, secondTerm, lcm)
 }
+
+fun Fraction.reduce() {
+    val gcd = getGCD(this[0], this[1])
+    this[0] /= gcd
+    this[1] /= gcd
+}
+
+fun Fraction.isZero() = this[0] == 0
 
 operator fun Fraction.plus(other: Fraction): Fraction {
     val (first, second, lcm) = toCommonDenominator(this, other)
