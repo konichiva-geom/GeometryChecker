@@ -4,8 +4,7 @@ import entity.expr.notation.*
 import entity.point_collection.*
 import entity.relation.*
 import error.SpoofError
-import math.Vector
-import math.VectorContainer
+import math.*
 import utils.Utils.sortAngle
 
 open class SymbolTable {
@@ -245,6 +244,13 @@ open class SymbolTable {
                     notation.getLetters().toMutableSet()
                 )
             )
+            is MulNotation -> {
+                return notation.elements.map {
+                    getOrCreateVector(it)
+                }.fold(mutableMapOf(1 to FractionFactory.one())) { acc, i ->
+                    acc.mergeWith(i, "*")
+                }
+            }
             else -> throw SpoofError(
                 "Unexpected notation %{notation} in arithmetic expression",
                 "notation" to notation

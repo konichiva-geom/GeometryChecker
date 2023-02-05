@@ -41,10 +41,11 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
     return map
 }
 
-fun Vector.multiplyBy(coeff: Fraction) {
+fun Vector.multiplyBy(coeff: Fraction): Vector {
     for ((key, number) in this) {
         this[key] = number * coeff
     }
+    return this
 }
 
 fun <T> MutableMap<T, Fraction>.mergeWithOperation(
@@ -90,6 +91,12 @@ fun Vector.compare(other: Vector): Int {
         if (value)
             return key
     return 0
+}
+
+fun vectorFromArithmeticMap(map: MutableMap<Notation, Fraction>, symbolTable: SymbolTable): Vector {
+    return map.keys.fold(
+        mutableMapOf()
+    ) { acc, notation -> acc.mergeWithOperation(fromNotation(symbolTable, notation).multiplyBy(map[notation]!!), "+") }
 }
 
 /**
