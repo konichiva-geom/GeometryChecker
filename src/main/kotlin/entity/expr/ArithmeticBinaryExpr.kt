@@ -5,6 +5,8 @@ import entity.expr.notation.NumNotation
 import entity.expr.notation.PointNotation
 import math.ArithmeticExpr
 import math.FractionFactory
+import math.mergeWithOperation
+import math.vectorFromArithmeticMap
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
@@ -51,7 +53,12 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         right as ArithmeticExpr
         return if (isEntityEquals(left, right))
             symbolTable.getRelationsByNotation(left.map.keys.first()) == symbolTable.getRelationsByNotation(right.map.keys.first())
-        else false
+        else  {
+            val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
+            val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
+            val isZeroVector = resolveLeft.mergeWithOperation(resolveRight, "-")
+            return isZeroVector.isEmpty()
+        }
     }
 
     override fun make(symbolTable: SymbolTable) {
@@ -65,7 +72,10 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             else
                 symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
         } else {
+            val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
+            val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
 
+            symbolTable.segmentVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
         } //else throw SpoofError("Expected notations and arithmetic operations in equal relation")
     }
 }

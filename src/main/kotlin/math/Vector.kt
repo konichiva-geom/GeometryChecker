@@ -20,14 +20,14 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
                 || other.size == 1 && other.keys.contains(setOf(0))
             ) {
                 val (numeric, vector) = numericFirst(other)
-                vector.keys.associateWith { vector[it]!! * numeric }.toMutableMap()
+                vector.keys.associateWith { vector[it]!!.multiply(numeric) }.toMutableMap()
             } else {
                 val res = mutableMapOf<Set<Int>, Fraction>()
                 this.forEach { (thisKey, thisElement) ->
                     other.forEach { (otherKey, otherElement) ->
                         res.addOrCreate(
                             setOf(*thisKey.toTypedArray(), *otherKey.toTypedArray()),
-                            thisElement * otherElement
+                            thisElement.multiply(otherElement)
                         )
                     }
                 }
@@ -51,7 +51,7 @@ fun Vector.copy(): Vector {
 
 fun Vector.multiplyBy(coeff: Fraction): Vector {
     for ((key, number) in this) {
-        this[key] = number * coeff
+        this[key] = number.multiply(coeff)
     }
     return this
 }
@@ -67,6 +67,7 @@ fun <T> MutableMap<T, Fraction>.mergeWithOperation(
                 other[it] ?: FractionFactory.zero()
             )
         }
+        .filter { !it.value.isZero() } // TODO: should really delete zero values?
         .toMutableMap()
 }
 
@@ -126,4 +127,8 @@ fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
 
 fun fromInt(number: Int): Vector {
     return mutableMapOf(setOf(number) to FractionFactory.one())
+}
+
+fun Vector.asString(): String {
+    return this.entries.joinToString(separator = ", ") { "${it.key.reduce { acc, i -> acc * i }}:${it.value.asString()}" }
 }

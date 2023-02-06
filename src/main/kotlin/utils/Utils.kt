@@ -12,10 +12,10 @@ object Utils {
     const val THEOREMS_PATH = "examples/theorems.txt"
     val keyForArithmeticNumeric = NumNotation(FractionFactory.zero())
 
-    private val lambdas = mutableListOf({ a: Fraction, b: Fraction -> a + b },
-        { a: Fraction, b: Fraction -> a - b },
-        { a: Fraction, b: Fraction -> a * b },
-        { a: Fraction, b: Fraction -> a / b })
+    private val lambdas = mutableListOf({ a: Fraction, b: Fraction -> a.add(b) },
+        { a: Fraction, b: Fraction -> a.subtract(b) },
+        { a: Fraction, b: Fraction -> a.multiply(b) },
+        { a: Fraction, b: Fraction -> a.divide(b) })
 
     val signToLambda = mutableMapOf(
         "+" to lambdas[0],

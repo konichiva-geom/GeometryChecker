@@ -6,6 +6,7 @@ import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import math.Fraction
 import math.FractionFactory
+import math.add
 
 object ExtensionUtils {
     fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key: R, vararg elements: T) {
@@ -22,7 +23,7 @@ object ExtensionUtils {
         if (this[key] == null)
             this[key] = element
         else
-            this[key] = this[key]!! + element
+            this[key] = this[key]!!.add(element)
         return this
     }
 

@@ -1,5 +1,6 @@
 import TestFactory.failDescription
 import TestFactory.parseFirst
+import TestFactory.passTask
 import entity.expr.BinaryExpr
 import math.*
 import pipeline.SymbolTable
@@ -69,12 +70,42 @@ internal class ArithmeticTest {
 
     @Test
     fun testResolveVector() {
-        val table = SymbolTable()
-        val resolvableExpr = parseFirst("ABC == 90 + 2DCB")
-        val resolveLeft =
-            vectorFromArithmeticMap(((resolvableExpr as BinaryExpr).left as ArithmeticExpr).map, table)
-        val resolveRight = vectorFromArithmeticMap(((resolvableExpr).right as ArithmeticExpr).map, table)
+//        val table = SymbolTable()
+//        val resolvableExpr = parseFirst("ABC == 90 + 2DCB")
+//        val resolveLeft =
+//            vectorFromArithmeticMap(((resolvableExpr as BinaryExpr).left as ArithmeticExpr).map, table)
+//        val resolveRight = vectorFromArithmeticMap(((resolvableExpr).right as ArithmeticExpr).map, table)
+//
+//        table.angleVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
 
-        table.angleVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
+
+    }
+
+    @Test
+    fun testArithmeticEquals() {
+        passTask("""
+            description:
+                new A; new B; new C; new D
+                ABC == 90 + 2DCB
+            prove:
+                BCD == ABC/2 - 45
+            solution:;
+        """)
+    }
+
+    @Test
+    fun testInferenceInVectors() {
+        passTask("""
+             description:
+                new A; new B; new C
+                AB == 2AC + BC - 6 
+                AC == 7AB - 3
+                BC + AC == AB + AC + 5
+            prove:
+                AB == 1/2
+                BC == 11/2
+                AC == 1/2
+            solution:;
+        """)
     }
 }

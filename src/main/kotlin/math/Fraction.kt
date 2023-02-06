@@ -29,28 +29,30 @@ fun Fraction.unaryMinus(): Fraction {
 
 fun Fraction.isZero() = this[0] == 0
 
-operator fun Fraction.plus(other: Fraction): Fraction {
+fun Fraction.add(other: Fraction): Fraction {
     val (first, second, lcm) = toCommonDenominator(this, other)
     return FractionFactory.create(first + second, lcm)
 }
 
-operator fun Fraction.minus(other: Fraction): Fraction {
+fun Fraction.subtract(other: Fraction): Fraction {
     val (first, second, lcm) = toCommonDenominator(this, other)
     return FractionFactory.create(first - second, lcm)
 }
 
-operator fun Fraction.times(other: Fraction) = FractionFactory.create(this[0] * other[0], this[1] * other[1])
+fun Fraction.multiply(other: Fraction) = FractionFactory.create(this[0] * other[0], this[1] * other[1])
 
-operator fun Fraction.div(other: Fraction) = FractionFactory.create(this[0] * other[1], this[1] * other[0])
+fun Fraction.divide(other: Fraction) = FractionFactory.create(this[0] * other[1], this[1] * other[0])
 
-fun Fraction.inPlaceDiv(other: Fraction) {
+fun Fraction.inPlaceDiv(other: Fraction): Fraction {
     this[0] *= other[1]
     this[1] *= other[0]
+    return this
 }
 
-fun Fraction.inPlaceMul(other: Fraction) {
+fun Fraction.inPlaceMul(other: Fraction): Fraction {
     this[0] *= other[0]
     this[1] *= other[1]
+    return this
 }
 
 fun Fraction.compareTo(other: Fraction): Int {

@@ -22,7 +22,7 @@ object ArithmeticExpander {
                 for ((key, value) in left) {
                     for ((key2, value2) in right) {
                         val (max, min) = MathUtils.maxToMin(Notation::getOrder, key, key2)
-                        res[mulBy(max, min)] = value * value2
+                        res[mulBy(max, min)] = value.multiply(value2)
                     }
                 }
                 return res
@@ -99,12 +99,12 @@ object ArithmeticExpander {
                     numerator = createArithmeticMap(numerator, notationFlattened.denominator, "*")
                         .mergeWithOperation(
                             notationFlattened.numerator.keys
-                                .associateWith { notationFlattened.numerator[it]!! * fraction }.toMutableMap(), "+"
+                                .associateWith { notationFlattened.numerator[it]!!.multiply(fraction) }.toMutableMap(), "+"
                         )
                 } else {
                     val first = createArithmeticMap(numerator, notationFlattened.denominator, "*")
                     val second = createArithmeticMap(
-                        notationFlattened.numerator.keys.associateWith { notationFlattened.numerator[it]!! * fraction }
+                        notationFlattened.numerator.keys.associateWith { notationFlattened.numerator[it]!!.multiply(fraction) }
                             .toMutableMap(),
                         denominator,
                         "*"
@@ -113,7 +113,12 @@ object ArithmeticExpander {
                     denominator = createArithmeticMap(notationFlattened.denominator, denominator, "*")
                 }
             } else {
-                numerator.addOrCreate(notation, fraction)
+                if(denominator.isEmpty())
+                    numerator.addOrCreate(notation, fraction)
+                else {
+                    val added = createArithmeticMap(mutableMapOf(notation to fraction), denominator, "*")
+                    numerator = numerator.mergeWithOperation(added, "+")
+                }
             }
         }
         removeZeros(numerator)

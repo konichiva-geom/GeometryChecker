@@ -17,7 +17,7 @@ class VectorContainer<T> {
 
     fun getOrCreate(key: T): Vector {
         if (vectors[key] != null)
-            return vectors[key]!!
+            return vectors[key]!!.copy()
         val res = fromInt(getNext())
         vectors[key] = res
         return mutableMapOf(res.keys.first() to res.values.first().copyOf())
@@ -40,8 +40,9 @@ class VectorContainer<T> {
             incompleteVectors.add(v)
         else {
             val nullified = singleKeys.first()
-            v.remove(setOf(nullified))
-            v.forEach { (_, u) -> u.unaryMinus() }
+            val divCoeff = v[setOf(nullified)]!!
+            v.remove(setOf(nullified)) // TODO: divide all other vector values by nullified value here
+            v.forEach { (_, u) -> u.unaryMinus().inPlaceDiv(divCoeff) }
             simplifyVectorCollection(nullified, v)
         }
     }
@@ -67,5 +68,9 @@ class VectorContainer<T> {
             }
             removeLast()
         }
+    }
+
+    override fun toString(): String {
+        return vectors.entries.joinToString { it.key.toString() + "->" + it.value.asString() }
     }
 }
