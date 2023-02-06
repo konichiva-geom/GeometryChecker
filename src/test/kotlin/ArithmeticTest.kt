@@ -14,7 +14,7 @@ internal class ArithmeticTest {
 
         assertEquals(
             arithmeticExpr3.toString(),
-            "7ABC*AG+14ABC == 6AG*FV+9ABC*AG+6ABC*FV+3ABC*FV*AG+18ABC+18AG+12FV+39"
+            "7AGB*ABC+14ABC == 6AGB*BFV+9AGB*ABC+6BFV*ABC+3BFV*ABC*AGB+18AGB+12BFV+18ABC+39"
         )
 
         val threeLevelFraction = parseFirst("ABC == 2+2/(2+2/(2+ABE))")

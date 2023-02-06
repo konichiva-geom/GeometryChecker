@@ -1,8 +1,7 @@
 package entity.expr
 
-import entity.expr.notation.Notation
-import entity.expr.notation.NumNotation
-import entity.expr.notation.PointNotation
+import entity.expr.notation.*
+import error.SpoofError
 import math.ArithmeticExpr
 import math.FractionFactory
 import math.mergeWithOperation
@@ -53,7 +52,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         right as ArithmeticExpr
         return if (isEntityEquals(left, right))
             symbolTable.getRelationsByNotation(left.map.keys.first()) == symbolTable.getRelationsByNotation(right.map.keys.first())
-        else  {
+        else {
             val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
             val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
             val isZeroVector = resolveLeft.mergeWithOperation(resolveRight, "-")
@@ -74,9 +73,17 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         } else {
             val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
             val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
-
-            symbolTable.segmentVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
-        } //else throw SpoofError("Expected notations and arithmetic operations in equal relation")
+            val notation = left.map.mergeWithOperation(right.map, "-")
+                .keys.firstOrNull { it !is NumNotation }
+                ?: throw SpoofError("Meaningless arithmetic expression. All non-constant values are zero")
+            when (notation) {
+                is SegmentNotation -> symbolTable
+                    .segmentVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
+                is Point3Notation -> symbolTable
+                    .angleVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
+                else -> throw SpoofError("This notation is not supported in rithmetic expressions, use segments and angles")
+            }
+        }
     }
 }
 
