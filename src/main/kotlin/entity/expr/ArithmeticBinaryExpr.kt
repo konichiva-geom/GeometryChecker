@@ -2,6 +2,7 @@ package entity.expr
 
 import entity.expr.notation.*
 import error.SpoofError
+import external.Logger
 import math.ArithmeticExpr
 import math.FractionFactory
 import math.mergeWithOperation
@@ -76,12 +77,25 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             val notation = left.map.mergeWithOperation(right.map, "-")
                 .keys.firstOrNull { it !is NumNotation }
                 ?: throw SpoofError("Meaningless arithmetic expression. All non-constant values are zero")
+            var sideEqual = true
+            for ((k, v) in resolveLeft) {
+                if (resolveRight[k].contentEquals(v))
+                    continue
+                else {
+                    sideEqual = false;
+                    break
+                }
+            }
+            if (sideEqual) {
+                Logger.warn("Expression %{expr} is already known", "expr" to this)
+                return
+            }
             when (notation) {
                 is SegmentNotation -> symbolTable
                     .segmentVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
                 is Point3Notation -> symbolTable
                     .angleVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
-                else -> throw SpoofError("This notation is not supported in rithmetic expressions, use segments and angles")
+                else -> throw SpoofError("This notation is not supported in arithmetic expressions, use segments and angles")
             }
         }
     }

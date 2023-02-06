@@ -108,4 +108,18 @@ internal class ArithmeticTest {
             solution:;
         """)
     }
+
+    @Test
+    fun testTrivial() {
+        passTask("""
+            description:
+                new A; new B; new C; new D
+                ABC == BCD + 90
+                ABC == BCD + 90
+                ABC == BCD + 90
+            prove:
+                ABC == BCD + 90
+            solution:;
+        """.trimIndent())
+    }
 }
