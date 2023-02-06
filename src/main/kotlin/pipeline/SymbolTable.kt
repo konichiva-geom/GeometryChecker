@@ -16,8 +16,8 @@ open class SymbolTable {
     val circles = mutableMapOf<IdentNotation, CircleRelations>()
     val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
 
-    private val segmentVectors = VectorContainer<SegmentPointCollection>()
-    private val angleVectors = VectorContainer<Point3Notation>()
+    val segmentVectors = VectorContainer<SegmentPointCollection>()
+    val angleVectors = VectorContainer<Point3Notation>()
     private val arcToAngleMap = mutableMapOf<ArcPointCollection, Point3Notation>()
 
     val equalIdentRenamer = EqualIdentRenamer()
@@ -231,7 +231,7 @@ open class SymbolTable {
 
     fun getOrCreateVector(notation: Notation): Vector {
         when (notation) {
-            is NumNotation -> return mutableMapOf(0 to notation.number)
+            is NumNotation -> return mutableMapOf(setOf(0) to if (notation.number.isZero()) FractionFactory.one() else notation.number)
             is ArcNotation -> {
                 val angle = arcToAngleMap[ArcPointCollection(
                     notation.getLetters().toMutableSet(), circle = notation.circle
@@ -247,7 +247,7 @@ open class SymbolTable {
             is MulNotation -> {
                 return notation.elements.map {
                     getOrCreateVector(it)
-                }.fold(mutableMapOf(1 to FractionFactory.one())) { acc, i ->
+                }.fold(mutableMapOf(setOf<Int>() to FractionFactory.one())) { acc, i ->
                     acc.mergeWith(i, "*")
                 }
             }

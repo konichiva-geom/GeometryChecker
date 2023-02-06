@@ -6,7 +6,7 @@ import pipeline.SymbolTable
 import utils.ExtensionUtils.addOrCreate
 import utils.Utils.signToLambda
 
-typealias Vector = MutableMap<Int, Fraction>
+typealias Vector = MutableMap<Set<Int>, Fraction>
 
 /**
  * Merge current vectors by addition, subtraction or multiplication
@@ -16,17 +16,17 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
         "+", "-" -> mergeWithOperation(other, operation)
         "*" -> {
             // something is a constant numeric value
-            if (this.size == 1 && this.keys.contains(0)
-                || other.size == 1 && other.keys.contains(0)
+            if (this.size == 1 && this.keys.contains(setOf(0))
+                || other.size == 1 && other.keys.contains(setOf(0))
             ) {
                 val (numeric, vector) = numericFirst(other)
                 vector.keys.associateWith { vector[it]!! * numeric }.toMutableMap()
             } else {
-                val res = mutableMapOf<Int, Fraction>()
+                val res = mutableMapOf<Set<Int>, Fraction>()
                 this.forEach { (thisKey, thisElement) ->
                     other.forEach { (otherKey, otherElement) ->
                         res.addOrCreate(
-                            thisKey * otherKey,
+                            setOf(*thisKey.toTypedArray(), *otherKey.toTypedArray()),
                             thisElement * otherElement
                         )
                     }
@@ -39,6 +39,14 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
         else -> throw SystemFatalError("Unknown operation `$operation`")
     }
     return map
+}
+
+fun Vector.copy(): Vector {
+    val res = mutableMapOf<Set<Int>, Fraction>()
+    for ((k, v) in this) {
+        res[k] = v.copyOf()
+    }
+    return res
 }
 
 fun Vector.multiplyBy(coeff: Fraction): Vector {
@@ -63,9 +71,9 @@ fun <T> MutableMap<T, Fraction>.mergeWithOperation(
 }
 
 private fun Vector.numericFirst(other: Vector): Pair<Fraction, Vector> {
-    return if (this.size == 1 && this.keys.contains(0))
-        this[0]!! to other
-    else other[0]!! to this
+    return if (this.size == 1 && this.keys.contains(setOf(0)))
+        this[setOf(0)]!! to other
+    else other[setOf(0)]!! to this
 }
 
 /**
@@ -99,6 +107,16 @@ fun vectorFromArithmeticMap(map: MutableMap<Notation, Fraction>, symbolTable: Sy
     ) { acc, notation -> acc.mergeWithOperation(fromNotation(symbolTable, notation).multiplyBy(map[notation]!!), "+") }
 }
 
+
+@Deprecated("Use VectorContainer.resolveVector")
+fun Vector.getNullifiedAndSubstitution(): Pair<Int, Vector> {
+    val max = this.keys.map { it.first() }.max()
+    val res = this.toMutableMap()
+    res.remove(setOf(max))
+    res.forEach { (_, u) -> u.unaryMinus() }
+    return max to res
+}
+
 /**
  * Create vector and add it to the symbol table
  */
@@ -107,5 +125,5 @@ fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
 }
 
 fun fromInt(number: Int): Vector {
-    return mutableMapOf(number to FractionFactory.one())
+    return mutableMapOf(setOf(number) to FractionFactory.one())
 }

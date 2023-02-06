@@ -5,10 +5,11 @@ import utils.PrimeGetter.primes
 
 class VectorContainer<T> {
     val vectors = mutableMapOf<T, Vector>()
+    val incompleteVectors = mutableSetOf<Vector>()
     private var currentIndex = 0
 
     fun getNext() = primes[currentIndex++]
-    fun getCurrent() = primes[currentIndex]
+    fun getCurrent() = primes[currentIndex - 1]
 
     fun removeLast() {
         currentIndex--
@@ -19,7 +20,30 @@ class VectorContainer<T> {
             return vectors[key]!!
         val res = fromInt(getNext())
         vectors[key] = res
-        return res
+        return mutableMapOf(res.keys.first() to res.values.first().copyOf())
+    }
+
+    fun resolveVector(v: Vector) {
+        val primeKeys = mutableSetOf<Int>()
+        val multipliedKeys = mutableSetOf<Int>()
+        for (key in v.keys) {
+            if (key.size == 1)
+                primeKeys.add(key.first())
+            else
+                multipliedKeys.addAll(key)
+        }
+        primeKeys.remove(0)
+
+        val singleKeys = primeKeys - multipliedKeys
+
+        if (singleKeys.isEmpty())
+            incompleteVectors.add(v)
+        else {
+            val nullified = singleKeys.first()
+            v.remove(setOf(nullified))
+            v.forEach { (_, u) -> u.unaryMinus() }
+            simplifyVectorCollection(nullified, v)
+        }
     }
 
     /**
@@ -27,19 +51,19 @@ class VectorContainer<T> {
      */
     fun simplifyVectorCollection(nullified: Int, substitution: Vector) {
         for (vector in vectors.values) {
-            val coeff = vector[nullified] ?: continue
-            vector.remove(nullified)
-            substitution.multiplyBy(coeff)
-            for ((key, element) in substitution) {
+            val coeff = vector[setOf(nullified)] ?: continue
+            vector.remove(setOf(nullified))
+            val multiplied = substitution.copy().multiplyBy(coeff)
+            for ((key, element) in multiplied) {
                 vector.addOrCreate(key, element)
             }
         }
         // if nullified is not maxCurrentIndex, swap it with maxCurrentIndex
         if (nullified != getCurrent()) {
             for (vector in vectors.values) {
-                if (vector[getCurrent()] != null)
-                    vector[nullified] = vector[getCurrent()]!!
-                vector.remove(getCurrent())
+                if (vector[setOf(getCurrent())] != null)
+                    vector[setOf(nullified)] = vector[setOf(getCurrent())]!!
+                vector.remove(setOf(getCurrent()))
             }
             removeLast()
         }

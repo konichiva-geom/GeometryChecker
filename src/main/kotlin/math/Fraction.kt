@@ -22,6 +22,11 @@ fun Fraction.reduce() {
     this[1] /= gcd
 }
 
+fun Fraction.unaryMinus(): Fraction {
+    this[0] = -this[0]
+    return this
+}
+
 fun Fraction.isZero() = this[0] == 0
 
 operator fun Fraction.plus(other: Fraction): Fraction {

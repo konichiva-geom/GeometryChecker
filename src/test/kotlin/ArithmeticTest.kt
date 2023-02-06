@@ -1,14 +1,10 @@
 import TestFactory.failDescription
 import TestFactory.parseFirst
 import entity.expr.BinaryExpr
-import math.ArithmeticExpr
-import math.FractionFactory
-import math.mergeWithOperation
-import math.vectorFromArithmeticMap
+import math.*
 import pipeline.SymbolTable
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 internal class ArithmeticTest {
     @Test
@@ -56,13 +52,29 @@ internal class ArithmeticTest {
         val right = vectorFromArithmeticMap(((withMultiplication).right as ArithmeticExpr).map, table)
 
         val expected = mutableMapOf(
-            2 to FractionFactory.fromInt(-2),
-            3 to FractionFactory.fromInt(-3),
-            6 to FractionFactory.fromInt(2)
+            setOf(2) to FractionFactory.fromInt(-2),
+            setOf(3) to FractionFactory.fromInt(-3),
+            setOf(2, 3) to FractionFactory.fromInt(2)
         )
 
         left.mergeWithOperation(right, "-").forEach {
             assert(expected[it.key].contentEquals(it.value))
         }
+
+        val (nullified, substitution) = left.mergeWithOperation(right, "-").getNullifiedAndSubstitution()
+        table.segmentVectors.simplifyVectorCollection(nullified, substitution)
+
+
+    }
+
+    @Test
+    fun testResolveVector() {
+        val table = SymbolTable()
+        val resolvableExpr = parseFirst("ABC == 90 + 2DCB")
+        val resolveLeft =
+            vectorFromArithmeticMap(((resolvableExpr as BinaryExpr).left as ArithmeticExpr).map, table)
+        val resolveRight = vectorFromArithmeticMap(((resolvableExpr).right as ArithmeticExpr).map, table)
+
+        table.angleVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
     }
 }
