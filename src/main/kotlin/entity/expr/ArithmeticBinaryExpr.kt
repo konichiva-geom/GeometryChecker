@@ -40,6 +40,40 @@ class ParenthesesExpr(val expr: Expr) : Expr {
     override fun toString(): String = "($expr)"
 }
 
+class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
+    override fun getRepr() = getReprForBinaryWithExpressions(left, right, " === ")
+    override fun mapIdents(mapper: IdentMapper) = BinaryEquals(left.mapIdents(mapper), right.mapIdents(mapper))
+
+    override fun toString(): String {
+        return "$left == $right"
+    }
+
+    override fun check(symbolTable: SymbolTable): Boolean {
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+        if (!isEntityEquals(left, right))
+            throw SpoofError("=== operator can only be used for two notations, not arithmetic expressions")
+        val leftNotation = left.map.keys.first()
+        if (leftNotation !is Point3Notation && leftNotation !is SegmentNotation)
+            Logger.warn("Use === only for angles and segments, for other relations use ==")
+        return symbolTable.getRelationsByNotation(leftNotation) ==
+                symbolTable.getRelationsByNotation(right.map.keys.first())
+    }
+
+    override fun make(symbolTable: SymbolTable) {
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+        if (!isEntityEquals(left, right))
+            throw SpoofError("=== operator can only be used for two notations, not arithmetic expressions")
+        val leftNotation = left.map.keys.first()
+        if (leftNotation is PointNotation)
+            symbolTable.getPoint(leftNotation.p)
+                .mergePoints(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
+        else
+            symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
+    }
+}
+
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " == ")
     override fun mapIdents(mapper: IdentMapper) = BinaryEquals(left.mapIdents(mapper), right.mapIdents(mapper))
@@ -51,8 +85,12 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun check(symbolTable: SymbolTable): Boolean {
         left as ArithmeticExpr
         right as ArithmeticExpr
-        return if (isEntityEquals(left, right))
-            symbolTable.getRelationsByNotation(left.map.keys.first()) == symbolTable.getRelationsByNotation(right.map.keys.first())
+        return if (isEntityEquals(left, right)
+            && left.map.keys.first() !is Point3Notation
+            && left.map.keys.first() !is SegmentNotation
+        )
+            symbolTable.getRelationsByNotation(left.map.keys.first()) ==
+                    symbolTable.getRelationsByNotation(right.map.keys.first())
         else {
             val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
             val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
@@ -64,7 +102,10 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun make(symbolTable: SymbolTable) {
         left as ArithmeticExpr
         right as ArithmeticExpr
-        if (isEntityEquals(left, right)) {
+        if (isEntityEquals(left, right)
+            && left.map.keys.first() !is Point3Notation
+            && left.map.keys.first() !is SegmentNotation
+        ) {
             val leftNotation = left.map.keys.first()
             if (leftNotation is PointNotation)
                 symbolTable.getPoint(leftNotation.p)

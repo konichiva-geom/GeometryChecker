@@ -68,12 +68,13 @@ object GeomGrammar : Grammar<Any>() {
     //region comparison tokens
     private val iffToken by literalToken("<=>")
     private val eqToken by literalToken("==")
+    private val sameToken by literalToken("===")
     private val neqToken by literalToken("!=")
     private val geq by literalToken(">=")
     private val leq by literalToken("<=")
     private val gt by literalToken(">")
     private val lt by literalToken("<")
-    private val compToken by geq or leq or gt or lt or eqToken or neqToken
+    private val compToken by geq or leq or gt or lt or sameToken or eqToken or neqToken
     // endregion
 
     private val mul by literalToken("*")
@@ -132,12 +133,14 @@ object GeomGrammar : Grammar<Any>() {
     private val divMulChain: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
         arithmeticTerm, div or mul
     ) { a, op, b ->
-        createArithmeticMap(a, b, op.text) }
+        createArithmeticMap(a, b, op.text)
+    }
 
     private val arithmeticExpression: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
         divMulChain, plus or minus
     ) { a, op, b ->
-        createArithmeticMap(a, b, op.text) }
+        createArithmeticMap(a, b, op.text)
+    }
 
     private val comparison by arithmeticExpression and compToken and arithmeticExpression map {
         val divLeft = mergeMapToDivNotation(it.t1)
@@ -148,6 +151,7 @@ object GeomGrammar : Grammar<Any>() {
         val left = ArithmeticExpr(leftMap)
         val right = ArithmeticExpr(rightMap)
         when (it.t2.text) {
+            "===" -> BinarySame(left,right)
             "==" -> BinaryEquals(left, right)
             "!=" -> BinaryNotEquals(left, right)
             ">" -> BinaryGreater(left, right)
