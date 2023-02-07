@@ -4,6 +4,7 @@ import TestFactory.passTask
 import entity.expr.BinaryExpr
 import math.*
 import pipeline.SymbolTable
+import kotlin.math.pow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -83,19 +84,22 @@ internal class ArithmeticTest {
 
     @Test
     fun testArithmeticEquals() {
-        passTask("""
+        passTask(
+            """
             description:
                 new A; new B; new C; new D
                 ABC == 90 + 2DCB
             prove:
                 BCD == ABC/2 - 45
             solution:;
-        """)
+        """
+        )
     }
 
     @Test
     fun testInferenceInVectors() {
-        passTask("""
+        passTask(
+            """
              description:
                 new A; new B; new C
                 AB == 2AC + BC - 6 
@@ -106,12 +110,14 @@ internal class ArithmeticTest {
                 BC == 11/2
                 AC == 1/2
             solution:;
-        """)
+        """
+        )
     }
 
     @Test
     fun testTrivial() {
-        passTask("""
+        passTask(
+            """
             description:
                 new A; new B; new C; new D
                 ABC == BCD + 90
@@ -120,6 +126,7 @@ internal class ArithmeticTest {
             prove:
                 ABC == BCD + 90
             solution:;
-        """.trimIndent())
+        """
+        )
     }
 }
