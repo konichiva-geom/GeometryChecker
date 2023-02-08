@@ -2,6 +2,7 @@ package pipeline.inference
 
 import entity.expr.AnyExpr
 import entity.expr.Expr
+import entity.relation.Relation
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
@@ -35,6 +36,9 @@ open class Inference(
         mapper.traverseExpr(newlyAddedExpr, foundExpr)
 
         mapper.forceUniqueMappings()
+        for (expr in toSideExpressions) {
+            Relation.makeRelation(expr as Relation, symbolTable)
+        }
         mapper.clear()
     }
 }
@@ -53,9 +57,16 @@ class DoubleSidedInference(
     override fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: IdentMapper) {
         val searchedRepr = newlyAddedExpr.getRepr().toString()
         toSideExpressions.filter { it.getRepr().toString() == searchedRepr }.forEach {
+            mapper.createLinks(newlyAddedExpr, it)
+        }
+
+        toSideExpressions.filter { it.getRepr().toString() == searchedRepr }.forEach {
             mapper.traverseExpr(newlyAddedExpr, it)
         }
         mapper.forceUniqueMappings()
+        for (expr in toSideExpressions) {
+            Relation.makeRelation(expr as Relation, symbolTable)
+        }
         mapper.clear()
     }
 
@@ -68,9 +79,16 @@ class DoubleSidedInference(
         val searchedRepr = newlyAddedExpr.getRepr().toString()
         (if (isToSide) toSideExpressions else fromSideExpressions).filter { it.getRepr().toString() == searchedRepr }
             .forEach {
+                mapper.createLinks(newlyAddedExpr, it)
+            }
+        (if (isToSide) toSideExpressions else fromSideExpressions).filter { it.getRepr().toString() == searchedRepr }
+            .forEach {
                 mapper.traverseExpr(newlyAddedExpr, it)
             }
         mapper.forceUniqueMappings()
+        for (expr in toSideExpressions) {
+            Relation.makeRelation(expr as Relation, symbolTable)
+        }
         mapper.clear()
     }
 }

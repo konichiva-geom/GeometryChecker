@@ -4,7 +4,7 @@ import TestFactory.passTask
 import entity.expr.BinaryExpr
 import math.*
 import pipeline.SymbolTable
-import kotlin.math.pow
+import pipeline.inference.InferenceProcessor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -48,7 +48,7 @@ internal class ArithmeticTest {
     @Test
     fun testVectorCreation() {
         val withMultiplication = parseFirst(" 2 AB * CD == 3AB + 2CD")
-        val table = SymbolTable()
+        val table = SymbolTable(InferenceProcessor())
 
         val left = vectorFromArithmeticMap(((withMultiplication as BinaryExpr).left as ArithmeticExpr).map, table)
         val right = vectorFromArithmeticMap(((withMultiplication).right as ArithmeticExpr).map, table)
@@ -62,24 +62,6 @@ internal class ArithmeticTest {
         left.mergeWithOperation(right, "-").forEach {
             assert(expected[it.key].contentEquals(it.value))
         }
-
-        val (nullified, substitution) = left.mergeWithOperation(right, "-").getNullifiedAndSubstitution()
-        table.segmentVectors.simplifyVectorCollection(nullified, substitution)
-
-
-    }
-
-    @Test
-    fun testResolveVector() {
-//        val table = SymbolTable()
-//        val resolvableExpr = parseFirst("ABC == 90 + 2DCB")
-//        val resolveLeft =
-//            vectorFromArithmeticMap(((resolvableExpr as BinaryExpr).left as ArithmeticExpr).map, table)
-//        val resolveRight = vectorFromArithmeticMap(((resolvableExpr).right as ArithmeticExpr).map, table)
-//
-//        table.angleVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
-
-
     }
 
     @Test

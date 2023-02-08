@@ -50,9 +50,8 @@ class IdentMapper {
     }
 
     private fun removeFromLinks(key: String, removed: String) {
-        for (linked in links[key]!!) {
+        for (linked in links[key] ?: return)
             mappings[linked]?.remove(removed)
-        }
     }
 
     fun addLink(first: String, second: String) {

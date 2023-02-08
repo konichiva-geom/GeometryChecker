@@ -21,7 +21,9 @@ object TestFactory {
      */
     private fun interpret(code: String): SymbolTable {
         val pipeline = Pipeline()
-        pipeline.addTheoremsFromFile()
+        pipeline
+            .addTheoremsFromFile()
+            .addInferenceFromFile()
             .parse(code).interpret()
         val symbolTableField = pipeline.interpreter::class.memberProperties.find { it.name == "symbolTable" }!!
         symbolTableField.isAccessible = true

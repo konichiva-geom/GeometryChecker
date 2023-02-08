@@ -6,6 +6,7 @@ import entity.expr.Expr
 import error.SpoofError
 import pipeline.inference.InferenceProcessor
 import pipeline.interpreter.Interpreter
+import utils.Utils.INFERENCE_PATH
 import utils.Utils.THEOREMS_PATH
 import java.io.File
 
@@ -30,12 +31,14 @@ class Pipeline {
         return this
     }
 
-    fun addInference(code: String) {
+    fun addInference(code: String): Pipeline {
         inferenceProcessor.setInference(parser.parseInference(code).item)
+        return this
     }
 
-    fun addInferenceFromFile(path: String) {
+    fun addInferenceFromFile(path: String = INFERENCE_PATH): Pipeline {
         inferenceProcessor.setInference(parser.parseInference(File(path).readText()).item)
+        return this
     }
 
     fun addTheoremsFromFile(path: String = THEOREMS_PATH): Pipeline {

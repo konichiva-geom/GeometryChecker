@@ -18,7 +18,7 @@ import utils.Utils.catchWithRangeAndArgs
 
 class Interpreter(val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
-    private val symbolTable = SymbolTable()
+    private val symbolTable = SymbolTable(inferenceProcessor)
     private var addedRelation = false
 
     fun interpret(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
@@ -34,7 +34,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     }
 
     private fun validatePointInitialization(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
-        val tempTable = SymbolTable()
+        val tempTable = SymbolTable(inferenceProcessor)
         for ((i, tuple) in tree.item.withIndex()) {
             if (tuple.t2 == null)
                 continue
@@ -101,8 +101,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
                         addedRelation = true
                     }
                     is Relation -> {
-                        expr.make(symbolTable)
-                        inferenceProcessor.processInference(expr, symbolTable)
+                        Relation.makeRelation(expr, symbolTable)
                         addedRelation = true
                     }
 

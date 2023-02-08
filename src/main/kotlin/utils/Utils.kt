@@ -10,6 +10,7 @@ import math.*
 object Utils {
     private const val SHOULD_CATCH = false
     const val THEOREMS_PATH = "examples/theorems.txt"
+    const val INFERENCE_PATH = "examples/inference.txt"
     val keyForArithmeticNumeric = NumNotation(FractionFactory.zero())
 
     private val lambdas = mutableListOf({ a: Fraction, b: Fraction -> a.add(b) },

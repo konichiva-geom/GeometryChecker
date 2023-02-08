@@ -5,9 +5,10 @@ import entity.point_collection.*
 import entity.relation.*
 import error.SpoofError
 import math.*
+import pipeline.inference.InferenceProcessor
 import utils.Utils.sortAngle
 
-open class SymbolTable {
+open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     private val points = mutableMapOf<String, PointRelations>()
     val lines = mutableMapOf<LinePointCollection, LineRelations>()
     val rays = mutableMapOf<RayPointCollection, RayRelations>()
