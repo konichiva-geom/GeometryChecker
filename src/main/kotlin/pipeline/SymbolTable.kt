@@ -164,6 +164,10 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         return CircleRelations()
     }
 
+    fun hasPoint(pointNotation: PointNotation): Boolean {
+        return points[pointNotation.p] != null
+    }
+
     fun getPoint(name: String): PointRelations {
         return points[name] ?: throw SpoofError("Point %{name} is not instantiated", "name" to name)
     }

@@ -67,8 +67,9 @@ object GeomGrammar : Grammar<Any>() {
 
     //region comparison tokens
     private val iffToken by literalToken("<=>")
-    private val eqToken by literalToken("==")
     private val sameToken by literalToken("===")
+    private val eqToken by literalToken("==")
+    private val assignmentToken by literalToken("=")
     private val neqToken by literalToken("!=")
     private val geq by literalToken(">=")
     private val leq by literalToken("<=")
@@ -132,15 +133,12 @@ object GeomGrammar : Grammar<Any>() {
 
     private val divMulChain: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
         arithmeticTerm, div or mul
-    ) { a, op, b ->
-        createArithmeticMap(a, b, op.text)
-    }
+    ) { a, op, b -> createArithmeticMap(a, b, op.text) }
 
     private val arithmeticExpression: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
         divMulChain, plus or minus
-    ) { a, op, b ->
-        createArithmeticMap(a, b, op.text)
-    }
+    ) { a, op, b -> createArithmeticMap(a, b, op.text) }
+
 
     private val comparison by arithmeticExpression and compToken and arithmeticExpression map {
         val divLeft = mergeMapToDivNotation(it.t1)
@@ -151,7 +149,7 @@ object GeomGrammar : Grammar<Any>() {
         val left = ArithmeticExpr(leftMap)
         val right = ArithmeticExpr(rightMap)
         when (it.t2.text) {
-            "===" -> BinarySame(left,right)
+            "===" -> BinarySame(left, right)
             "==" -> BinaryEquals(left, right)
             "!=" -> BinaryNotEquals(left, right)
             ">" -> BinaryGreater(left, right)
@@ -172,7 +170,9 @@ object GeomGrammar : Grammar<Any>() {
         }
     }
 
-    private val binaryStatement by creation or comparison or relation map { it }
+    private val assignment by notation and -assignmentToken and relation map { BinaryAssignment(it.t1, it.t2) }
+
+    private val binaryStatement by creation or assignment or comparison or relation map { it }
 
     private val args by separatedTerms(binaryStatement or notation, comma)
     private val optionalArgs by optional(args) map { it ?: emptyList() }

@@ -10,7 +10,6 @@ import error.SpoofError
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 import utils.NameGenerator
-import utils.Utils
 
 abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
     override fun getChildren(): List<Expr> = listOf(left, right)
@@ -154,6 +153,27 @@ class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryE
             lineRelations1.perpendicular.add(line2)
         if (!lineRelations2.perpendicular.map { symbolTable.getLine(it) }.contains(lineRelations1))
             lineRelations2.perpendicular.add(line1)
+    }
+}
+
+class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right) {
+    override fun getRepr(): StringBuilder = left.getRepr().append(" = ").append(right.getRepr())
+
+    override fun mapIdents(mapper: IdentMapper): Expr =
+        BinaryAssignment(left.mapIdents(mapper) as Notation, right.mapIdents(mapper))
+
+    override fun check(symbolTable: SymbolTable): Boolean {
+        if (!(right as BinaryExpr).check(symbolTable))
+            return false
+        if (left is PointNotation) {
+            if (symbolTable.hasPoint(left)) {
+                
+            }
+        } else throw SpoofError("Assigning non-points is not yet implemented")
+    }
+
+    override fun make(symbolTable: SymbolTable) {
+        TODO("Not yet implemented")
     }
 }
 
