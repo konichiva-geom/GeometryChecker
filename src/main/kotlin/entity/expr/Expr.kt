@@ -29,6 +29,10 @@ class AnyExpr(val notation: Notation) : Expr {
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
+
+    override fun toString(): String {
+        return "any $notation"
+    }
 }
 
 /**

@@ -277,7 +277,7 @@ private fun getReprForBinaryWithExpressions(left: Expr, right: Expr, sign: Strin
     val leftRepr = left.getRepr()
     val rightRepr = right.getRepr()
     if (leftRepr.length == rightRepr.length) {
-        return if (leftRepr.hashCode() > rightRepr.hashCode())
+        return if (leftRepr.toString().hashCode() > rightRepr.toString().hashCode())
             rightRepr.append(sign).append(leftRepr)
         else leftRepr.append(sign).append(rightRepr)
     }
