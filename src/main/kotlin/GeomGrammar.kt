@@ -140,7 +140,11 @@ object GeomGrammar : Grammar<Any>() {
     ) { a, op, b -> createArithmeticMap(a, b, op.text) }
 
 
-    private val comparison by arithmeticExpression and compToken and arithmeticExpression map {
+    private val comparison by (notation and compToken and parser(this::relation) map {
+        getReturnableEquals(it.t3, it.t1, it.t2.text)
+    }) or (parser(this::relation) and compToken and notation map {
+        getReturnableEquals(it.t1, it.t3, it.t2.text)
+    }) or (arithmeticExpression and compToken and arithmeticExpression map {
         val divLeft = mergeMapToDivNotation(it.t1)
         val divRight = mergeMapToDivNotation(it.t3)
         val leftMap = createArithmeticMap(divLeft.numerator, divRight.denominator, "*")
@@ -158,7 +162,7 @@ object GeomGrammar : Grammar<Any>() {
             "<=" -> BinaryGEQ(left, right)
             else -> throw Exception("Unexpected comparison")
         }
-    }
+    })
 
     private val relation: Parser<Expr> by notation and relationToken and notation or
             (negationToken and parser(GeomGrammar::relation)) map {
@@ -257,6 +261,19 @@ object GeomGrammar : Grammar<Any>() {
                 inferenceStatement,
                 statementSeparator
             ) and -optional(statementSeparator))
+
+    private fun getReturnableEquals(returnableRelation: Expr, notation: Notation, sign: String): BinaryExpr {
+        if (returnableRelation !is Returnable)
+            throw SpoofError(
+                "Cannot compare with %{expr}, because it does not return anything",
+                "expr" to returnableRelation
+            )
+        return when (sign) {
+            "==" -> ReturnableEquals(notation, returnableRelation)
+            "!=" -> ReturnableNotEquals(notation, returnableRelation)
+            else -> throw SpoofError("Expected == or != with returnable relation")
+        }
+    }
 
     /**
      * Create relation binary expression

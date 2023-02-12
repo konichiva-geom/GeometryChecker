@@ -26,7 +26,7 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("line AA")
-    override fun mapIdents(mapper: IdentMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
     override fun toString(): String = "line $p1$p2"
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2)
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {
@@ -43,7 +43,7 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     fun toSegmentNotation() = SegmentNotation(p1, p2)
     open fun toLine() = this
 
-    override fun renameAndRemap(symbolTable: SymbolTable) {
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
         p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
         Utils.sortLine(this)

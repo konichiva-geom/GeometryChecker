@@ -12,7 +12,7 @@ class IdentNotation(private var text: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("c")
-    override fun mapIdents(mapper: IdentMapper) = IdentNotation(mapper.get(text))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = IdentNotation(mapper.get(text))
     override fun toString(): String = text
     override fun getLetters(): MutableList<String> = mutableListOf(text)
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {
@@ -21,7 +21,7 @@ class IdentNotation(private var text: String) : RelatableNotation() {
 
     override fun createLinks(mapper: IdentMapper) {}
 
-    override fun renameAndRemap(symbolTable: SymbolTable) {
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         var circleRelations: CircleRelations? = null
         if (symbolTable.circles[this] != null) {
             circleRelations = symbolTable.circles[this]

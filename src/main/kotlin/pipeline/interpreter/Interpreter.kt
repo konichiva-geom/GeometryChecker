@@ -3,10 +3,7 @@ package pipeline.interpreter
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import entity.Renamable
-import entity.expr.Creation
-import entity.expr.Expr
-import entity.expr.PointCreation
-import entity.expr.TheoremUse
+import entity.expr.*
 import entity.expr.notation.Point2Notation
 import entity.expr.notation.Point3Notation
 import entity.expr.notation.PointNotation
@@ -49,7 +46,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
 
     private fun rename(expr: Expr) {
         if (expr is Renamable) {
-            expr.renameAndRemap(symbolTable)
+            expr.renameToMinimalAndRemap(symbolTable)
             expr.checkValidityAfterRename()
         }
         for (child in expr.getChildren())
@@ -59,6 +56,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     private fun validatePointInitialization(expr: Expr, tempTable: SymbolTable) {
         when (expr) {
             is PointCreation -> expr.create(tempTable)
+            is BinaryAssignment -> if(expr.left is PointNotation) tempTable.newPoint(expr.left)
             is PointNotation -> tempTable.getPoint(expr)
             is Point2Notation -> {
                 tempTable.getPoint(expr.p1)
@@ -91,10 +89,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     private fun interpretDescription(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex())
             catchWithRangeAndArgs({
-                if (addedRelation) {
-                    addedRelation = false
-                    rename(expr)
-                }
+                rename(expr)
                 when (expr) {
                     is TheoremUse -> {
                         interpretTheoremUse(expr)
@@ -114,10 +109,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
     private fun interpretSolution(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex())
             catchWithRangeAndArgs({
-                if (addedRelation) {
-                    addedRelation = false
-                    rename(expr)
-                }
+                rename(expr)
                 when (expr) {
                     is TheoremUse -> interpretTheoremUse(expr)
                     is Relation -> throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")

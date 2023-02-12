@@ -13,7 +13,7 @@ open class SegmentPointCollection(val bounds: MutableSet<String>, val points: Mu
         points.addAll(added)
     }
 
-    override fun renameAndRemap(symbolTable: SymbolTable) {
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         val segmentRelations = getRelations(symbolTable.segments)
 
         renamePointSet(bounds, symbolTable.equalIdentRenamer)

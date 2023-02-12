@@ -41,7 +41,7 @@ class EqualIdentRenamer {
         points[prev] = current
         if (subscribers[prev] != null) {
             subscribers[prev]!!.forEach {
-                (it as Renamable).renameAndRemap(symbolTable)
+                (it as Renamable).renameToMinimalAndRemap(symbolTable)
             }
             subscribers.addToOrCreateSet(current, *subscribers[prev]!!.toTypedArray())
             subscribers[prev]!!.clear()

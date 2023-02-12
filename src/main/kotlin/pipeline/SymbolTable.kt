@@ -65,6 +65,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 arrayOf(notation.getLetters().toMutableSet())
             )
             is Point3Notation -> return notation to getAngle(notation)
+            is IdentNotation -> return notation to circles[notation]!!
             else -> throw SpoofError(notation.toString())
         }
     }

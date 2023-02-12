@@ -13,11 +13,18 @@ class GeogebraApi {
         ggbResult.append("x=($xVal, $yVal)\n")
     }
 
+    fun addAngle() {
+
+    }
+
     fun connectPoints(first: String, second: String) {
         ggbResult.append("Segment($first, $second)\n")
     }
 
     fun lineBetween(first: String, second: String) {
         ggbResult.append("Line($first, $second)")
+    }
+
+    fun setPointStyle(name: String, block: Int) {
     }
 }

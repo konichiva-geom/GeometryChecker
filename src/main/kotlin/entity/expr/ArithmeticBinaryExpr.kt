@@ -29,7 +29,7 @@ class ParenthesesExpr(val expr: Expr) : Expr {
 
     override fun getRepr(): StringBuilder = StringBuilder("($expr)")
 
-    override fun mapIdents(mapper: IdentMapper): Expr {
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
         TODO("Not yet implemented")
     }
 
@@ -42,7 +42,7 @@ class ParenthesesExpr(val expr: Expr) : Expr {
 
 class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " === ")
-    override fun mapIdents(mapper: IdentMapper) = BinaryEquals(left.mapIdents(mapper), right.mapIdents(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryEquals(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
 
     override fun toString(): String {
         return "$left == $right"
@@ -68,15 +68,59 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
         val leftNotation = left.map.keys.first()
         if (leftNotation is PointNotation)
             symbolTable.getPoint(leftNotation.p)
-                .mergePoints(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
+                .mergeOtherToThisPoint(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
         else
             symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
     }
 }
 
+class ReturnableEquals(left: Notation, right: Expr) : BinaryExpr(left, right) {
+    override fun getRepr(): StringBuilder {
+        TODO("Not yet implemented")
+    }
+
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
+        TODO("Not yet implemented")
+    }
+
+    override fun check(symbolTable: SymbolTable): Boolean {
+        val returnValue = (right as Returnable).getReturnValue(symbolTable)
+//        if (left::class != returnValue::class)
+//            throw SpoofError("relation is faulty")
+        return symbolTable.getRelationsByNotation(left as Notation) ==
+                symbolTable.getRelationsByNotation(PointNotation(returnValue.first()))
+    }
+
+    override fun make(symbolTable: SymbolTable) {
+        val returnValue = (right as Returnable).getReturnValue(symbolTable)
+        if (left::class != returnValue::class)
+            throw SpoofError("Cannot make a relation because they are of different classes")
+
+    }
+}
+
+class ReturnableNotEquals(left: Notation, right: Expr) : BinaryExpr(left, right) {
+    override fun getRepr(): StringBuilder {
+        TODO("Not yet implemented")
+    }
+
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
+        TODO("Not yet implemented")
+    }
+
+    override fun check(symbolTable: SymbolTable): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun make(symbolTable: SymbolTable) {
+        TODO("Not yet implemented")
+    }
+
+}
+
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " == ")
-    override fun mapIdents(mapper: IdentMapper) = BinaryEquals(left.mapIdents(mapper), right.mapIdents(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryEquals(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
 
     override fun toString(): String {
         return "$left == $right"
@@ -109,7 +153,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             val leftNotation = left.map.keys.first()
             if (leftNotation is PointNotation)
                 symbolTable.getPoint(leftNotation.p)
-                    .mergePoints(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
+                    .mergeOtherToThisPoint(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
             else
                 symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
         } else {
@@ -149,7 +193,7 @@ private fun isEntityEquals(left: ArithmeticExpr, right: ArithmeticExpr) =
 
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
-    override fun mapIdents(mapper: IdentMapper) = BinaryNotEquals(left.mapIdents(mapper), right.mapIdents(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryNotEquals(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
     override fun toString(): String {
         return "$left != $right"
     }
@@ -186,7 +230,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " > ")
-    override fun mapIdents(mapper: IdentMapper) = BinaryGreater(left.mapIdents(mapper), right.mapIdents(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryGreater(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
     override fun toString(): String {
         return "$left > $right"
     }
@@ -202,7 +246,7 @@ class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " >= ")
-    override fun mapIdents(mapper: IdentMapper) = BinaryGEQ(left.mapIdents(mapper), right.mapIdents(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryGEQ(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
 
     override fun toString(): String {
         return "$left >= $right"

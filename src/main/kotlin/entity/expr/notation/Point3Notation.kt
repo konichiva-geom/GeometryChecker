@@ -16,7 +16,7 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun compareTo(other: Expr): Int = super.compareOrSame(other) ?: toString().compareTo(other.toString())
 
     override fun getRepr() = StringBuilder("AAA")
-    override fun mapIdents(mapper: IdentMapper) = Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
     override fun toString(): String = "$p1$p2$p3"
 
     override fun getLetters(): MutableList<String> = mutableListOf(p1, p2, p3)
@@ -31,7 +31,7 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
         mapper.addLink(p1, p3)
     }
 
-    override fun renameAndRemap(symbolTable: SymbolTable) {
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         var relations: AngleRelations? = null
         if (symbolTable.angles[this] != null) {
             relations = symbolTable.angles[this]

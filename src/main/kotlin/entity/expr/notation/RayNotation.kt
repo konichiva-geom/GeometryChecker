@@ -20,12 +20,12 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
     override fun getOrder(): Int = 3
 
     override fun toLine() = Point2Notation(p1, p2)
-    override fun mapIdents(mapper: IdentMapper) = RayNotation(mapper.get(p1), mapper.get(p2))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = RayNotation(mapper.get(p1), mapper.get(p2))
 
     override fun getRepr() = StringBuilder("ray AA")
     override fun toString(): String = "ray ${super.toString()}"
 
-    override fun renameAndRemap(symbolTable: SymbolTable) {
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
         p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
     }

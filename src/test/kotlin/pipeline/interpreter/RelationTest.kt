@@ -1,3 +1,5 @@
+package pipeline.interpreter
+
 import TestFactory.passTask
 import kotlin.test.Test
 
@@ -33,6 +35,21 @@ internal class RelationTest {
             solution:
 
         """.trimIndent()
+        )
+    }
+
+    @Test
+    fun testAssignment() {
+        passTask(
+            """
+            description:
+                new A; new B; new C; new D;
+                AB intersects CD
+                O = AB intersects CD
+            prove:
+                O == AB intersects CD
+            solution:;
+            """
         )
     }
 

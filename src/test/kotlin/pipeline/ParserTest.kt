@@ -1,3 +1,5 @@
+package pipeline
+
 import TestFactory.failInference
 import TestFactory.failTask
 import TestFactory.passInference

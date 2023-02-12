@@ -71,17 +71,17 @@ class TheoremParser : Parser() {
         println(signatureMapper.mappings)
         for (expr in theoremBody.body) {
             when (expr) {
-                is Relation -> Relation.makeRelation(expr.mapIdents(signatureMapper) as Relation, symbolTable)
+                is Relation -> Relation.makeRelation(expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation, symbolTable)
                 is TheoremUse -> {
                     if (expr.signature.name == "check")
-                        check(expr.signature.args.map { it.mapIdents(signatureMapper) }, symbolTable)
+                        check(expr.signature.args.map { it.createNewWithMappedPointsAndCircles(signatureMapper) }, symbolTable)
                     else throw SpoofError("Expected relation to check")
                 }
             }
         }
         if (theoremBody.ret.isNotEmpty()) {
             for (expr in theoremBody.ret)
-                Relation.makeRelation(expr.mapIdents(signatureMapper) as Relation, symbolTable)
+                Relation.makeRelation(expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation, symbolTable)
         }
         signatureMapper.clear()
     }

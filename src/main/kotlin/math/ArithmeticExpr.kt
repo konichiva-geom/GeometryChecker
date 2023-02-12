@@ -12,11 +12,11 @@ class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr {
         return getArithmeticToString(map)
     }
 
-    override fun mapIdents(mapper: IdentMapper): Expr {
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
         val res = mutableMapOf<Notation, Fraction>()
 
         for ((notation, fraction) in map)
-            res[notation.mapIdents(mapper) as Notation] = fraction
+            res[notation.createNewWithMappedPointsAndCircles(mapper) as Notation] = fraction
 
         return ArithmeticExpr(res)
     }

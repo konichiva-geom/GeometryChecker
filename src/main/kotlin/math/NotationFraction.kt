@@ -39,9 +39,9 @@ class MulNotation(val elements: MutableList<Notation>) : Notation() {
     override fun mergeMapping(mapper: IdentMapper, other: Notation) = TODO("Not yet implemented")
     override fun createLinks(mapper: IdentMapper) = TODO("Not yet implemented")
     override fun getRepr() = TODO("Not yet implemented")
-    override fun mapIdents(mapper: IdentMapper) = TODO("Not yet implemented")
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = TODO("Not yet implemented")
     override fun compareTo(other: Expr) = TODO("Not yet implemented")
-    override fun renameAndRemap(symbolTable: SymbolTable) = TODO("Not yet implemented")
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) = TODO("Not yet implemented")
 
     override fun toString(): String {
         return elements.joinToString(separator = "*")

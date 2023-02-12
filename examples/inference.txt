@@ -10,9 +10,9 @@ A == B, any C => AC == BC
 // any - конструкция, начинающая перебор.
 
 // all possible line relations
-AB || CD <=> not AB ∩ CD, not AB ⊥ CD
-AB ⊥ CD <=> not AB ∩ CD, not AB || CD
-AB ∩ CD <=> not AB || CD, not AB ⊥ CD
+//AB || CD <=> not AB ∩ CD, not AB ⊥ CD
+//AB ⊥ CD <=> not AB ∩ CD, not AB || CD
+//AB ∩ CD <=> not AB || CD, not AB ⊥ CD
 
 // line AB ⊥ line CD, O as line AB ∩ line CD => AOC == 90, AOD == 90,
 // AOB == 90 => line OB ⊥ line AO

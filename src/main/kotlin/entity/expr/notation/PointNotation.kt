@@ -12,8 +12,8 @@ class PointNotation(var p: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("A")
-    override fun mapIdents(mapper: IdentMapper) = PointNotation(mapper.get(p))
-    override fun renameAndRemap(symbolTable: SymbolTable) {
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PointNotation(mapper.get(p))
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         p = symbolTable.equalIdentRenamer.getIdentical(p)
     }
 
@@ -25,4 +25,14 @@ class PointNotation(var p: String) : RelatableNotation() {
     }
 
     override fun createLinks(mapper: IdentMapper) {}
+
+    override fun hashCode(): Int {
+        return p.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is PointNotation)
+            return false
+        return p == other.p
+    }
 }

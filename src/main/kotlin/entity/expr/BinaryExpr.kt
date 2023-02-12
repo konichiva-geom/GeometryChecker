@@ -4,9 +4,11 @@ import com.github.h0tk3y.betterParse.utils.Tuple4
 import entity.expr.notation.*
 import entity.point_collection.PointCollection
 import entity.point_collection.SegmentPointCollection
+import entity.relation.CircleRelations
 import entity.relation.LineRelations
 import entity.relation.Relation
 import error.SpoofError
+import external.Logger
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 import utils.NameGenerator
@@ -24,8 +26,11 @@ abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
  */
 class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relation {
     override fun getRepr(): StringBuilder = left.getRepr().append(" in ").append(right.getRepr())
-    override fun mapIdents(mapper: IdentMapper) =
-        BinaryIn(left.mapIdents(mapper) as Notation, right.mapIdents(mapper) as Notation)
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        BinaryIn(
+            left.createNewWithMappedPointsAndCircles(mapper) as Notation,
+            right.createNewWithMappedPointsAndCircles(mapper) as Notation
+        )
 
     override fun toString(): String {
         return "$left in $right"
@@ -62,11 +67,22 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
  * segments AB and BE are not intersecting, but have a common point
  */
 class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right), Returnable {
-    private lateinit var intersectionValue: Any // two circles intersect by array of points
-    override fun getReturnValue(): Any = intersectionValue
+    /**
+     * two circles intersect by array of points
+     */
+    override fun getReturnValue(symbolTable: SymbolTable): Set<String> {
+        return symbolTable.getPointSetNotationByNotation(left as Notation)
+            .intersect(symbolTable.getPointSetNotationByNotation(right as Notation))
+            .map { symbolTable.equalIdentRenamer.getIdentical(it) }
+            .toSet()
+    }
+
     override fun getRepr(): StringBuilder = left.getRepr().append(" intersects ").append(right.getRepr())
-    override fun mapIdents(mapper: IdentMapper) =
-        BinaryIntersects(left.mapIdents(mapper) as Notation, right.mapIdents(mapper) as Notation)
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        BinaryIntersects(
+            left.createNewWithMappedPointsAndCircles(mapper) as Notation,
+            right.createNewWithMappedPointsAndCircles(mapper) as Notation
+        )
 
     override fun toString(): String {
         return "$left ∩ $right"
@@ -79,23 +95,39 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
         return if (left is Notation && right is Notation) {
             symbolTable.getPointSetNotationByNotation(left)
                 .intersect(symbolTable.getPointSetNotationByNotation(right))
-                .map { symbolTable.getPoint(it) }.toSet().size == 1
+                .map { symbolTable.getPoint(it) }.toSet().isNotEmpty()
         } else false
     }
 
     override fun make(symbolTable: SymbolTable) {
-        val leftSet = symbolTable.getPointSetNotationByNotation(left as Notation)
-        val rightSet = symbolTable.getPointSetNotationByNotation(right as Notation)
-        val intersection = leftSet.intersect(rightSet)
-        intersectionValue = if (intersection.isNotEmpty())
+        val intersection = getReturnValue(symbolTable)
+        val intersectionValue = if (intersection.isNotEmpty())
             PointNotation(intersection.first())
         else PointNotation(NameGenerator.getName())
+        if (intersection.isEmpty()) {
+            symbolTable.newPoint(intersectionValue)
+            addPointsToCircleOrLinear(symbolTable, left as Notation, listOf(intersectionValue.p))
+            addPointsToCircleOrLinear(symbolTable, right as Notation, listOf(intersectionValue.p))
+            return
+        }
         if (intersection.map { symbolTable.getPoint(it) }.toSet().size > 1)
             throw SpoofError(
                 "This task is incorrect. There can be only one intersection point between two lines, " +
                         "but got a second one from: %{expr}",
                 "expr" to this
             )
+        Logger.warn("This relation is already made")
+    }
+
+    private fun addPointsToCircleOrLinear(
+        symbolTable: SymbolTable,
+        notation: Notation,
+        intersectionValue: List<String>
+    ) {
+        val (collection, relations) = symbolTable.getKeyValueByNotation(notation)
+        if (collection is PointCollection<*>)
+            collection.addPoints(intersectionValue)
+        else (relations as CircleRelations).points.addAll(intersectionValue)
     }
 }
 
@@ -104,8 +136,11 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
  */
 class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder = left.getRepr().append(" parallel ").append(right.getRepr())
-    override fun mapIdents(mapper: IdentMapper) =
-        BinaryParallel(left.mapIdents(mapper) as Point2Notation, right.mapIdents(mapper) as Point2Notation)
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        BinaryParallel(
+            left.createNewWithMappedPointsAndCircles(mapper) as Point2Notation,
+            right.createNewWithMappedPointsAndCircles(mapper) as Point2Notation
+        )
 
     override fun toString(): String {
         return "$left || $right"
@@ -134,8 +169,11 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
  */
 class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder = left.getRepr().append(" perpendicular ").append(right.getRepr())
-    override fun mapIdents(mapper: IdentMapper) =
-        BinaryPerpendicular(left.mapIdents(mapper) as Point2Notation, right.mapIdents(mapper) as Point2Notation)
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        BinaryPerpendicular(
+            left.createNewWithMappedPointsAndCircles(mapper) as Point2Notation,
+            right.createNewWithMappedPointsAndCircles(mapper) as Point2Notation
+        )
 
     override fun toString(): String {
         return "$left ⊥ $right"
@@ -157,23 +195,42 @@ class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryE
 }
 
 class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right) {
+    override fun getChildren(): List<Expr> {
+        return listOf(right)
+    }
+
     override fun getRepr(): StringBuilder = left.getRepr().append(" = ").append(right.getRepr())
 
-    override fun mapIdents(mapper: IdentMapper): Expr =
-        BinaryAssignment(left.mapIdents(mapper) as Notation, right.mapIdents(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr =
+        BinaryAssignment(
+            left.createNewWithMappedPointsAndCircles(mapper) as Notation,
+            right.createNewWithMappedPointsAndCircles(mapper)
+        )
 
     override fun check(symbolTable: SymbolTable): Boolean {
         if (!(right as BinaryExpr).check(symbolTable))
             return false
+        if (right !is Returnable)
+            throw SpoofError("Cannot assign from %{expr}", "expr" to right)
         if (left is PointNotation) {
-            if (symbolTable.hasPoint(left)) {
-                
-            }
+            if (!symbolTable.hasPoint(left))
+                return false
+            return symbolTable.getPoint(left) == symbolTable.getPoint(right.getReturnValue(symbolTable) as String)
         } else throw SpoofError("Assigning non-points is not yet implemented")
     }
 
     override fun make(symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+        if (!(right as BinaryExpr).check(symbolTable))
+            throw SpoofError("prove %{expr} first, then assign", "expr" to right)
+        if (right !is Returnable)
+            throw SpoofError("Cannot assign from %{expr}", "expr" to right)
+        if (left is PointNotation) {
+            val newRelations = symbolTable.newPoint(left)
+            val assignValue = (right as Returnable).getReturnValue(symbolTable)
+            if (assignValue.size != 1)
+                throw SpoofError("Expected 1 assign point")
+            newRelations.mergeOtherToThisPoint(left, PointNotation(assignValue.first()), symbolTable)
+        } else throw SpoofError("Assigning non-points is not yet implemented")
     }
 }
 

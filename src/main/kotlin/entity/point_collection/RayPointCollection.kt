@@ -12,7 +12,7 @@ class RayPointCollection(var start: String, val points: MutableSet<String>) : Po
         points.addAll(added)
     }
 
-    override fun renameAndRemap(symbolTable: SymbolTable) {
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         val rayRelations = getRelations(symbolTable.rays)
 
         renamePointSet(points, symbolTable.equalIdentRenamer)

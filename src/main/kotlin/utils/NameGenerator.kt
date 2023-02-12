@@ -3,5 +3,9 @@ package utils
 object NameGenerator {
     private var index = 0
 
-    fun getName() = "$${index++}"
+    /**
+     * Character ¤ is bigger than any english letter,
+     * so [pipeline.EqualIdentRenamer] will not point to this name for renaming
+     */
+    fun getName() = "¤${index++}"
 }

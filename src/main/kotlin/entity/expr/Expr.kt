@@ -18,13 +18,13 @@ interface Expr : Comparable<Expr> {
      *
      * Used for theorem and pipeline.inference interpreting
      */
-    fun mapIdents(mapper: IdentMapper): Expr
+    fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr
 }
 
 class AnyExpr(val notation: Notation) : Expr {
     override fun getChildren(): List<Expr> = listOf(notation)
     override fun getRepr(): StringBuilder = notation.getRepr().insert(0, "any ")
-    override fun mapIdents(mapper: IdentMapper) = AnyExpr(notation.mapIdents(mapper) as Notation)
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = AnyExpr(notation.createNewWithMappedPointsAndCircles(mapper) as Notation)
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -39,11 +39,11 @@ class AnyExpr(val notation: Notation) : Expr {
 class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
     override fun getChildren(): List<Expr> = signature.args + output
     override fun getRepr(): StringBuilder = throw SystemFatalError("Unexpected getRepr() for TheoremUse")
-    override fun mapIdents(mapper: IdentMapper): Expr {
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
         throw SystemFatalError("Unexpected rename() for TheoremUse. Remove this exception if theorems are called inside theorems")
         TheoremUse(
-            Signature(signature.name, signature.args.map { it.mapIdents(mapper) }),
-            output.map { it.mapIdents(mapper) }
+            Signature(signature.name, signature.args.map { it.createNewWithMappedPointsAndCircles(mapper) }),
+            output.map { it.createNewWithMappedPointsAndCircles(mapper) }
         )
     }
 
@@ -55,7 +55,7 @@ class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
 class PrefixNot(private val expr: Expr) : Expr {
     override fun getChildren(): List<Expr> = listOf(expr)
     override fun getRepr(): StringBuilder = expr.getRepr().insert(0, "not ")
-    override fun mapIdents(mapper: IdentMapper) = PrefixNot(expr.mapIdents(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PrefixNot(expr.createNewWithMappedPointsAndCircles(mapper))
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -72,7 +72,7 @@ class PointCreation(private val name: String) : Expr, Creation {
     }
 
     override fun getRepr(): StringBuilder = StringBuilder("new A")
-    override fun mapIdents(mapper: IdentMapper) = PointCreation(mapper.get(name))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PointCreation(mapper.get(name))
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -90,7 +90,7 @@ class CircleCreation(private val name: String) : Expr, Creation {
     }
 
     override fun getRepr(): StringBuilder = StringBuilder("new c")
-    override fun mapIdents(mapper: IdentMapper) = PointCreation(mapper.get(name))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PointCreation(mapper.get(name))
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")

@@ -13,8 +13,8 @@ class NumNotation(val number: Fraction) : Notation() {
     }
 
     override fun getRepr() = StringBuilder("0")
-    override fun mapIdents(mapper: IdentMapper) = NumNotation(number)
-    override fun renameAndRemap(symbolTable: SymbolTable) {}
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = NumNotation(number)
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {}
 
     override fun toString(): String = ""
     override fun getLetters(): MutableList<String> = mutableListOf()
