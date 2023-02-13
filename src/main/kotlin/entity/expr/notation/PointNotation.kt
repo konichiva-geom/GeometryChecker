@@ -18,7 +18,7 @@ class PointNotation(var p: String) : RelatableNotation() {
     }
 
     override fun toString(): String = p
-    override fun getLetters(): MutableList<String> = mutableListOf(p)
+    override fun getPointsAndCircles(): MutableList<String> = mutableListOf(p)
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {
         other as PointNotation
         mapper.mergeMapping(p, listOf(other.p))

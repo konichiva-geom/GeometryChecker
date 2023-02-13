@@ -6,6 +6,7 @@ import entity.expr.Expr
 import error.SpoofError
 import pipeline.inference.InferenceProcessor
 import pipeline.interpreter.Interpreter
+import pipeline.parser.Parser
 import utils.Utils.INFERENCE_PATH
 import utils.Utils.THEOREMS_PATH
 import java.io.File

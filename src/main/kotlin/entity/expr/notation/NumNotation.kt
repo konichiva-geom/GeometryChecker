@@ -17,7 +17,7 @@ class NumNotation(val number: Fraction) : Notation() {
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {}
 
     override fun toString(): String = ""
-    override fun getLetters(): MutableList<String> = mutableListOf()
+    override fun getPointsAndCircles(): MutableList<String> = mutableListOf()
 
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {}
     override fun createLinks(mapper: IdentMapper) {}

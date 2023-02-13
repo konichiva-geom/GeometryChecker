@@ -53,6 +53,19 @@ internal class RelationTest {
         )
     }
 
+    @Test
+    fun testInference() {
+        passTask("""
+            description:
+                new A; new B; new C;
+                A in BC
+            prove:
+                A in line BC
+                A in ray BC
+            solution:;
+        """)
+    }
+
 //    @Test
 //    fun testInRelation() {
 //        interpret("""

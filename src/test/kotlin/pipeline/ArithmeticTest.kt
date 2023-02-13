@@ -3,7 +3,7 @@ package pipeline
 import TestFactory.failDescription
 import TestFactory.parseFirst
 import TestFactory.passTask
-import entity.expr.BinaryExpr
+import entity.expr.binary_expr.BinaryExpr
 import math.*
 import pipeline.inference.InferenceProcessor
 import kotlin.test.Test

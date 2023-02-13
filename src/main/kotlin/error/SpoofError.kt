@@ -4,8 +4,6 @@ import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.Token
 import external.Spoof.changeAllIndicesInOrder
 
-val normalFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
-
 /**
  * Error in which args will be changed to support multiple languages
  * @param msg message of the error (different for all languages)

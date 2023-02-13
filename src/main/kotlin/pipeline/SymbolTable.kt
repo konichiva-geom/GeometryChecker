@@ -52,17 +52,17 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
             is SegmentNotation -> return getKeyValueForLinear<SegmentRelations, SegmentNotation, SegmentPointCollection>(
                 notation,
                 segments as MutableMap<PointCollection<SegmentNotation>, SegmentRelations>,
-                arrayOf(notation.getLetters().toMutableSet(), mutableSetOf<String>())
+                arrayOf(notation.getPointsAndCircles().toMutableSet(), mutableSetOf<String>())
             )
             is ArcNotation -> return getKeyValueForLinear<ArcRelations, ArcNotation, ArcPointCollection>(
                 notation,
                 arcs as MutableMap<PointCollection<ArcNotation>, ArcRelations>,
-                arrayOf(notation.getLetters().toMutableSet(), mutableSetOf<String>(), notation.circle)
+                arrayOf(notation.getPointsAndCircles().toMutableSet(), mutableSetOf<String>(), notation.circle)
             )
             is Point2Notation -> return getKeyValueForLinear<LineRelations, Point2Notation, LinePointCollection>(
                 notation,
                 lines as MutableMap<PointCollection<Point2Notation>, LineRelations>,
-                arrayOf(notation.getLetters().toMutableSet())
+                arrayOf(notation.getPointsAndCircles().toMutableSet())
             )
             is Point3Notation -> return notation to getAngle(notation)
             is IdentNotation -> return notation to circles[notation]!!
@@ -87,7 +87,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         val linearRelations = T::class.constructors.first().call()
         val collection = C::class.constructors.first().call(*constructorArgs)
         map[collection] = linearRelations
-        equalIdentRenamer.addSubscribers(collection, *notation.getLetters().toTypedArray())
+        equalIdentRenamer.addSubscribers(collection, *notation.getPointsAndCircles().toTypedArray())
         if (notation is ArcNotation)
             equalIdentRenamer.addSubscribers(collection, notation.circle)
 
@@ -119,7 +119,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         newRelations: R
     ) {
         for ((searchedNotation, _) in linearCollection) {
-            if (searchedNotation.getPointsInCollection().containsAll(notation.getLetters())) {
+            if (searchedNotation.getPointsInCollection().containsAll(notation.getPointsAndCircles())) {
                 linearCollection[searchedNotation] = newRelations
                 return
             }
@@ -205,17 +205,17 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         if (angles[notation] != null)
             return angles[notation]!!
         angles[notation] = AngleRelations()
-        equalIdentRenamer.addSubscribers(notation, *notation.getLetters().toTypedArray())
+        equalIdentRenamer.addSubscribers(notation, *notation.getPointsAndCircles().toTypedArray())
         return angles[notation]!!
     }
 
     fun getArc(notation: ArcNotation): ArcRelations {
         for ((collection, value) in arcs) {
-            if (collection.getPointsInCollection().containsAll(notation.getLetters()))
+            if (collection.getPointsInCollection().containsAll(notation.getPointsAndCircles()))
                 return value
         }
         val res = ArcRelations()
-        arcs[ArcPointCollection(notation.getLetters().toMutableSet(), circle = notation.circle)] = res
+        arcs[ArcPointCollection(notation.getPointsAndCircles().toMutableSet(), circle = notation.circle)] = res
         return res
     }
 
@@ -240,14 +240,14 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
             is NumNotation -> return mutableMapOf(setOf(0) to if (notation.number.isZero()) FractionFactory.one() else notation.number)
             is ArcNotation -> {
                 val angle = arcToAngleMap[ArcPointCollection(
-                    notation.getLetters().toMutableSet(), circle = notation.circle
+                    notation.getPointsAndCircles().toMutableSet(), circle = notation.circle
                 )] ?: throw SpoofError("Angle for arc %{arc} not specified", "arc" to notation)
                 return angleVectors.getOrCreate(angle)
             }
             is Point3Notation -> return angleVectors.getOrCreate(notation)
             is SegmentNotation -> return segmentVectors.getOrCreate(
                 SegmentPointCollection(
-                    notation.getLetters().toMutableSet()
+                    notation.getPointsAndCircles().toMutableSet()
                 )
             )
             is MulNotation -> {

@@ -1,5 +1,7 @@
 ### Development
 1. interpreter is becoming a pipeline too. Maybe convert it to pipeline and move part of its logic to a separate class
+2. Add toPower operator `^`
+3. Reflection calls are **slow**. Do not add them to interpretation process. ~~(Currently used only in [TestFactory](../src/test/kotlin/TestFactory.kt))~~
 
 ### Dev questions
 1. SegmentPointCollection, ArcPointCollection addPoints(). is it bad if added point is in [bounds]?

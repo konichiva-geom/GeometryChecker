@@ -32,7 +32,7 @@ class ArcPointCollection(
             throw SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to points.first())
     }
 
-    override fun isFromNotation(notation: ArcNotation) = bounds.containsAll(notation.getLetters())
+    override fun isFromNotation(notation: ArcNotation) = bounds.containsAll(notation.getPointsAndCircles())
             && notation.circle == circle
 
     override fun equals(other: Any?): Boolean {

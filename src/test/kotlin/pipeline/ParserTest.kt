@@ -4,6 +4,7 @@ import TestFactory.failInference
 import TestFactory.failTask
 import TestFactory.passInference
 import TestFactory.passTask
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 internal class ParserTest {
@@ -69,5 +70,16 @@ internal class ParserTest {
             "line AB in arc AB of omega",
             "If arc is at the second position in `in`, then point or arc should be in the first position"
         )
+    }
+
+    @Ignore("make readable error for this situation")
+    @Test
+    fun failTwoBlocks() {
+        passTask("""
+            int:
+                A in AB
+            double:
+                A in AB
+        """)
     }
 }

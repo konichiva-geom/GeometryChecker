@@ -7,7 +7,7 @@ import pipeline.SymbolTable
 open class SegmentPointCollection(val bounds: MutableSet<String>, val points: MutableSet<String> = mutableSetOf()) :
     PointCollection<SegmentNotation> {
     override fun getPointsInCollection(): Set<String> = bounds + points
-    override fun isFromNotation(notation: SegmentNotation) = bounds.containsAll(notation.getLetters())
+    override fun isFromNotation(notation: SegmentNotation) = bounds.containsAll(notation.getPointsAndCircles())
 
     override fun addPoints(added: List<String>) {
         points.addAll(added)

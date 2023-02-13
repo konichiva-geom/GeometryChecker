@@ -36,16 +36,16 @@ class AnyExpr(val notation: Notation) : Expr {
 }
 
 /**
- * invocation
  * some_call(arg1, arg2) => A in CD
- * ^^^^^ signature ^^^^^ | ^output^
+ *
+ * ^^^^ signature ^^^^ | ^output^
  */
-class TheoremUse(val signature: Signature, val output: List<Expr>) : Expr {
+class Invocation(val signature: Signature, val output: List<Expr>) : Expr {
     override fun getChildren(): List<Expr> = signature.args + output
     override fun getRepr(): StringBuilder = throw SystemFatalError("Unexpected getRepr() for TheoremUse")
     override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
         throw SystemFatalError("Unexpected rename() for TheoremUse. Remove this exception if theorems are called inside theorems")
-        TheoremUse(
+        Invocation(
             Signature(signature.name, signature.args.map { it.createNewWithMappedPointsAndCircles(mapper) }),
             output.map { it.createNewWithMappedPointsAndCircles(mapper) }
         )

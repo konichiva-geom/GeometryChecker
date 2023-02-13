@@ -27,7 +27,7 @@ abstract class Notation : Expr, Comparable<Expr>, Renamable {
 
     override fun getChildren(): List<Expr> = listOf()
 
-    abstract fun getLetters(): MutableList<String>
+    abstract fun getPointsAndCircles(): MutableList<String>
 
     abstract fun mergeMapping(mapper: IdentMapper, other: Notation)
     abstract fun createLinks(mapper: IdentMapper)
@@ -35,22 +35,22 @@ abstract class Notation : Expr, Comparable<Expr>, Renamable {
     override fun equals(other: Any?): Boolean = toString() == other.toString()
     override fun hashCode(): Int = toString().hashCode()
 
-    override fun toString(): String = getLetters().joinToString(separator = "")
+    override fun toString(): String = getPointsAndCircles().joinToString(separator = "")
 
     // TODO rewrite in case [RectangleNotation] is created
     override fun checkValidityAfterRename() {
-        if (getLetters().size == 3 && getLetters().toSet().size != 3) {
-            val names = if (getLetters()[0] == getLetters()[1]) mutableListOf(1, 2, getLetters()[0])
-            else if (getLetters()[0] == getLetters()[1]) mutableListOf(1, 3, getLetters()[0])
-            else mutableListOf(2, 3, getLetters()[1])
+        if (getPointsAndCircles().size == 3 && getPointsAndCircles().toSet().size != 3) {
+            val names = if (getPointsAndCircles()[0] == getPointsAndCircles()[1]) mutableListOf(1, 2, getPointsAndCircles()[0])
+            else if (getPointsAndCircles()[0] == getPointsAndCircles()[1]) mutableListOf(1, 3, getPointsAndCircles()[0])
+            else mutableListOf(2, 3, getPointsAndCircles()[1])
             throw SpoofError(
                 "Cannot use notation with same points. %{first} and %{second} points equal to %{point}",
                 "first" to names[0], "second" to names[1], "point" to names[2]
             )
-        } else if (getLetters().size == 2 && getLetters().size == 1)
+        } else if (getPointsAndCircles().size == 2 && getPointsAndCircles().size == 1)
             throw SpoofError(
                 "Cannot use notation with same points. %{first} and %{second} points equal to %{point}",
-                "first" to getLetters()[0], "second" to getLetters()[1], "point" to getLetters()[0]
+                "first" to getPointsAndCircles()[0], "second" to getPointsAndCircles()[1], "point" to getPointsAndCircles()[0]
             )
     }
 }

@@ -1,13 +1,16 @@
-package entity.relation
+package entity.expr
 
-import entity.expr.Expr
 import pipeline.SymbolTable
 
-/*
-Creating and checking the existence of a relation. For expr
+/**
+ * Creating and checking the existence of a relation. For entity.expr
  */
 interface Relation {
     fun check(symbolTable: SymbolTable): Boolean
+
+    /**
+     * Use [makeRelation] instead
+     */
     fun make(symbolTable: SymbolTable)
 
     companion object {

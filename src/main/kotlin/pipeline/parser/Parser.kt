@@ -1,7 +1,8 @@
-package pipeline
+package pipeline.parser
 
-import GeomGrammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
+import com.github.h0tk3y.betterParse.lexer.LiteralToken
+import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.parser.*
 import com.github.h0tk3y.betterParse.st.LiftToSyntaxTreeOptions
 import com.github.h0tk3y.betterParse.st.SyntaxTree
@@ -14,6 +15,8 @@ import pipeline.inference.Inference
 import utils.ExtensionUtils.toRange
 import utils.ExtensionUtils.toViewable
 import utils.MathUtils.min
+
+val filteredFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
 
 @Suppress("UNCHECKED_CAST")
 open class Parser {

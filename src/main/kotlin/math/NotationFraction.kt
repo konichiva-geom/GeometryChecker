@@ -35,7 +35,7 @@ import pipeline.interpreter.IdentMapper
 
 class MulNotation(val elements: MutableList<Notation>) : Notation() {
     override fun getOrder() = Int.MAX_VALUE - 1
-    override fun getLetters(): MutableList<String> = TODO("Not yet implemented")
+    override fun getPointsAndCircles(): MutableList<String> = TODO("Not yet implemented")
     override fun mergeMapping(mapper: IdentMapper, other: Notation) = TODO("Not yet implemented")
     override fun createLinks(mapper: IdentMapper) = TODO("Not yet implemented")
     override fun getRepr() = TODO("Not yet implemented")

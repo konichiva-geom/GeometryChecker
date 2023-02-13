@@ -79,8 +79,8 @@ class IdentMapper {
         if (call::class != definition::class)
             throw SpoofError("Expected ${definition::class}, got ${call::class}")
         if (call is Notation) {
-            val callLetters = call.getLetters()
-            val defLetters = (definition as Notation).getLetters()
+            val callLetters = call.getPointsAndCircles()
+            val defLetters = (definition as Notation).getPointsAndCircles()
             when (defLetters.size) {
                 1 -> mergeMapping(defLetters.first(), callLetters)
                 2 -> {

@@ -6,7 +6,7 @@ import pipeline.SymbolTable
 
 class LinePointCollection(val points: MutableSet<String>) : PointCollection<Point2Notation> {
     override fun getPointsInCollection(): Set<String> = points
-    override fun isFromNotation(notation: Point2Notation) = points.containsAll(notation.getLetters())
+    override fun isFromNotation(notation: Point2Notation) = points.containsAll(notation.getPointsAndCircles())
 
     override fun addPoints(added: List<String>) {
         points.addAll(added)

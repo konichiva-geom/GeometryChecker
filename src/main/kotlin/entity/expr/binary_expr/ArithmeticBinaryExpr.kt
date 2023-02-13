@@ -1,8 +1,10 @@
-package entity.expr
+package entity.expr.binary_expr
 
+import entity.expr.Expr
+import entity.expr.Returnable
 import entity.expr.notation.*
 import error.SpoofError
-import external.Logger
+import external.WarnLogger
 import math.ArithmeticExpr
 import math.FractionFactory
 import math.mergeWithOperation
@@ -10,39 +12,12 @@ import math.vectorFromArithmeticMap
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
-
-private fun extractEntityNotation(expr: Expr): Notation? {
-    if (expr is Notation)
-        return if (expr is NumNotation) null else expr
-    expr as BinaryExpr
-    val left = extractEntityNotation(expr.left)
-    if (left != null)
-        return left
-    val right = extractEntityNotation(expr.right)
-    if (right != null)
-        return right
-    return null
-}
-
-class ParenthesesExpr(val expr: Expr) : Expr {
-    override fun getChildren(): List<Expr> = listOf(expr)
-
-    override fun getRepr(): StringBuilder = StringBuilder("($expr)")
-
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
-        TODO("Not yet implemented")
-    }
-
-    override fun compareTo(other: Expr): Int {
-        TODO("Not yet implemented")
-    }
-
-    override fun toString(): String = "($expr)"
-}
-
 class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " === ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryEquals(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinarySame(
+        left.createNewWithMappedPointsAndCircles(mapper),
+        right.createNewWithMappedPointsAndCircles(mapper)
+    )
 
     override fun toString(): String {
         return "$left == $right"
@@ -55,7 +30,7 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
             throw SpoofError("=== operator can only be used for two notations, not arithmetic expressions")
         val leftNotation = left.map.keys.first()
         if (leftNotation !is Point3Notation && leftNotation !is SegmentNotation)
-            Logger.warn("Use === only for angles and segments, for other relations use ==")
+            WarnLogger.warn("Use === only for angles and segments, for other relations use ==")
         return symbolTable.getRelationsByNotation(leftNotation) ==
                 symbolTable.getRelationsByNotation(right.map.keys.first())
     }
@@ -69,8 +44,9 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
         if (leftNotation is PointNotation)
             symbolTable.getPoint(leftNotation.p)
                 .mergeOtherToThisPoint(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
-        else
+        else {
             symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
+        }
     }
 }
 
@@ -120,7 +96,10 @@ class ReturnableNotEquals(left: Notation, right: Expr) : BinaryExpr(left, right)
 
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " == ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryEquals(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryEquals(
+        left.createNewWithMappedPointsAndCircles(mapper),
+        right.createNewWithMappedPointsAndCircles(mapper)
+    )
 
     override fun toString(): String {
         return "$left == $right"
@@ -172,7 +151,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 }
             }
             if (sideEqual) {
-                Logger.warn("Expression %{expr} is already known", "expr" to this)
+                WarnLogger.warn("Expression %{entity.expr} is already known", "entity.expr" to this)
                 return
             }
             when (notation) {
@@ -193,7 +172,11 @@ private fun isEntityEquals(left: ArithmeticExpr, right: ArithmeticExpr) =
 
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryNotEquals(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryNotEquals(
+        left.createNewWithMappedPointsAndCircles(mapper),
+        right.createNewWithMappedPointsAndCircles(mapper)
+    )
+
     override fun toString(): String {
         return "$left != $right"
     }
@@ -230,7 +213,11 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " > ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryGreater(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryGreater(
+        left.createNewWithMappedPointsAndCircles(mapper),
+        right.createNewWithMappedPointsAndCircles(mapper)
+    )
+
     override fun toString(): String {
         return "$left > $right"
     }
@@ -246,7 +233,8 @@ class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " >= ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryGEQ(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        BinaryGEQ(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
 
     override fun toString(): String {
         return "$left >= $right"

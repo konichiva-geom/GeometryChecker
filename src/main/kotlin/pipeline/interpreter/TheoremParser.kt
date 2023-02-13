@@ -1,14 +1,14 @@
 package pipeline.interpreter
 
-import GeomGrammar
+import pipeline.parser.GeomGrammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
 import entity.expr.Expr
-import entity.expr.TheoremUse
-import entity.relation.Relation
+import entity.expr.Invocation
+import entity.expr.Relation
 import error.SpoofError
-import pipeline.Parser
+import pipeline.parser.Parser
 import pipeline.SymbolTable
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
@@ -72,7 +72,7 @@ class TheoremParser : Parser() {
         for (expr in theoremBody.body) {
             when (expr) {
                 is Relation -> Relation.makeRelation(expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation, symbolTable)
-                is TheoremUse -> {
+                is Invocation -> {
                     if (expr.signature.name == "check")
                         check(expr.signature.args.map { it.createNewWithMappedPointsAndCircles(signatureMapper) }, symbolTable)
                     else throw SpoofError("Expected relation to check")
@@ -94,7 +94,7 @@ class TheoremParser : Parser() {
     fun check(expressions: List<Expr>, symbolTable: SymbolTable) {
         for (rel in expressions) {
             if (rel !is Relation)
-                throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
+                throw SpoofError("Cannot check %{entity.expr}, because it is not a relation", "entity.expr" to rel)
             if (!rel.check(symbolTable))
                 throw SpoofError("Relation $rel unknown")
         }

@@ -14,7 +14,7 @@ class IdentNotation(private var text: String) : RelatableNotation() {
     override fun getRepr() = StringBuilder("c")
     override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = IdentNotation(mapper.get(text))
     override fun toString(): String = text
-    override fun getLetters(): MutableList<String> = mutableListOf(text)
+    override fun getPointsAndCircles(): MutableList<String> = mutableListOf(text)
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {
         mapper.mergeMapping(text, listOf((other as IdentNotation).text))
     }

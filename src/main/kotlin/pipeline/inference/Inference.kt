@@ -2,7 +2,7 @@ package pipeline.inference
 
 import entity.expr.AnyExpr
 import entity.expr.Expr
-import entity.relation.Relation
+import entity.expr.Relation
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 

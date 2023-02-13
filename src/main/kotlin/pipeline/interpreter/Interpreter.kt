@@ -7,23 +7,22 @@ import entity.expr.*
 import entity.expr.notation.Point2Notation
 import entity.expr.notation.Point3Notation
 import entity.expr.notation.PointNotation
-import entity.relation.Relation
+import entity.expr.Relation
+import entity.expr.binary_expr.BinaryAssignment
 import error.SpoofError
 import pipeline.SymbolTable
 import pipeline.inference.InferenceProcessor
 import utils.Utils.catchWithRangeAndArgs
 
-class Interpreter(val inferenceProcessor: InferenceProcessor) {
+class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
     private val symbolTable = SymbolTable(inferenceProcessor)
-    private var addedRelation = false
 
     fun interpret(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
         checkHeaders(tree.item as List<Tuple2<String, *>>)
         validatePointInitialization(tree)
         if (tree.item[0].t2 != null)
             interpretDescription(tree.item[0].t2!!, tree.children[0].children[1])
-        addedRelation = false
         if (tree.item[2].t2 != null)
             interpretSolution(tree.item[2].t2!!, tree.children[2].children[1])
         if (tree.item[1].t2 != null)
@@ -91,15 +90,10 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
             catchWithRangeAndArgs({
                 rename(expr)
                 when (expr) {
-                    is TheoremUse -> {
-                        interpretTheoremUse(expr)
-                        addedRelation = true
-                    }
+                    is Invocation -> interpretTheoremUse(expr)
                     is Relation -> {
                         Relation.makeRelation(expr, symbolTable)
-                        addedRelation = true
                     }
-
                     is Creation -> expr.create(symbolTable)
                     else -> throw SpoofError("Unexpected expression in description")
                 }
@@ -111,7 +105,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
             catchWithRangeAndArgs({
                 rename(expr)
                 when (expr) {
-                    is TheoremUse -> interpretTheoremUse(expr)
+                    is Invocation -> interpretTheoremUse(expr)
                     is Relation -> throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
                     is Creation -> expr.create(symbolTable)
                     else -> throw SpoofError("Unexpected expression in solution. Use theorems or creation statements")
@@ -119,7 +113,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
             }, syntaxTree.children[i].range)
     }
 
-    private fun interpretTheoremUse(expr: TheoremUse) {
+    private fun interpretTheoremUse(expr: Invocation) {
         if (expr.signature.name == "check") {
             theoremParser.check(expr.signature.args, symbolTable)
         } else {
@@ -135,7 +129,7 @@ class Interpreter(val inferenceProcessor: InferenceProcessor) {
                 when (expr) {
                     is Relation -> theoremParser.check(expr, symbolTable)
                     else -> {
-                        if (expr is TheoremUse && expr.signature.name == "check")
+                        if (expr is Invocation && expr.signature.name == "check")
                             theoremParser.check(expr.signature.args, symbolTable)
                         else throw SpoofError("Expected relation to check in prove block")
                     }

@@ -19,7 +19,7 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
     override fun toString(): String = "$p1$p2$p3"
 
-    override fun getLetters(): MutableList<String> = mutableListOf(p1, p2, p3)
+    override fun getPointsAndCircles(): MutableList<String> = mutableListOf(p1, p2, p3)
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {
         other as Point3Notation
         mapper.mergeMapping(p1, listOf(other.p1, other.p3))

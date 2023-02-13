@@ -1,5 +1,5 @@
 import entity.expr.Expr
-import pipeline.Parser
+import pipeline.parser.Parser
 import pipeline.Pipeline
 import pipeline.SymbolTable
 import kotlin.reflect.full.memberProperties
@@ -19,15 +19,15 @@ object TestFactory {
     /**
      * Using [pipeline.Parser.parseSolution] for pipeline.inference and theorems, it runs successfully
      */
-    private fun interpret(code: String): SymbolTable {
+    private fun interpret(code: String) {
         val pipeline = Pipeline()
         pipeline
             .addTheoremsFromFile()
             .addInferenceFromFile()
             .parse(code).interpret()
-        val symbolTableField = pipeline.interpreter::class.memberProperties.find { it.name == "symbolTable" }!!
-        symbolTableField.isAccessible = true
-        return symbolTableField.getter.call(pipeline.interpreter) as SymbolTable
+//        val symbolTableField = pipeline.interpreter::class.memberProperties.find { it.name == "symbolTable" }!!
+//        symbolTableField.isAccessible = true
+//        return symbolTableField.getter.call(pipeline.interpreter) as SymbolTable
     }
 
     fun parseFirst(code: String): Expr {

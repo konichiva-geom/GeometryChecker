@@ -1,3 +1,5 @@
+package pipeline.parser
+
 import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parser
@@ -8,10 +10,10 @@ import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.github.h0tk3y.betterParse.utils.Tuple3
 import entity.expr.*
+import entity.expr.binary_expr.*
 import entity.expr.notation.*
 import error.PosError
 import error.SpoofError
-import error.SystemFatalError
 import math.ArithmeticExpr
 import math.Fraction
 import math.FractionFactory
@@ -22,12 +24,14 @@ import pipeline.inference.DoubleSidedInference
 import pipeline.inference.Inference
 import pipeline.interpreter.Signature
 import pipeline.interpreter.TheoremBody
+import pipeline.parser.GrammarHelperMethods.getBinaryRelationByString
+import pipeline.parser.GrammarHelperMethods.getReturnableEquals
 import utils.ExtensionUtils.toRange
-import utils.Utils
 import utils.Utils.keyForArithmeticNumeric
 
 @Suppress("UNCHECKED_CAST", "UNUSED")
 object GeomGrammar : Grammar<Any>() {
+    // region tokens
     private val semicolonToken by literalToken(";")
     private val colon by literalToken(":")
     private val comma by literalToken(",")
@@ -55,12 +59,12 @@ object GeomGrammar : Grammar<Any>() {
 
     //region relation tokens
     private val intersectsToken by literalToken("intersects")
-    private val shortIntersectsToken by literalToken("∩")
     private val perpendicularToken by literalToken("perpendicular")
-    private val shortPerpendicularToken by literalToken("⊥")
     private val parallelToken by literalToken("parallel")
-    private val shortParallelToken by literalToken("||")
     private val inToken by literalToken("in")
+    private val shortIntersectsToken by literalToken("∩")
+    private val shortPerpendicularToken by literalToken("⊥")
+    private val shortParallelToken by literalToken("||")
     private val relationToken by intersectsToken or shortIntersectsToken or inToken or
             perpendicularToken or shortPerpendicularToken or parallelToken or shortParallelToken
     //endregion
@@ -69,7 +73,6 @@ object GeomGrammar : Grammar<Any>() {
     private val iffToken by literalToken("<=>")
     private val sameToken by literalToken("===")
     private val eqToken by literalToken("==")
-    private val assignmentToken by literalToken("=")
     private val neqToken by literalToken("!=")
     private val geq by literalToken(">=")
     private val leq by literalToken("<=")
@@ -77,6 +80,8 @@ object GeomGrammar : Grammar<Any>() {
     private val lt by literalToken("<")
     private val compToken by geq or leq or gt or lt or sameToken or eqToken or neqToken
     // endregion
+
+    private val assignmentToken by literalToken("=")
 
     private val mul by literalToken("*")
     private val div by literalToken("/")
@@ -90,16 +95,17 @@ object GeomGrammar : Grammar<Any>() {
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
     private val repeatedSeparator by lineBreak or comment or semicolonToken
     private val statementSeparator by oneOrMore(repeatedSeparator)
+    // endregion
 
     //region statements
-    private val creation by -newToken and (point or ident) map {
+    private val creation: Parser<Expr> by -newToken and (point or ident) map {
         if (it.text[0] in 'A'..'Z')
             PointCreation(it.text)
         else CircleCreation(it.text)
     }
 
     // angle, segment, arc
-    private val relatableNotation: Parser<Notation> by (angle map {
+    private val comparableNotation: Parser<Notation> by (angle map {
         Point3Notation(it[0].text, it[1].text, it[2].text)
     }) or (linear map {
         SegmentNotation(it.first, it.second)
@@ -109,18 +115,19 @@ object GeomGrammar : Grammar<Any>() {
         NumNotation(FractionFactory.fromInt(it.text.toIntOrNull() ?: throw Exception("Not a number")))
     })
 
-    // segment AB, A, ray DF
-    private val notation by (line map {
+    // relations, creations, comparisons are for notations
+    private val notation: Parser<Notation> by (line map {
         Point2Notation(it.first, it.second)
     }) or (-ray and linear map {
         RayNotation(it.first, it.second)
-    }) or (relatableNotation map {
+    }) or (comparableNotation map {
         it
     }) or (point map {
         PointNotation(it.text)
     }) or (ident map { IdentNotation(it.text) })
 
-    private val arithmeticTerm: Parser<MutableMap<Notation, Fraction>> by (number and relatableNotation map {
+    private val arithmeticTerm: Parser<MutableMap<Notation, Fraction>> by (number and comparableNotation map {
+        // for terms like 2AB, omitting * operator
         if (it.t2 is NumNotation)
             throw SpoofError("Unexpected 2 numbers in a row")
         mutableMapOf(it.t2 to FractionFactory.fromInt(it.t1.text.toInt()))
@@ -187,6 +194,7 @@ object GeomGrammar : Grammar<Any>() {
             it.t2 as List<Expr>
         )
     }
+
     private val zeroArgsOrMoreInvocation by ident and -leftPar and optionalArgs and -rightPar map {
         Signature(
             it.t1.text,
@@ -195,15 +203,15 @@ object GeomGrammar : Grammar<Any>() {
     }
 
     private val theoremUsage by (zeroArgsOrMoreInvocation and -inferToken and (mul or args)) or (invocation) map {
-        if (it is Signature) TheoremUse(
+        if (it is Signature) Invocation(
             it,
             emptyList()
         ) else {
             if ((it as Tuple2<Any, Any>).t2 is TokenMatch)
-                TheoremUse(it.t1 as Signature, emptyList())
+                Invocation(it.t1 as Signature, emptyList())
             else {
                 it as Tuple2<Signature, List<Expr>>
-                TheoremUse(it.t1, it.t2)
+                Invocation(it.t1, it.t2)
             }
         }
     }
@@ -261,98 +269,4 @@ object GeomGrammar : Grammar<Any>() {
                 inferenceStatement,
                 statementSeparator
             ) and -optional(statementSeparator))
-
-    private fun getReturnableEquals(returnableRelation: Expr, notation: Notation, sign: String): BinaryExpr {
-        if (returnableRelation !is Returnable)
-            throw SpoofError(
-                "Cannot compare with %{expr}, because it does not return anything",
-                "expr" to returnableRelation
-            )
-        return when (sign) {
-            "==" -> ReturnableEquals(notation, returnableRelation)
-            "!=" -> ReturnableNotEquals(notation, returnableRelation)
-            else -> throw SpoofError("Expected == or != with returnable relation")
-        }
-    }
-
-    /**
-     * Create relation binary expression
-     */
-    private fun getBinaryRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
-        return Utils.catchWithRangeAndArgs({
-            val first = tuple.t1
-            val operator = tuple.t2.text
-            val second = tuple.t3
-            when (operator) {
-                "in" -> {
-                    checkNotNumber(first, operator)
-                    checkNotNumber(second, operator)
-                    checkNotCircle(first, operator)
-                    checkNotPoint(second, operator)
-                    checkNotAngle(first, operator)
-                    checkNotAngle(second, operator)
-                    if (first is ArcNotation && second !is ArcNotation)
-                        throw SpoofError("If arc is at the first position in `in`, then it should be in the second position too")
-                    if (second is ArcNotation && first !is PointNotation)
-                        throw SpoofError("If arc is at the second position in `in`, then point or arc should be in the first position")
-                    checkNoGreaterOrder(first, second)
-                    BinaryIn(first, second)
-                }
-                "intersects", "∩" -> {
-                    checkNotNumber(first, operator)
-                    checkNotNumber(second, operator)
-                    checkNotPoint(first, operator)
-                    checkNotPoint(second, operator)
-                    checkNotAngle(first, operator)
-                    checkNotAngle(second, operator)
-                    BinaryIntersects(first, second)
-                }
-
-                "parallel", "||" -> {
-                    checkLinear(first, second, operator)
-                    BinaryParallel(first as Point2Notation, second as Point2Notation)
-                }
-
-                "perpendicular", "⊥" -> {
-                    checkLinear(first, second, operator)
-                    BinaryPerpendicular(first as Point2Notation, second as Point2Notation)
-                }
-
-                else -> throw SystemFatalError("Unknown comparison")
-            }
-        }, tuple.t2.toRange()) as BinaryExpr
-    }
-
-    private fun checkNoGreaterOrder(first: Notation, second: Notation) {
-        if (first.getOrder() > second.getOrder())
-            throw SpoofError("`$first` is 'smaller' than `$second`")
-    }
-
-    private fun checkNotNumber(notation: Notation, operator: String) {
-        if (notation is NumNotation
-        )
-            throw SpoofError("`$notation` is number, `$operator` is not applicable to numbers")
-    }
-
-    private fun checkNotPoint(notation: Notation, operator: String) {
-        if (notation is PointNotation)
-            throw SpoofError("`$notation` is point, `$operator` is not applicable to points in this position")
-    }
-
-    private fun checkNotAngle(notation: Notation, operator: String) {
-        if (notation is Point3Notation)
-            throw SpoofError("`$notation` is angle, `$operator` is not applicable to angle in this position")
-    }
-
-    private fun checkNotCircle(notation: Notation, operator: String) {
-        if (notation is IdentNotation)
-            throw SpoofError("`$notation` is circle, `$operator` is not applicable to circle in this position")
-    }
-
-    private fun checkLinear(first: Notation, second: Notation, operator: String) {
-        if (first !is Point2Notation || second !is Point2Notation || first is ArcNotation || second is ArcNotation)
-            throw SpoofError(
-                "`${if (first !is Point2Notation) first else second}` is not linear, `$operator` is not applicable"
-            )
-    }
 }

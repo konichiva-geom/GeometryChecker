@@ -2,9 +2,7 @@
 A in BC => A in line BC, A in ray BC
 A in ray BC => A in line BC
 line AB || line CD, any C, any D, C != A, C != B, D != A, D != B, line CD || line EF => line AB || line EF
-// merging lines
-A in BC => AB == BC, BC == AC
-A == B, any C => AC == BC
+
 // Проходим по всем правым частям (после =>) и ищем A in ray BC. Где нашли, смотрим, какие отношения нужны.
 // Проверяем, знаем ли мы их.
 // any - конструкция, начинающая перебор.

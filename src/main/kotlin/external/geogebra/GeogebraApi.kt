@@ -2,6 +2,7 @@ package external.geogebra
 
 import kotlin.random.Random
 
+@Deprecated("Moved to JS")
 class GeogebraApi {
     val ggbResult = StringBuilder()
     private val SIZE = 10
