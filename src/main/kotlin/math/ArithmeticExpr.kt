@@ -1,11 +1,14 @@
 package math
 
+import entity.Renamable
 import entity.expr.Expr
 import entity.expr.notation.Notation
 import pipeline.ArithmeticExpander.getArithmeticToString
+import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
+import utils.ExtensionUtils.addOrCreate
 
-class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr {
+class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr, Renamable {
     override fun getChildren(): List<Expr> = map.keys.toList()
 
     override fun getRepr(): StringBuilder {
@@ -23,6 +26,24 @@ class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr {
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
+    }
+
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
+        val renamedList = map.entries.map {
+            val renamedKey = it.key
+            renamedKey.renameToMinimalAndRemap(symbolTable)
+            renamedKey to it.value
+        }
+        val resultingMap = mutableMapOf<Notation, Fraction>()
+        for((k, v) in renamedList) {
+            resultingMap.addOrCreate(k, v)
+        }
+        map.clear()
+        map.putAll(resultingMap)
+    }
+
+    override fun checkValidityAfterRename() {
+        map.keys.forEach { it.checkValidityAfterRename() }
     }
 
     override fun toString(): String {

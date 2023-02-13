@@ -13,7 +13,7 @@ class LinePointCollection(val points: MutableSet<String>) : PointCollection<Poin
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        val lineRelations = getRelations(symbolTable.lines)
+        val lineRelations = getValueFromMapAndDeleteThisKey(symbolTable.lines)
 
         renamePointSet(points, symbolTable.equalIdentRenamer)
 

@@ -3,6 +3,7 @@ package entity.point_collection
 import entity.expr.notation.SegmentNotation
 import error.SpoofError
 import pipeline.SymbolTable
+import utils.ExtensionUtils.addOrCreateVectorWithDivision
 
 open class SegmentPointCollection(val bounds: MutableSet<String>, val points: MutableSet<String> = mutableSetOf()) :
     PointCollection<SegmentNotation> {
@@ -14,13 +15,17 @@ open class SegmentPointCollection(val bounds: MutableSet<String>, val points: Mu
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        val segmentRelations = getRelations(symbolTable.segments)
+        val segmentRelations = getValueFromMapAndDeleteThisKey(symbolTable.segments)
+        val vector = getValueFromMapAndDeleteThisKey(symbolTable.segmentVectors.vectors)
 
         renamePointSet(bounds, symbolTable.equalIdentRenamer)
         renamePointSet(points, symbolTable.equalIdentRenamer)
 
         if (segmentRelations != null)
             symbolTable.segments[this] = segmentRelations
+        // TODO: same for incomplete vectors in VectorContainer
+        if (vector != null)
+            symbolTable.segmentVectors.vectors.addOrCreateVectorWithDivision(this, vector)
     }
 
     override fun checkValidityAfterRename() {

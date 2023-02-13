@@ -105,7 +105,10 @@ fun Vector.compare(other: Vector): Int {
 fun vectorFromArithmeticMap(map: MutableMap<Notation, Fraction>, symbolTable: SymbolTable): Vector {
     return map.keys.fold(
         mutableMapOf()
-    ) { acc, notation -> acc.mergeWithOperation(fromNotation(symbolTable, notation).multiplyBy(map[notation]!!), "+") }
+    ) { acc, notation ->
+        map[notation]
+        acc.mergeWithOperation(fromNotation(symbolTable, notation)
+        .multiplyBy(map[notation]!!), "+") }
 }
 
 

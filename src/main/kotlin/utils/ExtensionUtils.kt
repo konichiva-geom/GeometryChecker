@@ -4,9 +4,7 @@ import com.github.h0tk3y.betterParse.lexer.CharToken
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
-import math.Fraction
-import math.FractionFactory
-import math.add
+import math.*
 
 object ExtensionUtils {
     fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key: R, vararg elements: T) {
@@ -14,6 +12,18 @@ object ExtensionUtils {
             this[key] = mutableSetOf(*elements)
         else
             this[key]!!.addAll(elements.toList())
+    }
+
+    fun <R> MutableMap<R, Vector>.addOrCreateVectorWithDivision(
+        key: R,
+        element: Vector
+    ): MutableMap<R, Vector> {
+        if (this[key] == null)
+            this[key] = element
+        else
+            this[key] = this[key]!!.mergeWithOperation(element, "+")
+                .mergeWith(mutableMapOf(setOf(0) to FractionFactory.create(1, 2)), "*")
+        return this
     }
 
     fun <R> MutableMap<R, Fraction>.addOrCreate(

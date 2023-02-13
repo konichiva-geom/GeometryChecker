@@ -2,7 +2,6 @@ package entity.point_collection
 
 import entity.Renamable
 import entity.expr.notation.Notation
-import entity.relation.EntityRelations
 import pipeline.EqualIdentRenamer
 
 interface PointCollection<T : Notation> : Renamable {
@@ -14,11 +13,11 @@ interface PointCollection<T : Notation> : Renamable {
     fun isFromNotation(notation: T): Boolean
     fun addPoints(added: List<String>)
 
-    fun <T : EntityRelations?> getRelations(mapWithRelations: MutableMap<out PointCollection<*>, T>): T? {
+    fun <T> getValueFromMapAndDeleteThisKey(map: MutableMap<out PointCollection<*>, T>): T? {
         var relations: T? = null
-        if (mapWithRelations[this] != null) {
-            relations = mapWithRelations[this]
-            mapWithRelations.remove(this)
+        if (map[this] != null) {
+            relations = map[this]
+            map.remove(this)
         }
 
         return relations

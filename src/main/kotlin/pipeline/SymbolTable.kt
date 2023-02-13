@@ -245,11 +245,12 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 return angleVectors.getOrCreate(angle)
             }
             is Point3Notation -> return angleVectors.getOrCreate(notation)
-            is SegmentNotation -> return segmentVectors.getOrCreate(
-                SegmentPointCollection(
-                    notation.getPointsAndCircles().toMutableSet()
-                )
-            )
+            is SegmentNotation -> {
+                val key = SegmentPointCollection(notation.getPointsAndCircles().toMutableSet())
+                if (segmentVectors.vectors[key] == null)
+                    equalIdentRenamer.addSubscribers(key, *key.getPointsInCollection().toTypedArray())
+                return segmentVectors.getOrCreate(key)
+            }
             is MulNotation -> {
                 return notation.elements.map {
                     getOrCreateVector(it)
