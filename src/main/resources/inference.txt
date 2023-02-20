@@ -3,6 +3,13 @@ A in BC => A in line BC, A in ray BC
 A in ray BC => A in line BC
 line AB || line CD, any C, any D, C != A, C != B, D != A, D != B, line CD || line EF => line AB || line EF
 
+A === B => A == B
+AB === CD => AB == CD
+ray AB === ray CD => ray AB == ray CD
+line AB === line CD => line AB == line CD
+ABC === DEF => ABC == DEF
+circle1 === circle2 => circle1 == circle2
+
 // Проходим по всем правым частям (после =>) и ищем A in ray BC. Где нашли, смотрим, какие отношения нужны.
 // Проверяем, знаем ли мы их.
 // any - конструкция, начинающая перебор.
