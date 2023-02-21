@@ -1,14 +1,18 @@
 package entity.relation
 
 import entity.expr.notation.Notation
+import error.SystemFatalError
 import pipeline.SymbolTable
 
 abstract class LinearRelations : EntityRelations() {
     // points not in linear
     protected val differentPoints = mutableSetOf<String>()
 
-    override fun merge(other: Notation, symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+    /**
+     * Delete [other], merge its relations with [this]
+     */
+    override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) {
+        throw SystemFatalError("Should be overridden in inheritors")
     }
 
     protected fun mergeDifferentPoints(other: LinearRelations) {

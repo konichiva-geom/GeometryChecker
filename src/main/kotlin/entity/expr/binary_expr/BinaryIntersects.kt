@@ -79,7 +79,7 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
     ) {
         val (collection, relations) = symbolTable.getKeyValueByNotation(notation)
         if (collection is PointCollection<*>)
-            collection.addPoints(intersectionValue)
+            collection.addPoints(intersectionValue, symbolTable)
         else (relations as CircleRelations).points.addAll(intersectionValue)
     }
 }

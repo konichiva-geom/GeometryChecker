@@ -6,7 +6,7 @@ import pipeline.SymbolTable
 
 class ArcRelations : LinearRelations() {
     val points = mutableSetOf<String>()
-    override fun merge(other: Notation, symbolTable: SymbolTable) {
+    override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) {
         points.addAll(symbolTable.getArc(other as ArcNotation).points)
     }
 }

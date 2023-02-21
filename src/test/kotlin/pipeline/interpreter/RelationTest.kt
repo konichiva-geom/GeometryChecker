@@ -14,6 +14,7 @@ internal class RelationTest {
                 AB in line AB
                 ray AB in line AB
                 A in AB
+                B in AB
                 A in ray AB
                 AB in ray AB
                 ray AB in line AB

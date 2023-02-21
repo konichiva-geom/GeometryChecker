@@ -19,15 +19,15 @@ object TestFactory {
     /**
      * Using [pipeline.Parser.parseSolution] for pipeline.inference and theorems, it runs successfully
      */
-    private fun interpret(code: String) {
+    private fun interpret(code: String): SymbolTable {
         val pipeline = Pipeline()
         pipeline
             .addTheoremsFromFile()
             .addInferenceFromFile()
             .parse(code).interpret()
-//        val symbolTableField = pipeline.interpreter::class.memberProperties.find { it.name == "symbolTable" }!!
-//        symbolTableField.isAccessible = true
-//        return symbolTableField.getter.call(pipeline.interpreter) as SymbolTable
+        val symbolTableField = pipeline.interpreter::class.memberProperties.find { it.name == "symbolTable" }!!
+        symbolTableField.isAccessible = true
+        return symbolTableField.getter.call(pipeline.interpreter) as SymbolTable
     }
 
     fun parseFirst(code: String): Expr {
@@ -48,8 +48,8 @@ object TestFactory {
         passSolution(code)
     }
 
-    fun passTask(code: String) {
-        interpret(code)
+    fun passTask(code: String): SymbolTable {
+        return interpret(code)
     }
 
     fun passDescription(code: String) {

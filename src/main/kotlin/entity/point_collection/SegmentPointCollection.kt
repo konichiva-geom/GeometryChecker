@@ -5,13 +5,18 @@ import error.SpoofError
 import pipeline.SymbolTable
 import utils.ExtensionUtils.addOrCreateVectorWithDivision
 
-open class SegmentPointCollection(val bounds: MutableSet<String>, val points: MutableSet<String> = mutableSetOf()) :
-    PointCollection<SegmentNotation> {
+open class SegmentPointCollection internal constructor(
+    protected val bounds: MutableSet<String>,
+    protected val points: MutableSet<String> = mutableSetOf()
+) :
+    PointCollection<SegmentNotation>() {
     override fun getPointsInCollection(): Set<String> = bounds + points
     override fun isFromNotation(notation: SegmentNotation) = bounds.containsAll(notation.getPointsAndCircles())
 
-    override fun addPoints(added: List<String>) {
+    override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
+        val relations = symbolTable.segments.remove(this)!!
         points.addAll(added)
+        symbolTable.segments[this] = relations
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
@@ -21,8 +26,7 @@ open class SegmentPointCollection(val bounds: MutableSet<String>, val points: Mu
         renamePointSet(bounds, symbolTable.equalIdentRenamer)
         renamePointSet(points, symbolTable.equalIdentRenamer)
 
-        if (segmentRelations != null)
-            symbolTable.segments[this] = segmentRelations
+        setRelationsInMapIfNotNull(symbolTable.segments, symbolTable, segmentRelations)
         // TODO: same for incomplete vectors in VectorContainer
         if (vector != null)
             symbolTable.segmentVectors.vectors.addOrCreateVectorWithDivision(this, vector)
@@ -43,5 +47,11 @@ open class SegmentPointCollection(val bounds: MutableSet<String>, val points: Mu
 
     override fun hashCode(): Int {
         return bounds.hashCode()
+    }
+
+    override fun merge(other: PointCollection<*>) {
+        other as SegmentPointCollection
+        assert(bounds == other.bounds)
+        points.addAll(other.points)
     }
 }

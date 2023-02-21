@@ -14,6 +14,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     val rays = mutableMapOf<RayPointCollection, RayRelations>()
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
     val angles = mutableMapOf<Point3Notation, AngleRelations>()
+    val newAngles = mutableMapOf<String, MutableMap<LinePointCollection, AngleRelations>>()
     val circles = mutableMapOf<IdentNotation, CircleRelations>()
     val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
 

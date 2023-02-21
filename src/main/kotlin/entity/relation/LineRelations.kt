@@ -9,11 +9,12 @@ open class LineRelations : LinearRelations() {
     val parallel = mutableSetOf<Point2Notation>()
     val perpendicular = mutableSetOf<Point2Notation>()
 
-    override fun merge(other: Notation, symbolTable: SymbolTable) {
-        val deleted = symbolTable.getLine(other as Point2Notation)
+    override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) {
+        val deleted = (otherRelations ?: symbolTable.getLine(other as Point2Notation)) as LineRelations
         mergeDifferentPoints(deleted)
         parallel.addAll(deleted.parallel)
         perpendicular.addAll(deleted.parallel)
-        symbolTable.resetLine(this, other)
+        if (other != null)
+            symbolTable.resetLine(this, other as Point2Notation)
     }
 }

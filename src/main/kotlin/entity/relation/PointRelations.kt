@@ -7,7 +7,7 @@ import pipeline.SymbolTable
 
 class PointRelations : EntityRelations() {
     val unknown = mutableSetOf<String>()
-    override fun merge(other: Notation, symbolTable: SymbolTable) = throw SystemFatalError("Use mergePoints instead")
+    override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) = throw SystemFatalError("Use mergePoints instead")
 
     fun mergeOtherToThisPoint(self: PointNotation, other: PointNotation, symbolTable: SymbolTable) {
         unknown.addAll(symbolTable.getPoint(other).unknown)

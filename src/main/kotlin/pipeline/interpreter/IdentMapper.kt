@@ -79,21 +79,22 @@ class IdentMapper {
         if (call::class != definition::class)
             throw SpoofError("Expected ${definition::class}, got ${call::class}")
         if (call is Notation) {
-            val callLetters = call.getPointsAndCircles()
-            val defLetters = (definition as Notation).getPointsAndCircles()
-            when (defLetters.size) {
-                1 -> mergeMapping(defLetters.first(), callLetters)
-                2 -> {
-                    mergeMapping(defLetters.first(), callLetters)
-                    mergeMapping(defLetters.last(), callLetters)
-                }
-
-                3 -> {
-                    mergeMapping(defLetters[0], mutableListOf(callLetters.first(), callLetters.last()))
-                    mergeMapping(defLetters[2], mutableListOf(callLetters.first(), callLetters.last()))
-                    mergeMapping(defLetters[1], mutableListOf(callLetters[1]))
-                }
-            }
+            (definition as Notation).mergeMapping(this, call)
+//            val callLetters = call.getPointsAndCircles()
+//            val defLetters = (definition as Notation).getPointsAndCircles()
+//            when (defLetters.size) {
+//                1 -> mergeMapping(defLetters.first(), callLetters)
+//                2 -> {
+//                    mergeMapping(defLetters.first(), callLetters)
+//                    mergeMapping(defLetters.last(), callLetters)
+//                }
+//
+//                3 -> {
+//                    mergeMapping(defLetters[0], mutableListOf(callLetters.first(), callLetters.last()))
+//                    mergeMapping(defLetters[2], mutableListOf(callLetters.first(), callLetters.last()))
+//                    mergeMapping(defLetters[1], mutableListOf(callLetters[1]))
+//                }
+//            }
         }
 
         val (callChildren, defChildren) = listOf(call.getChildren(), definition.getChildren())

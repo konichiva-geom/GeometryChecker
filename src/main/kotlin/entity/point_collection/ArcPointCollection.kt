@@ -5,15 +5,17 @@ import error.SpoofError
 import pipeline.SymbolTable
 
 class ArcPointCollection(
-    val bounds: MutableSet<String>,
-    val points: MutableSet<String> = mutableSetOf(),
-    var circle: String
+    private val bounds: MutableSet<String>,
+    private val points: MutableSet<String> = mutableSetOf(),
+    private var circle: String
 ) :
-    PointCollection<ArcNotation> {
+    PointCollection<ArcNotation>() {
     override fun getPointsInCollection() = bounds + points
 
-    override fun addPoints(added: List<String>) {
+    override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
+        val relations = symbolTable.arcs.remove(this)!!
         points.addAll(added)
+        symbolTable.arcs[this] = relations
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
@@ -23,8 +25,7 @@ class ArcPointCollection(
         renamePointSet(points, symbolTable.equalIdentRenamer)
         circle = symbolTable.equalIdentRenamer.getIdentical(circle)
 
-        if (arcRelations != null)
-            symbolTable.arcs[this] = arcRelations
+        setRelationsInMapIfNotNull(symbolTable.arcs, symbolTable, arcRelations)
     }
 
     override fun checkValidityAfterRename() {
@@ -45,5 +46,12 @@ class ArcPointCollection(
 
     override fun hashCode(): Int {
         return bounds.hashCode() + 31 * circle.hashCode()
+    }
+
+    override fun merge(other: PointCollection<*>) {
+        other as ArcPointCollection
+        assert(circle == other.circle)
+        assert(bounds == other.bounds)
+        points.addAll(other.points)
     }
 }

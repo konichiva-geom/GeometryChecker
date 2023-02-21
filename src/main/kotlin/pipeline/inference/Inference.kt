@@ -36,10 +36,17 @@ open class Inference(
         mapper.traverseExpr(newlyAddedExpr, foundExpr)
 
         mapper.forceUniqueMappings()
-        for (expr in toSideExpressions) {
+        // remapping expressions
+        val mappedToSideExpressions = toSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
+        mapper.clear()
+        for (expr in mappedToSideExpressions) {
+            // TODO probably should rename expr. Or not, because all points should be minimal already?
             Relation.makeRelation(expr as Relation, symbolTable)
         }
-        mapper.clear()
+    }
+
+    override fun toString(): String {
+        return "${fromSideExpressions.joinToString(",")} => ${toSideExpressions.joinToString(",")}"
     }
 }
 

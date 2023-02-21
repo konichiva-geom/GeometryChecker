@@ -91,7 +91,7 @@ object GeomGrammar : Grammar<Any>() {
     private val leftPar by literalToken("(")
     private val rightPar by literalToken(")")
     private val ws by regexToken("[\\t ]+", ignore = true)
-    private val ident by regexToken("[a-zA-Z]+[\\w_]*")
+    private val ident by regexToken("[a-z]+[\\w_]*")
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
     private val repeatedSeparator by lineBreak or comment or semicolonToken
     private val statementSeparator by oneOrMore(repeatedSeparator)

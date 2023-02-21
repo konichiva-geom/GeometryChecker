@@ -1,25 +1,44 @@
 package entity.point_collection
 
 import entity.expr.notation.RayNotation
+import entity.relation.RayRelations
 import error.SpoofError
 import pipeline.SymbolTable
 
-class RayPointCollection(var start: String, val points: MutableSet<String>) : PointCollection<RayNotation> {
+class RayPointCollection(private var start: String, private val points: MutableSet<String>) :
+    PointCollection<RayNotation>() {
     override fun getPointsInCollection(): Set<String> = setOf(start) + points
     override fun isFromNotation(notation: RayNotation) = notation.p1 == start && points.contains(notation.p2)
 
-    override fun addPoints(added: List<String>) {
+    override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
+        val relations = symbolTable.rays.remove(this)!!
         points.addAll(added)
+        symbolTable.rays[this] = relations
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        val rayRelations = getValueFromMapAndDeleteThisKey(symbolTable.rays)
+        var rayRelations: RayRelations? = null
+        for (rayPointCollection in symbolTable.rays.keys) {
+            if (rayPointCollection == this) {
+                rayRelations = symbolTable.rays[rayPointCollection]
+                symbolTable.rays.remove(rayPointCollection)
+                break
+            }
+        }
 
         renamePointSet(points, symbolTable.equalIdentRenamer)
         start = symbolTable.equalIdentRenamer.getIdentical(start)
 
-        if (rayRelations != null)
-            symbolTable.rays[this] = rayRelations
+        for (rayCollection in symbolTable.rays.keys) {
+            if (this == rayCollection) {
+                val oldRelation = symbolTable.rays.remove(rayCollection)!!
+                this.merge(rayCollection)
+                if (rayRelations != null)
+                    oldRelation.merge(null, symbolTable, rayRelations)
+                symbolTable.rays[this] = oldRelation
+                break
+            }
+        }
     }
 
     override fun checkValidityAfterRename() {
@@ -48,5 +67,12 @@ class RayPointCollection(var start: String, val points: MutableSet<String>) : Po
      */
     override fun hashCode(): Int {
         return points.hashCode() + 31 * start.hashCode()
+    }
+
+    override fun toString(): String = "$start:$points"
+    override fun merge(other: PointCollection<*>) {
+        other as RayPointCollection
+        assert(start == other.start)
+        points.addAll(other.points)
     }
 }
