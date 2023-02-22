@@ -37,16 +37,33 @@ open class Inference(
 
         mapper.forceUniqueMappings()
         // remapping expressions
-        val mappedToSideExpressions = toSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
-        mapper.clear()
-        for (expr in mappedToSideExpressions) {
-            // TODO probably should rename expr. Or not, because all points should be minimal already?
-            Relation.makeRelation(expr as Relation, symbolTable)
+        val copiedMappings = mapper.mappings.toMap()
+        val quantifierVariants = symbolTable.equalIdentRenamer.getAllNSizedPointLists(fromSideQuantifier.size)
+        for (variant in quantifierVariants) {
+            mapper.mappings.putAll(copiedMappings)
+            println(this)
+            println(mapper)
+            for ((i, point) in variant.withIndex())
+                mapper.mappings[fromSideQuantifier[i].notation.toString()] = mutableSetOf(point)
+
+            println(mapper)
+            println()
+            val mappedToSideExpressions = toSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
+
+            mapper.clear()
+            for (expr in mappedToSideExpressions) {
+                // TODO probably should rename expr. Or not, because all points should be minimal already?
+                Relation.makeRelation(expr as Relation, symbolTable, fromInference = true)
+            }
         }
     }
 
     override fun toString(): String {
-        return "${fromSideExpressions.joinToString(",")} => ${toSideExpressions.joinToString(",")}"
+        return "${fromSideQuantifier.joinToString(separator = ", ")}${
+            if (fromSideQuantifier.size > 0) ", " else ""
+        }${
+            fromSideExpressions.joinToString(", ")
+        } => ${toSideExpressions.joinToString(", ")}"
     }
 }
 

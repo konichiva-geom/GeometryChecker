@@ -52,7 +52,7 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class ReturnableEquals(left: Notation, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder {
-        TODO("Not yet implemented")
+        return left.getRepr().append(" == ").append(right.getRepr())
     }
 
     override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
@@ -72,6 +72,10 @@ class ReturnableEquals(left: Notation, right: Expr) : BinaryExpr(left, right) {
         if (left::class != returnValue::class)
             throw SpoofError("Cannot make a relation because they are of different classes")
 
+    }
+
+    override fun toString(): String {
+        return "$left == $right"
     }
 }
 

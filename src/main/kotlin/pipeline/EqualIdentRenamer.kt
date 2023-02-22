@@ -3,7 +3,9 @@ package pipeline
 import entity.Renamable
 import entity.expr.notation.Notation
 import entity.point_collection.PointCollection
+import error.SpoofError
 import utils.ExtensionUtils.addToOrCreateSet
+import kotlin.math.pow
 
 /**
  * Maps to equal point (or circle) with the least lexicographical order
@@ -47,6 +49,35 @@ class EqualIdentRenamer {
             subscribers[prev]!!.clear()
             subscribers.remove(prev)
         }
+    }
+
+    /**
+     * [n] shouldn't be bigger than 3. No need to create a common algorithm for all n
+     */
+    fun getAllNSizedPointLists(n: Int): List<List<String>> {
+        val setOfPoints = points.values.toSet().filter { Regex("[A-Z]+\\w*").matches(it) }.toList()
+        val m = setOfPoints.size
+        val res = mutableListOf<List<String>>()
+        when (n) {
+            0 -> {res.add(mutableListOf())}
+            1 -> {
+                for (i in 0 until m)
+                    res.add(mutableListOf(setOfPoints[i]))
+            }
+            2 -> {
+                for (i in 0 until m)
+                    for (j in 0 until m)
+                        res.add(mutableListOf(setOfPoints[i], setOfPoints[j]))
+            }
+            3 -> {
+                for (i in 0 until m)
+                    for (j in 0 until m)
+                        for (k in 0 until m)
+                            res.add(mutableListOf(setOfPoints[i], setOfPoints[j], setOfPoints[k]))
+            }
+            else -> throw SpoofError("Do not use more than 3 enumeration variables: $n")
+        }
+        return res
     }
 
     fun clear() {

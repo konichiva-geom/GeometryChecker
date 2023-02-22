@@ -14,7 +14,9 @@ interface Relation {
     fun make(symbolTable: SymbolTable)
 
     companion object {
-        fun makeRelation(relation: Relation, symbolTable: SymbolTable) {
+        fun makeRelation(relation: Relation, symbolTable: SymbolTable, fromInference: Boolean = false) {
+            if(!fromInference)
+                symbolTable.inferenceProcessor.clearAfterProcessingRelation()
             relation.make(symbolTable)
             symbolTable.inferenceProcessor.processInference(relation as Expr, symbolTable)
         }

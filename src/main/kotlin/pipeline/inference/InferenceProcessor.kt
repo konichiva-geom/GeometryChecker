@@ -8,12 +8,19 @@ class InferenceProcessor {
     private val inferenceSets = mutableMapOf<String, MutableSet<Inference>>()
     private val doubleInferenceSets = mutableMapOf<String, MutableSet<Pair<Inference, Boolean>>>()
     private val mapper = IdentMapper()
+    private val processedSet = mutableSetOf<String>()
+    // TODO: clear processedSet after each makeRelation
 
     /**
      * Check all inferences for this expression
      */
     fun processInference(expr: Expr, symbolTable: SymbolTable) {
+        val currentExpression = expr.toString()
+        println(currentExpression)
+        if(processedSet.contains(currentExpression))
+            return
         val repr = expr.getRepr().toString()
+        processedSet.add(currentExpression)
         val inferences = inferenceSets[repr] ?: return
         for (inference in inferences) {
             inference.process(expr, symbolTable, mapper)
@@ -46,5 +53,9 @@ class InferenceProcessor {
             else
                 sets[repr]!!.add(added)
         }
+    }
+
+    fun clearAfterProcessingRelation() {
+        processedSet.clear()
     }
 }

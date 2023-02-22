@@ -1,6 +1,5 @@
 package pipeline.interpreter
 
-import TestFactory.passDescription
 import TestFactory.passTask
 import kotlin.test.Test
 
@@ -20,7 +19,8 @@ internal class RelationTest {
                 AB in ray AB
                 ray AB in line AB
             solution:;
-        """.trimIndent())
+        """
+        )
     }
 
     @Test
@@ -34,9 +34,8 @@ internal class RelationTest {
                 line AD parallel BC
                 AD parallel BC
                 ray DA || line CB
-            solution:
-
-        """.trimIndent()
+            solution:;
+        """
         )
     }
 
@@ -54,7 +53,6 @@ internal class RelationTest {
             prove:
                 O == AB intersects CD
                 K in alpha; K in omega; O in alpha; O in omega; B in omega
-        
             solution:;
             """
         )
@@ -62,7 +60,8 @@ internal class RelationTest {
 
     @Test
     fun testInference() {
-        passTask("""
+        passTask(
+            """
             description:
                 new A; new B; new C;
                 A in BC
@@ -70,22 +69,24 @@ internal class RelationTest {
                 A in line BC
                 A in ray BC
             solution:;
-        """)
+        """
+        )
     }
 
-//    @Test
-//    fun testInRelation() {
-//        interpret("""
-//            description:
-//                new A
-//                new B
-//                new C
-//                A in segment BC
-//            prove:
-//                A in BC
-//                A in ray BC
-//            solution:
-//
-//        """.trimIndent())
-//    }
+    @Test
+    fun testInRelation() {
+        passTask(
+            """
+            description:
+                new A
+                new B
+                new C
+                A in BC
+            prove:
+                A in BC
+                A in ray BC
+            solution:;
+        """
+        )
+    }
 }

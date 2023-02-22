@@ -1,7 +1,7 @@
 // IMPORTANT: do NOT create inferences based on point equality. For more info, refer to [Inference.process] method
 
 //A in BC <=> not A in BC
-A in BC => A in line BC, A in ray BC, A in ray CB
+B in AC => B in line AC, B in ray AC, B in ray CA
 A in ray BC => A in line BC
 line AB || line CD, any C, any D, C != A, C != B, D != A, D != B, line CD || line EF => line AB || line EF
 
@@ -15,10 +15,13 @@ circle1 === circle2 => circle1 == circle2
 // Проверяем, знаем ли мы их.
 // any - конструкция, начинающая перебор.
 
+line AB ⊥ line CD => line AB ∩ line CD
+line AB ⊥ line CD, any O, O == line AB ∩ line CD => AOC == 90, AOD == 90, BOC == 90, BOD == 90
+ABC == 90 => line AB ⊥ line BC
+
 // all possible line relations
 //AB || CD <=> not AB ∩ CD, not AB ⊥ CD
 //AB ⊥ CD <=> not AB ∩ CD, not AB || CD
 //AB ∩ CD <=> not AB || CD, not AB ⊥ CD
 
-// line AB ⊥ line CD, O as line AB ∩ line CD => AOC == 90, AOD == 90,
 // AOB == 90 => line OB ⊥ line AO
