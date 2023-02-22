@@ -2,8 +2,15 @@ package pipeline
 
 import TestFactory.failInference
 import TestFactory.failTask
+import TestFactory.passDescription
 import TestFactory.passInference
 import TestFactory.passTask
+import entity.expr.Creation
+import entity.expr.Relation
+import entity.expr.binary_expr.BinaryAssignment
+import entity.expr.binary_expr.BinaryIntersects
+import entity.expr.notation.Point2Notation
+import entity.expr.notation.PointNotation
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -75,11 +82,13 @@ internal class ParserTest {
     @Ignore("make readable error for this situation")
     @Test
     fun failTwoBlocks() {
-        passTask("""
+        passTask(
+            """
             int:
                 A in AB
             double:
                 A in AB
-        """)
+        """
+        )
     }
 }

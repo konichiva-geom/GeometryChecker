@@ -15,7 +15,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
     val angles = mutableMapOf<Point3Notation, AngleRelations>()
     val newAngles = mutableMapOf<String, MutableMap<LinePointCollection, AngleRelations>>()
-    val circles = mutableMapOf<IdentNotation, CircleRelations>()
+    val circles = mutableMapOf<String, CircleRelations>()
     val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
 
     val segmentVectors = VectorContainer<SegmentPointCollection>()
@@ -66,7 +66,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 arrayOf(notation.getPointsAndCircles().toMutableSet())
             )
             is Point3Notation -> return notation to getAngle(notation)
-            is IdentNotation -> return notation to circles[notation]!!
+            is IdentNotation -> return notation to circles[notation.text]!!
             else -> throw SpoofError(notation.toString())
         }
     }
@@ -127,8 +127,8 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         }
     }
 
-    fun resetPoint(newRelations: PointRelations, notation: PointNotation) {
-        points[notation.p] = newRelations
+    fun resetPoint(newRelations: PointRelations, notation: String) {
+        points[notation] = newRelations
     }
 
     fun resetAngle(newRelations: AngleRelations, notation: Point3Notation) {
@@ -154,20 +154,28 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     /**
      * Make point distinct from all others
      */
-    fun newPoint(notation: PointNotation): PointRelations {
-        if (points[notation.p] != null)
-            throw SpoofError("Point %{name} already defined", "name" to notation.p)
-        points[notation.p] = PointRelations()
-        equalIdentRenamer.addPoint(notation.p)
-        return points[notation.p]!!
+    fun newPoint(point: String): PointRelations {
+        if (points[point] != null)
+            throw SpoofError("Point %{name} already defined", "name" to point)
+        points[point] = PointRelations()
+        equalIdentRenamer.addPoint(point)
+        return points[point]!!
     }
 
     fun newCircle(notation: IdentNotation): CircleRelations {
-        return CircleRelations()
+        if (circles[notation.text] != null)
+            throw SpoofError("Circle %{name} already defined", "name" to notation.text)
+        circles[notation.text] = CircleRelations()
+        equalIdentRenamer.addPoint(notation.text)
+        return circles[notation.text]!!
     }
 
     fun hasPoint(pointNotation: PointNotation): Boolean {
         return points[pointNotation.p] != null
+    }
+
+    fun hasPoint(point: String): Boolean {
+        return points[point] != null
     }
 
     fun getPoint(name: String): PointRelations {
@@ -183,10 +191,10 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     }
 
     fun getCircle(notation: IdentNotation): CircleRelations {
-        var res = circles[notation]
+        var res = circles[notation.text]
         if (res == null) {
             res = CircleRelations()
-            circles[notation] = res
+            circles[notation.text] = res
         }
         return res
     }

@@ -5,7 +5,7 @@ import entity.relation.CircleRelations
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
-class IdentNotation(private var text: String) : RelatableNotation() {
+class IdentNotation(var text: String) : RelatableNotation() {
     override fun getOrder(): Int = 7
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -23,14 +23,24 @@ class IdentNotation(private var text: String) : RelatableNotation() {
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         var circleRelations: CircleRelations? = null
-        if (symbolTable.circles[this] != null) {
-            circleRelations = symbolTable.circles[this]
-            symbolTable.circles.remove(this)
+        if (symbolTable.circles[text] != null) {
+            circleRelations = symbolTable.circles[text]
+            symbolTable.circles.remove(text)
         }
 
         text = symbolTable.equalIdentRenamer.getIdentical(text)
 
         if (circleRelations != null)
-            symbolTable.circles[this] = circleRelations
+            symbolTable.circles[text] = circleRelations
+    }
+
+    override fun hashCode(): Int {
+        return text.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is IdentNotation)
+            return false
+        return text == other.text
     }
 }

@@ -84,7 +84,7 @@ class PointCreation(private val name: String) : Expr, Creation {
 
     override fun create(symbolTable: SymbolTable) {
         val res = PointNotation(name)
-        symbolTable.newPoint(res)
+        symbolTable.newPoint(res.p)
     }
 }
 

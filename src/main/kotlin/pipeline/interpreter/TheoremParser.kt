@@ -63,7 +63,7 @@ class TheoremParser : Parser() {
 
     fun getSignature(call: Signature): Signature {
         return theorems.keys.find { it.hashCode() == call.hashCode() }
-            ?: throw Exception("pipeline.interpreter.Signature not found")
+            ?: throw Exception("signature not found")
     }
 
     fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody, symbolTable: SymbolTable) {
@@ -94,7 +94,7 @@ class TheoremParser : Parser() {
     fun check(expressions: List<Expr>, symbolTable: SymbolTable) {
         for (rel in expressions) {
             if (rel !is Relation)
-                throw SpoofError("Cannot check %{entity.expr}, because it is not a relation", "entity.expr" to rel)
+                throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
             if (!rel.check(symbolTable))
                 throw SpoofError("Relation $rel unknown")
         }

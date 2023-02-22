@@ -15,8 +15,8 @@ object GrammarHelperMethods {
     internal fun getReturnableEquals(returnableRelation: Expr, notation: Notation, sign: String): BinaryExpr {
         if (returnableRelation !is Returnable)
             throw SpoofError(
-                "Cannot compare with %{entity.expr}, because it does not return anything",
-                "entity.expr" to returnableRelation
+                "Cannot compare with %{expr}, because it does not return anything",
+                "expr" to returnableRelation
             )
         return when (sign) {
             "==" -> ReturnableEquals(notation, returnableRelation)

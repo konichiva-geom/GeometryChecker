@@ -181,7 +181,16 @@ object GeomGrammar : Grammar<Any>() {
         }
     }
 
-    private val assignment by notation and -assignmentToken and relation map { BinaryAssignment(it.t1, it.t2) }
+    private val tupleNotation by -leftPar and separatedTerms(notation, comma) and -rightPar map { TupleNotation(it) }
+
+    private val assignment by (notation or tupleNotation) and -assignmentToken and relation map {
+        if(it.t2 !is Returnable)
+            throw SpoofError("Expected returnable as right operand")
+        BinaryAssignment(
+            it.t1,
+            it.t2
+        )
+    }
 
     private val binaryStatement by creation or assignment or comparison or relation map { it }
 
@@ -191,14 +200,14 @@ object GeomGrammar : Grammar<Any>() {
     private val invocation by ident and -leftPar and args and -rightPar map {
         Signature(
             it.t1.text,
-            it.t2 as List<Expr>
+            it.t2
         )
     }
 
     private val zeroArgsOrMoreInvocation by ident and -leftPar and optionalArgs and -rightPar map {
         Signature(
             it.t1.text,
-            it.t2 as List<Expr>
+            it.t2
         )
     }
 

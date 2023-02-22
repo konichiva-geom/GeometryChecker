@@ -4,11 +4,11 @@ import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import entity.Renamable
 import entity.expr.*
+import entity.expr.binary_expr.BinaryAssignment
+import entity.expr.notation.Notation
 import entity.expr.notation.Point2Notation
 import entity.expr.notation.Point3Notation
 import entity.expr.notation.PointNotation
-import entity.expr.Relation
-import entity.expr.binary_expr.BinaryAssignment
 import error.SpoofError
 import pipeline.SymbolTable
 import pipeline.inference.InferenceProcessor
@@ -52,10 +52,14 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
             rename(child)
     }
 
+    /**
+     * Check that all points mentioned in all notations are initialized
+     */
     private fun validatePointInitialization(expr: Expr, tempTable: SymbolTable) {
         when (expr) {
             is PointCreation -> expr.create(tempTable)
-            is BinaryAssignment -> if(expr.left is PointNotation) tempTable.newPoint(expr.left)
+            is BinaryAssignment -> (expr.left as Notation).getPointsAndCircles()
+                .forEach { if (!tempTable.hasPoint(it)) tempTable.newPoint(it) }
             is PointNotation -> tempTable.getPoint(expr)
             is Point2Notation -> {
                 tempTable.getPoint(expr.p1)

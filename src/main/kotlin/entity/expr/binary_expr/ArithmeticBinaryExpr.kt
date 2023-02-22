@@ -43,7 +43,7 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
         val leftNotation = left.map.keys.first()
         if (leftNotation is PointNotation)
             symbolTable.getPoint(leftNotation.p)
-                .mergeOtherToThisPoint(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
+                .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
         else {
             symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
         }
@@ -132,7 +132,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             val leftNotation = left.map.keys.first()
             if (leftNotation is PointNotation)
                 symbolTable.getPoint(leftNotation.p)
-                    .mergeOtherToThisPoint(leftNotation, right.map.keys.first() as PointNotation, symbolTable)
+                    .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
             else
                 symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
         } else {
@@ -151,7 +151,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 }
             }
             if (sideEqual) {
-                WarnLogger.warn("Expression %{entity.expr} is already known", "entity.expr" to this)
+                WarnLogger.warn("Expression %{expr} is already known", "expr" to this)
                 return
             }
             when (notation) {

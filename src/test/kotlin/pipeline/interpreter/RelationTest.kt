@@ -1,5 +1,6 @@
 package pipeline.interpreter
 
+import TestFactory.passDescription
 import TestFactory.passTask
 import kotlin.test.Test
 
@@ -45,10 +46,15 @@ internal class RelationTest {
             """
             description:
                 new A; new B; new C; new D;
+                new omega; new alpha
                 AB intersects CD
                 O = AB intersects CD
+                (B, O) = omega intersects AB
+                (O, K) = omega intersects alpha
             prove:
                 O == AB intersects CD
+                K in alpha; K in omega; O in alpha; O in omega; B in omega
+        
             solution:;
             """
         )

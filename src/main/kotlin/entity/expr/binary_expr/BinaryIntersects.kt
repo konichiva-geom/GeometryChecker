@@ -2,6 +2,7 @@ package entity.expr.binary_expr
 
 import entity.expr.Returnable
 import entity.expr.notation.Notation
+import entity.expr.notation.Point2Notation
 import entity.expr.notation.PointNotation
 import entity.point_collection.PointCollection
 import entity.relation.CircleRelations
@@ -54,11 +55,15 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
 
     override fun make(symbolTable: SymbolTable) {
         val intersection = getReturnValue(symbolTable)
-        val intersectionValue = if (intersection.isNotEmpty())
-            PointNotation(intersection.first())
-        else PointNotation(NameGenerator.getName())
+        val intersectionValue = PointNotation(
+            if (intersection.isNotEmpty())
+                intersection.first()
+            else if (left is Point2Notation && right is Point2Notation)
+                NameGenerator.getName()
+            else NameGenerator.getUnknownPointQuantityName()
+        )
         if (intersection.isEmpty()) {
-            symbolTable.newPoint(intersectionValue)
+            symbolTable.newPoint(intersectionValue.p)
             addPointsToCircleOrLinear(symbolTable, left as Notation, listOf(intersectionValue.p))
             addPointsToCircleOrLinear(symbolTable, right as Notation, listOf(intersectionValue.p))
             return
@@ -66,13 +71,13 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
         if (intersection.map { symbolTable.getPoint(it) }.toSet().size > 1)
             throw SpoofError(
                 "This task is incorrect. There can be only one intersection point between two lines, " +
-                        "but got a second one from: %{entity.expr}",
-                "entity.expr" to this
+                        "but got a second one from: %{expr}",
+                "expr" to this
             )
         WarnLogger.warn("This relation is already made")
     }
 
-    private fun addPointsToCircleOrLinear(
+    fun addPointsToCircleOrLinear(
         symbolTable: SymbolTable,
         notation: Notation,
         intersectionValue: List<String>
