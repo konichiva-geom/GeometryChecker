@@ -28,9 +28,10 @@ class ArcPointCollection(
         setRelationsInMapIfNotNull(symbolTable.arcs, symbolTable, arcRelations)
     }
 
-    override fun checkValidityAfterRename() {
+    override fun checkValidityAfterRename(): Exception? {
         if (points.size < 2)
-            throw SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to points.first())
+            return SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to points.first())
+        return null
     }
 
     override fun isFromNotation(notation: ArcNotation) = bounds.containsAll(notation.getPointsAndCircles())

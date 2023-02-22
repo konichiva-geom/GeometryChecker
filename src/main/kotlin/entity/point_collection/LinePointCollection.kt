@@ -22,9 +22,10 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
         setRelationsInMapIfNotNull(symbolTable.lines, symbolTable, lineRelations)
     }
 
-    override fun checkValidityAfterRename() {
+    override fun checkValidityAfterRename(): Exception? {
         if (points.size < 2)
-            throw SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to points.first())
+            return SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to points.first())
+        return null
     }
 
     override fun equals(other: Any?): Boolean {

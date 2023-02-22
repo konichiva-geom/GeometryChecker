@@ -35,15 +35,20 @@ class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr, Renamable 
             renamedKey to it.value
         }
         val resultingMap = mutableMapOf<Notation, Fraction>()
-        for((k, v) in renamedList) {
+        for ((k, v) in renamedList) {
             resultingMap.addOrCreate(k, v)
         }
         map.clear()
         map.putAll(resultingMap)
     }
 
-    override fun checkValidityAfterRename() {
-        map.keys.forEach { it.checkValidityAfterRename() }
+    override fun checkValidityAfterRename(): Exception? {
+        map.keys.forEach {
+            val exception = it.checkValidityAfterRename()
+            if (exception != null)
+                return exception
+        }
+        return null
     }
 
     override fun toString(): String {

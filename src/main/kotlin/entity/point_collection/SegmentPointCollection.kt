@@ -32,9 +32,10 @@ open class SegmentPointCollection internal constructor(
             symbolTable.segmentVectors.vectors.addOrCreateVectorWithDivision(this, vector)
     }
 
-    override fun checkValidityAfterRename() {
+    override fun checkValidityAfterRename(): Exception? {
         if (bounds.size < 2)
-            throw SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to points.first())
+            return SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to points.first())
+        return null
     }
 
     override fun toString(): String = "${bounds.joinToString(separator = "")}:$points"

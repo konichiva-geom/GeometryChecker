@@ -3,6 +3,7 @@ package pipeline.inference
 import entity.expr.AnyExpr
 import entity.expr.Expr
 import entity.expr.Relation
+import entity.expr.notation.Notation
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
@@ -49,6 +50,17 @@ open class Inference(
             println(mapper)
             println()
             val mappedToSideExpressions = toSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
+            if (mappedToSideExpressions.any {
+                    it.traverseExpr(symbolTable) { expr, _ ->
+                        if (expr !is Notation)
+                            false
+                        else {
+                            expr.checkValidityAfterRename() != null
+                        }
+                    }
+                })
+                continue
+            //mappedToSideExpressions.forEach { (it as Notation).checkValidityAfterRename() }
 
             mapper.clear()
             for (expr in mappedToSideExpressions) {

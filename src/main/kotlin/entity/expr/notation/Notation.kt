@@ -38,20 +38,21 @@ abstract class Notation : Expr, Comparable<Expr>, Renamable {
     override fun toString(): String = getPointsAndCircles().joinToString(separator = "")
 
     // TODO rewrite in case [RectangleNotation] is created
-    override fun checkValidityAfterRename() {
+    override fun checkValidityAfterRename(): Exception? {
         if (getPointsAndCircles().size == 3 && getPointsAndCircles().toSet().size != 3) {
             val names = if (getPointsAndCircles()[0] == getPointsAndCircles()[1]) mutableListOf(1, 2, getPointsAndCircles()[0])
             else if (getPointsAndCircles()[0] == getPointsAndCircles()[1]) mutableListOf(1, 3, getPointsAndCircles()[0])
             else mutableListOf(2, 3, getPointsAndCircles()[1])
-            throw SpoofError(
+            return SpoofError(
                 "Cannot use notation with same points. %{first} and %{second} points equal to %{point}",
                 "first" to names[0], "second" to names[1], "point" to names[2]
             )
         } else if (getPointsAndCircles().size == 2 && getPointsAndCircles().size == 1)
-            throw SpoofError(
+            return SpoofError(
                 "Cannot use notation with same points. %{first} and %{second} points equal to %{point}",
                 "first" to getPointsAndCircles()[0], "second" to getPointsAndCircles()[1], "point" to getPointsAndCircles()[0]
             )
+        return null
     }
 }
 

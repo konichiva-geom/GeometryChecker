@@ -19,12 +19,23 @@ interface Expr : Comparable<Expr> {
      * Used for theorem and pipeline.inference interpreting
      */
     fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr
+
+    fun traverseExpr(symbolTable: SymbolTable, lambda: (expr: Expr, SymbolTable) -> Boolean): Boolean {
+        if (lambda(this, symbolTable))
+            return true
+        getChildren().forEach {
+            if (it.traverseExpr(symbolTable, lambda))
+                return true
+        }
+        return false
+    }
 }
 
 class AnyExpr(val notation: Notation) : Expr {
     override fun getChildren(): List<Expr> = listOf(notation)
     override fun getRepr(): StringBuilder = notation.getRepr().insert(0, "any ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = AnyExpr(notation.createNewWithMappedPointsAndCircles(mapper) as Notation)
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        AnyExpr(notation.createNewWithMappedPointsAndCircles(mapper) as Notation)
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -59,7 +70,8 @@ class Invocation(val signature: Signature, val output: List<Expr>) : Expr {
 class PrefixNot(private val expr: Expr) : Expr {
     override fun getChildren(): List<Expr> = listOf(expr)
     override fun getRepr(): StringBuilder = expr.getRepr().insert(0, "not ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PrefixNot(expr.createNewWithMappedPointsAndCircles(mapper))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        PrefixNot(expr.createNewWithMappedPointsAndCircles(mapper))
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")

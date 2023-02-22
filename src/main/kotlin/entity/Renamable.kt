@@ -10,5 +10,5 @@ interface Renamable {
      * just renaming won't work
      */
     fun renameToMinimalAndRemap(symbolTable: SymbolTable)
-    fun checkValidityAfterRename()
+    fun checkValidityAfterRename(): Exception?
 }

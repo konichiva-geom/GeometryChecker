@@ -46,7 +46,9 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     private fun rename(expr: Expr) {
         if (expr is Renamable) {
             expr.renameToMinimalAndRemap(symbolTable)
-            expr.checkValidityAfterRename()
+            val exception = expr.checkValidityAfterRename()
+            if(exception != null)
+                throw exception
         }
         for (child in expr.getChildren())
             rename(child)

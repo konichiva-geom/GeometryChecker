@@ -8,7 +8,7 @@ class AnglePointCollection(pivot: String, leftArm: RayPointCollection, rightArm:
         TODO("Not yet implemented")
     }
 
-    override fun checkValidityAfterRename() {
+    override fun checkValidityAfterRename(): Exception? {
         TODO("Not yet implemented")
     }
 

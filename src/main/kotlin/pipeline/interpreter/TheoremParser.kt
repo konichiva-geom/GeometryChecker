@@ -106,8 +106,7 @@ class TheoremParser : Parser() {
         for (rel in expressions) {
             if (rel !is Relation)
                 throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
-            if (!rel.check(symbolTable))
-                throw SpoofError("Relation $rel unknown")
+            check(rel, symbolTable)
         }
     }
 

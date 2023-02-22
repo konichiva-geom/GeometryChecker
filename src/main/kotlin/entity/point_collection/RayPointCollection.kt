@@ -41,9 +41,10 @@ class RayPointCollection(private var start: String, private val points: MutableS
         }
     }
 
-    override fun checkValidityAfterRename() {
+    override fun checkValidityAfterRename(): Exception? {
         if ((points - start).isEmpty())
-            throw SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to start)
+            return SpoofError("Cannot use notation with same points: %{point}%{point}", "point" to start)
+        return null
     }
 
     /**
