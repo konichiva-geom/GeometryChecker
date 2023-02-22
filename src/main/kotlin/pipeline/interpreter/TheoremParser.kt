@@ -1,6 +1,5 @@
 package pipeline.interpreter
 
-import pipeline.parser.GeomGrammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
@@ -8,8 +7,9 @@ import entity.expr.Expr
 import entity.expr.Invocation
 import entity.expr.Relation
 import error.SpoofError
-import pipeline.parser.Parser
 import pipeline.SymbolTable
+import pipeline.parser.GeomGrammar
+import pipeline.parser.Parser
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
     override fun toString(): String {
@@ -71,17 +71,28 @@ class TheoremParser : Parser() {
         println(signatureMapper.mappings)
         for (expr in theoremBody.body) {
             when (expr) {
-                is Relation -> Relation.makeRelation(expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation, symbolTable)
+                is Relation -> Relation.makeRelation(
+                    expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation,
+                    symbolTable,
+                    fromInference = false
+                )
                 is Invocation -> {
                     if (expr.signature.name == "check")
-                        check(expr.signature.args.map { it.createNewWithMappedPointsAndCircles(signatureMapper) }, symbolTable)
+                        check(
+                            expr.signature.args.map { it.createNewWithMappedPointsAndCircles(signatureMapper) },
+                            symbolTable
+                        )
                     else throw SpoofError("Expected relation to check")
                 }
             }
         }
         if (theoremBody.ret.isNotEmpty()) {
             for (expr in theoremBody.ret)
-                Relation.makeRelation(expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation, symbolTable)
+                Relation.makeRelation(
+                    expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation,
+                    symbolTable,
+                    fromInference = false
+                )
         }
         signatureMapper.clear()
     }
