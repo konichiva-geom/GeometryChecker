@@ -14,21 +14,6 @@ object ExtensionUtils {
             this[key]!!.addAll(elements.toList())
     }
 
-    /**
-     *
-     */
-    fun <R> MutableMap<R, Vector>.addOrCreateVectorWithDivision(
-        key: R,
-        element: Vector
-    ): MutableMap<R, Vector> {
-      //  if (this[key] == null)
-            this[key] = element
-//        else
-//            this[key] = this[key]!!.mergeWithOperation(element, "+")
-//                .mergeWith(mutableMapOf(setOf(0) to FractionFactory.create(1, 2)), "*")
-        return this
-    }
-
     fun <R> MutableMap<R, Fraction>.addOrCreate(
         key: R,
         element: Fraction = FractionFactory.one()
