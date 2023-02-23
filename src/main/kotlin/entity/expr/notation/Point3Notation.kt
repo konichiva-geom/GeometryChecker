@@ -1,7 +1,6 @@
 package entity.expr.notation
 
 import entity.expr.Expr
-import entity.relation.AngleRelations
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 import utils.Utils
@@ -32,18 +31,9 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        var relations: AngleRelations? = null
-        if (symbolTable.angles[this] != null) {
-            relations = symbolTable.angles[this]
-            symbolTable.angles.remove(this)
-        }
-
         p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
         p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
         p3 = symbolTable.equalIdentRenamer.getIdentical(p3)
         Utils.sortAngle(this)
-
-        if (relations != null)
-            symbolTable.angles[this] = relations
     }
 }

@@ -6,21 +6,20 @@ import entity.relation.*
 import error.SpoofError
 import math.*
 import pipeline.inference.InferenceProcessor
-import utils.Utils.sortAngle
 
 open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     private val points = mutableMapOf<String, PointRelations>()
     val lines = mutableMapOf<LinePointCollection, LineRelations>()
     val rays = mutableMapOf<RayPointCollection, RayRelations>()
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
-    val angles = mutableMapOf<Point3Notation, AngleRelations>()
+    val angles = mutableMapOf<AnglePointCollection, AngleRelations>()
     val newAngles = mutableMapOf<String, MutableMap<LinePointCollection, AngleRelations>>()
     val circles = mutableMapOf<String, CircleRelations>()
     val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
 
     val segmentVectors = VectorContainer<SegmentPointCollection>()
-    val angleVectors = VectorContainer<Point3Notation>()
-    private val arcToAngleMap = mutableMapOf<ArcPointCollection, Point3Notation>()
+    val angleVectors = VectorContainer<AnglePointCollection>()
+    private val arcToAngleMap = mutableMapOf<ArcPointCollection, AnglePointCollection>()
 
     val equalIdentRenamer = EqualIdentRenamer()
 
@@ -65,7 +64,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 lines as MutableMap<PointCollection<Point2Notation>, LineRelations>,
                 arrayOf(notation.getPointsAndCircles().toMutableSet())
             )
-            is Point3Notation -> return notation to getAngle(notation)
+            is Point3Notation -> return getAngleCollectionFromNotation(notation) to getAngle(notation)
             is IdentNotation -> return notation to circles[notation.text]!!
             else -> throw SpoofError(notation.toString())
         }
@@ -131,8 +130,16 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         points[notation] = newRelations
     }
 
+    fun getAngleAndRelationsOrNull(notation: Point3Notation): Pair<AnglePointCollection, AngleRelations>? {
+        for ((collection, relations) in angles) {
+            if (collection.isFromNotation(notation))
+                return collection to relations
+        }
+        return null
+    }
+
     fun resetAngle(newRelations: AngleRelations, notation: Point3Notation) {
-        angles[notation] = newRelations
+        angles[getAngleAndRelationsOrNull(notation)!!.first] = newRelations
     }
 
     fun getPointSetNotationByNotation(notation: Notation): Set<String> {
@@ -143,6 +150,14 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
             is IdentNotation -> getCircle(notation).points
             else -> throw SpoofError("Unexpected notation: %{notation}", "notation" to notation)
         }
+    }
+
+    private fun getAngleCollectionFromNotation(notation: Point3Notation): AnglePointCollection {
+        return AnglePointCollection(
+            notation.p2,
+            getKeyByNotation(RayNotation(notation.p2, notation.p1)) as RayPointCollection,
+            getKeyByNotation(RayNotation(notation.p2, notation.p3)) as RayPointCollection
+        )
     }
 
     fun getPointObjectsByNotation(notation: Notation): Set<PointRelations> =
@@ -208,14 +223,13 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     }
 
     fun getAngle(notation: Point3Notation): AngleRelations {
-        sortAngle(notation)
-        // if (points[notation.p1] == null || points[notation.p2] == null || points[notation.p3] == null)
-        //     throw Exception("Point ${if (points[notation.p1] == null) notation.p1 else if (points[notation.p2] == null) notation.p2 else notation.p3} not found")
-        if (angles[notation] != null)
-            return angles[notation]!!
-        angles[notation] = AngleRelations()
+        val keyValue = getAngleAndRelationsOrNull(notation)
+        if (keyValue != null)
+            return keyValue.second
+        val newRelations = AngleRelations()
+        angles[getAngleCollectionFromNotation(notation)] = newRelations
         equalIdentRenamer.addSubscribers(notation, *notation.getPointsAndCircles().toTypedArray())
-        return angles[notation]!!
+        return newRelations
     }
 
     fun getArc(notation: ArcNotation): ArcRelations {
@@ -253,7 +267,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 )] ?: throw SpoofError("Angle for arc %{arc} not specified", "arc" to notation)
                 return angleVectors.getOrCreate(angle)
             }
-            is Point3Notation -> return angleVectors.getOrCreate(notation)
+            is Point3Notation -> return angleVectors.getOrCreate(getKeyByNotation(notation) as AnglePointCollection)
             is SegmentNotation -> {
                 val key = SegmentPointCollection(notation.getPointsAndCircles().toMutableSet())
                 if (segmentVectors.vectors[key] == null)

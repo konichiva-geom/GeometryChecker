@@ -2,8 +2,8 @@ package entity.point_collection
 
 import entity.expr.notation.SegmentNotation
 import error.SpoofError
+import math.mergeWithOperation
 import pipeline.SymbolTable
-import utils.ExtensionUtils.addOrCreateVectorWithDivision
 
 open class SegmentPointCollection internal constructor(
     protected val bounds: MutableSet<String>,
@@ -30,8 +30,12 @@ open class SegmentPointCollection internal constructor(
 
         setRelationsInMapIfNotNull(symbolTable.segments, symbolTable, segmentRelations)
         // TODO: same for incomplete vectors in VectorContainer
-        if (vector != null)
-            symbolTable.segmentVectors.vectors.addOrCreateVectorWithDivision(this, vector)
+        if (vector != null) {
+            if (symbolTable.segmentVectors.vectors[this] != null) {
+                symbolTable.segmentVectors
+                    .resolveVector(vector.mergeWithOperation(symbolTable.segmentVectors.vectors[this]!!, "-"))
+            } else symbolTable.segmentVectors.vectors[this] = vector
+        }
     }
 
     override fun checkValidityAfterRename(): Exception? {

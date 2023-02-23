@@ -56,7 +56,7 @@ class RayPointCollection(private var start: String, private val points: MutableS
     override fun equals(other: Any?): Boolean {
         if (other !is RayPointCollection)
             return false
-        if (points.intersect(other.points).isEmpty())
+        if ((points - start).intersect(other.points - other.start).isEmpty())
             return false
         return start == other.start
     }

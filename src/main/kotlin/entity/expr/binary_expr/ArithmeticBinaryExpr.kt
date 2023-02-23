@@ -29,8 +29,10 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
         if (!isEntityEquals(left, right))
             throw SpoofError("=== operator can only be used for two notations, not arithmetic expressions")
         val leftNotation = left.map.keys.first()
+        if (leftNotation is Point3Notation)
+            throw SpoofError("Cannot use this operator for angles. To make points same, use == for points")
         if (leftNotation !is Point3Notation && leftNotation !is SegmentNotation)
-            WarnLogger.warn("Use === only for angles and segments, for other relations use ==")
+            WarnLogger.warn("Use === only for segments, for other relations use ==")
         return symbolTable.getRelationsByNotation(leftNotation) ==
                 symbolTable.getRelationsByNotation(right.map.keys.first())
     }

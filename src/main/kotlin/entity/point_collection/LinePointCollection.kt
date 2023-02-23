@@ -41,6 +41,7 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
     }
 
     override fun toString(): String = "$points"
+
     override fun merge(other: PointCollection<*>) {
         other as LinePointCollection
         points.addAll(other.points)
