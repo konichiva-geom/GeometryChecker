@@ -14,7 +14,9 @@ class ArcPointCollection(
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
         val relations = symbolTable.arcs.remove(this)!!
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
         points.addAll(added)
+        symbolTable.equalIdentRenamer.addSubscribers(this, *added.toTypedArray())
         symbolTable.arcs[this] = relations
     }
 

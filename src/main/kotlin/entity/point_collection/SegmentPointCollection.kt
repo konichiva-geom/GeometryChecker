@@ -15,7 +15,9 @@ open class SegmentPointCollection internal constructor(
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
         val relations = symbolTable.segments.remove(this)!!
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
         points.addAll(added)
+        symbolTable.equalIdentRenamer.addSubscribers(this, *added.toTypedArray())
         symbolTable.segments[this] = relations
     }
 

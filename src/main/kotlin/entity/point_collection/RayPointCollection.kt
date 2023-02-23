@@ -12,7 +12,9 @@ class RayPointCollection(private var start: String, private val points: MutableS
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
         val relations = symbolTable.rays.remove(this)!!
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
         points.addAll(added)
+        symbolTable.equalIdentRenamer.addSubscribers(this, *added.toTypedArray())
         symbolTable.rays[this] = relations
     }
 
@@ -36,9 +38,10 @@ class RayPointCollection(private var start: String, private val points: MutableS
                 if (rayRelations != null)
                     oldRelation.merge(null, symbolTable, rayRelations)
                 symbolTable.rays[this] = oldRelation
-                break
+                return
             }
         }
+        symbolTable.rays[this] = rayRelations!!
     }
 
     override fun checkValidityAfterRename(): Exception? {

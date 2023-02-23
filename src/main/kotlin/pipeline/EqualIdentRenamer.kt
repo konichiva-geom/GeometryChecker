@@ -5,7 +5,6 @@ import entity.expr.notation.Notation
 import entity.point_collection.PointCollection
 import error.SpoofError
 import utils.ExtensionUtils.addToOrCreateSet
-import kotlin.math.pow
 
 /**
  * Maps to equal point (or circle) with the least lexicographical order
@@ -36,6 +35,13 @@ class EqualIdentRenamer {
         points.forEach { subscribers.addToOrCreateSet(it, notation) }
     }
 
+    fun removeSubscribers(collection: PointCollection<*>, vararg points: String) {
+        points.forEach {
+            if (subscribers[it] != null)
+                subscribers[it]!!.remove(collection)
+        }
+    }
+
     /**
      * Works for points and circles
      */
@@ -59,7 +65,9 @@ class EqualIdentRenamer {
         val m = setOfPoints.size
         val res = mutableListOf<List<String>>()
         when (n) {
-            0 -> {res.add(mutableListOf())}
+            0 -> {
+                res.add(mutableListOf())
+            }
             1 -> {
                 for (i in 0 until m)
                     res.add(mutableListOf(setOfPoints[i]))

@@ -10,7 +10,9 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
         val relations = symbolTable.lines.remove(this)!!
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
         points.addAll(added)
+        symbolTable.equalIdentRenamer.addSubscribers(this, *added.toTypedArray())
         symbolTable.lines[this] = relations
     }
 
