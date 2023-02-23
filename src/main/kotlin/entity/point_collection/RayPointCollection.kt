@@ -1,5 +1,6 @@
 package entity.point_collection
 
+import entity.Renamable
 import entity.expr.notation.RayNotation
 import entity.relation.RayRelations
 import error.SpoofError
@@ -14,7 +15,7 @@ class RayPointCollection(private var start: String, private val points: MutableS
         val relations = symbolTable.rays.remove(this)!!
         symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
         points.addAll(added)
-        symbolTable.equalIdentRenamer.addSubscribers(this, *added.toTypedArray())
+        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
         symbolTable.rays[this] = relations
     }
 

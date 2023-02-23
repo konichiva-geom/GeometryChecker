@@ -79,7 +79,7 @@ class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), C
         }
     }
 
-    fun assignFromSolution(symbolTable: SymbolTable) {
+    private fun assignFromSolution(symbolTable: SymbolTable) {
         if (!(right as Relation).check(symbolTable))
             throw SpoofError("prove %{expr} first, then assign", "expr" to right)
         val renamedPoints = (right as Returnable).getReturnValue(symbolTable)
@@ -99,6 +99,6 @@ class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), C
     }
 
     override fun create(symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+        assignFromSolution(symbolTable)
     }
 }

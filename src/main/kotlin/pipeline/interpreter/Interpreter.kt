@@ -112,9 +112,9 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
                 rename(expr)
                 when (expr) {
                     is Invocation -> interpretTheoremUse(expr)
+                    is Creation -> expr.create(symbolTable)
                     is Relation ->
                         throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
-                    is Creation -> expr.create(symbolTable)
                     else -> throw SpoofError("Unexpected expression in solution. Use theorems or creation statements")
                 }
             }, syntaxTree.children[i].range)

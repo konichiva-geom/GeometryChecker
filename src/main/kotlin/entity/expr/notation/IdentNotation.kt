@@ -23,15 +23,15 @@ class IdentNotation(var text: String) : RelatableNotation() {
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         var circleRelations: CircleRelations? = null
-        if (symbolTable.circles[text] != null) {
-            circleRelations = symbolTable.circles[text]
-            symbolTable.circles.remove(text)
+        if (symbolTable.circles[this] != null) {
+            circleRelations = symbolTable.circles[this]
+            symbolTable.circles.remove(this)
         }
 
         text = symbolTable.equalIdentRenamer.getIdentical(text)
 
         if (circleRelations != null)
-            symbolTable.circles[text] = circleRelations
+            symbolTable.circles[this] = circleRelations
     }
 
     override fun hashCode(): Int {

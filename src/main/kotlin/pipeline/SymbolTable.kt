@@ -14,7 +14,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
     val angles = mutableMapOf<AnglePointCollection, AngleRelations>()
     val newAngles = mutableMapOf<String, MutableMap<LinePointCollection, AngleRelations>>()
-    val circles = mutableMapOf<String, CircleRelations>()
+    val circles = mutableMapOf<IdentNotation, CircleRelations>() // IdentNotation is used to rename and remap to work
     val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
 
     val segmentVectors = VectorContainer<SegmentPointCollection>()
@@ -65,7 +65,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 arrayOf(notation.getPointsAndCircles().toMutableSet())
             )
             is Point3Notation -> return getAngleCollectionFromNotation(notation) to getAngle(notation)
-            is IdentNotation -> return notation to circles[notation.text]!!
+            is IdentNotation -> return notation to circles[notation]!!
             else -> throw SpoofError(notation.toString())
         }
     }
@@ -147,7 +147,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
             is PointNotation -> setOf(notation.p)
             is Point2Notation -> (getKeyValueByNotation(notation).first as PointCollection<*>).getPointsInCollection()
             is Point3Notation -> setOf(notation.p1, notation.p2, notation.p3)
-            is IdentNotation -> getCircle(notation).points
+            is IdentNotation -> getCircle(notation).getPoints()
             else -> throw SpoofError("Unexpected notation: %{notation}", "notation" to notation)
         }
     }
@@ -178,11 +178,11 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     }
 
     fun newCircle(notation: IdentNotation): CircleRelations {
-        if (circles[notation.text] != null)
+        if (circles[notation] != null)
             throw SpoofError("Circle %{name} already defined", "name" to notation.text)
-        circles[notation.text] = CircleRelations()
+        circles[notation] = CircleRelations()
         equalIdentRenamer.addPoint(notation.text)
-        return circles[notation.text]!!
+        return circles[notation]!!
     }
 
     fun hasPoint(pointNotation: PointNotation): Boolean {
@@ -206,10 +206,10 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     }
 
     fun getCircle(notation: IdentNotation): CircleRelations {
-        var res = circles[notation.text]
+        var res = circles[notation]
         if (res == null) {
             res = CircleRelations()
-            circles[notation.text] = res
+            circles[notation] = res
         }
         return res
     }

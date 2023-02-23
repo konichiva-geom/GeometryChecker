@@ -1,5 +1,6 @@
 package entity.point_collection
 
+import entity.Renamable
 import entity.expr.notation.Point2Notation
 import error.SpoofError
 import pipeline.SymbolTable
@@ -12,7 +13,7 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
         val relations = symbolTable.lines.remove(this)!!
         symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
         points.addAll(added)
-        symbolTable.equalIdentRenamer.addSubscribers(this, *added.toTypedArray())
+        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
         symbolTable.lines[this] = relations
     }
 

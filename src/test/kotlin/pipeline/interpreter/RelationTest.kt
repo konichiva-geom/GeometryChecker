@@ -46,14 +46,19 @@ internal class RelationTest {
             description:
                 new A; new B; new C; new D;
                 new omega; new alpha
-                AB intersects CD
-                O = AB intersects CD
-                (B, O) = omega intersects AB
-                (O, K) = omega intersects alpha
+                AB ∩ CD
+                O = AB ∩ CD
+                (B, O) = omega ∩ AB
+                (O, K) = omega ∩ alpha
             prove:
-                O == AB intersects CD
+                O == AB ∩ CD
                 K in alpha; K in omega; O in alpha; O in omega; B in omega
-            solution:;
+                
+            solution:
+                G = AB ∩ CD
+                (E, F) = omega ∩ AB
+                check(E in omega); check(E in AB); check(F in omega); check(F in AB)
+                check(G in AB); check(G in CD)
             """
         )
     }

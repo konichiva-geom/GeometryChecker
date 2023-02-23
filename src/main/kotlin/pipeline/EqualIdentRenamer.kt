@@ -1,7 +1,6 @@
 package pipeline
 
 import entity.Renamable
-import entity.expr.notation.Notation
 import entity.point_collection.PointCollection
 import error.SpoofError
 import utils.ExtensionUtils.addToOrCreateSet
@@ -14,25 +13,21 @@ import utils.ExtensionUtils.addToOrCreateSet
  * know that. And there was no way to figure it out without IdentRenamer.
  */
 class EqualIdentRenamer {
-    private val points = mutableMapOf<String, String>()
+    private val pointsAndCircles = mutableMapOf<String, String>()
 
     /**
      * map of renamed collections when key point becomes equal to a smaller point lexicographically
      */
     private val subscribers = mutableMapOf<String, MutableSet<Any>>()
 
-    fun getIdentical(point: String) = points[point]!!
+    fun getIdentical(point: String) = pointsAndCircles[point]!!
 
     fun addPoint(point: String) {
-        points[point] = point
+        pointsAndCircles[point] = point
     }
 
-    fun addSubscribers(pointCollection: PointCollection<*>, vararg points: String) {
-        points.forEach { subscribers.addToOrCreateSet(it, pointCollection) }
-    }
-
-    fun addSubscribers(notation: Notation, vararg points: String) {
-        points.forEach { subscribers.addToOrCreateSet(it, notation) }
+    fun addSubscribers(renamable: Renamable, vararg points: String) {
+        points.forEach { subscribers.addToOrCreateSet(it, renamable) }
     }
 
     fun removeSubscribers(collection: PointCollection<*>, vararg points: String) {
@@ -46,11 +41,9 @@ class EqualIdentRenamer {
      * Works for points and circles
      */
     fun renameSubscribersAndPointer(prev: String, current: String, symbolTable: SymbolTable) {
-        points[prev] = current
+        pointsAndCircles[prev] = current
         if (subscribers[prev] != null) {
-            subscribers[prev]!!.forEach {
-                (it as Renamable).renameToMinimalAndRemap(symbolTable)
-            }
+            subscribers[prev]!!.forEach { (it as Renamable).renameToMinimalAndRemap(symbolTable) }
             subscribers.addToOrCreateSet(current, *subscribers[prev]!!.toTypedArray())
             subscribers[prev]!!.clear()
             subscribers.remove(prev)
@@ -61,7 +54,7 @@ class EqualIdentRenamer {
      * [n] shouldn't be bigger than 3. No need to create a common algorithm for all n
      */
     fun getAllNSizedPointLists(n: Int): List<List<String>> {
-        val setOfPoints = points.values.toSet().filter { Regex("[A-Z]+\\w*").matches(it) }.toList()
+        val setOfPoints = pointsAndCircles.values.toSet().filter { Regex("[A-Z]+\\w*").matches(it) }.toList()
         val m = setOfPoints.size
         val res = mutableListOf<List<String>>()
         when (n) {
@@ -89,7 +82,7 @@ class EqualIdentRenamer {
     }
 
     fun clear() {
-        points.clear()
+        pointsAndCircles.clear()
         subscribers.clear()
     }
 }

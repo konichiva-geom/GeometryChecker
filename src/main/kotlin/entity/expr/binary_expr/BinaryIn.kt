@@ -3,7 +3,6 @@ package entity.expr.binary_expr
 import entity.expr.Relation
 import entity.expr.notation.*
 import entity.point_collection.PointCollection
-import entity.point_collection.SegmentPointCollection
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
@@ -28,8 +27,9 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
     }
 
     override fun make(symbolTable: SymbolTable) {
-        if (right is IdentNotation)
-            symbolTable.getCircle(right).points.add((left as PointNotation).p)
+        if (right is IdentNotation) {
+            symbolTable.getCircle(right).addPoints(symbolTable, (left as PointNotation).p)
+        }
         if (right is ArcNotation) {
             TODO("not yet implemented")
 //            val arcCollection = symbolTable.getKeyByNotation(right as Notation) as SegmentPointCollection
