@@ -3,7 +3,6 @@ package entity.point_collection
 import entity.Renamable
 import entity.expr.notation.RayNotation
 import entity.relation.AngleRelations
-import entity.relation.RayRelations
 import error.SpoofError
 import math.Vector
 import pipeline.SymbolTable
@@ -15,44 +14,25 @@ class RayPointCollection(private var start: String, private val points: MutableS
     override fun isFromNotation(notation: RayNotation) = notation.p1 == start && points.contains(notation.p2)
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
-        val relations = symbolTable.rays.remove(this)!!
         symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
-        val anglePairs = mutableListOf<Pair<Vector?, AngleRelations?>>()
+
+        val angleVectors = mutableListOf<Vector?>()
         for (angle in angles)
-            anglePairs.add(angle.removeFromMaps(symbolTable))
+            angleVectors.add(getValueFromMap(symbolTable.angleVectors.vectors, angle))
 
         points.addAll(added)
 
         for ((i, angle) in angles.withIndex())
-            angle.addToMaps(symbolTable, anglePairs[i].second, anglePairs[i].first)
+            addToMap(angleVectors[i], symbolTable.angleVectors, angle)
+
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
-        symbolTable.rays[this] = relations
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        var rayRelations: RayRelations? = null
-        for (rayPointCollection in symbolTable.rays.keys) {
-            if (rayPointCollection == this) {
-                rayRelations = symbolTable.rays[rayPointCollection]
-                symbolTable.rays.remove(rayPointCollection)
-                break
-            }
-        }
-
         renamePointSet(points, symbolTable.equalIdentRenamer)
         start = symbolTable.equalIdentRenamer.getIdentical(start)
 
-        for (rayCollection in symbolTable.rays.keys) {
-            if (this == rayCollection) {
-                val oldRelation = symbolTable.rays.remove(rayCollection)!!
-                this.merge(rayCollection, symbolTable)
-                if (rayRelations != null)
-                    oldRelation.merge(null, symbolTable, rayRelations)
-                symbolTable.rays[this] = oldRelation
-                return
-            }
-        }
-        symbolTable.rays[this] = rayRelations!!
+        mergeEntitiesInList(symbolTable.rays, symbolTable)
     }
 
     override fun checkValidityAfterRename(): Exception? {
@@ -91,15 +71,15 @@ class RayPointCollection(private var start: String, private val points: MutableS
         angles.addAll(other.angles)
         symbolTable.equalIdentRenamer.removeSubscribers(this, *other.points.toTypedArray())
 
-        val anglePairs = mutableListOf<Pair<Vector?, AngleRelations?>>()
+        val anglePairs = mutableListOf<Vector?>()
         for (angle in angles)
-            anglePairs.add(angle.removeFromMaps(symbolTable))
+            anglePairs.add(getValueFromMap(symbolTable.angleVectors.vectors, angle))
 
-        points.addAll(other.points)
+        addPoints(other.points.toList(), symbolTable)
 
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *other.points.toTypedArray())
         for ((i, angle) in angles.withIndex())
-            angle.addToMaps(symbolTable, anglePairs[i].second, anglePairs[i].first)
+            addToMap(anglePairs[i], symbolTable.angleVectors, angle)
     }
 
     fun addAngle(angle: AnglePointCollection) {

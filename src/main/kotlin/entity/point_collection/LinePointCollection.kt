@@ -10,24 +10,17 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
     override fun isFromNotation(notation: Point2Notation) = points.containsAll(notation.getPointsAndCircles())
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
-        val relations = symbolTable.lines.remove(this)!!
         symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
         points.addAll(added)
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
-//        for(line in symbolTable.lines.keys) {
-//            if(line == this) {
-//
-//            }
-//        }
-        symbolTable.lines[this] = relations
+
+        mergeEntitiesInList(symbolTable.lines, symbolTable)
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        val lineRelations = getValueFromMapAndDeleteThisKey(symbolTable.lines)
-
         renamePointSet(points, symbolTable.equalIdentRenamer)
 
-        setRelationsInMapIfNotNull(symbolTable.lines, symbolTable, lineRelations)
+        mergeEntitiesInList(symbolTable.lines, symbolTable)
     }
 
     override fun checkValidityAfterRename(): Exception? {
@@ -50,6 +43,6 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
 
     override fun merge(other: PointCollection<*>, symbolTable: SymbolTable) {
         other as LinePointCollection
-        points.addAll(other.points)
+        addPoints(other.points.toList(), symbolTable)
     }
 }

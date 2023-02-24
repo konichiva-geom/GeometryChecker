@@ -1,8 +1,8 @@
 package math
 
 import utils.ExtensionUtils.addOrCreate
-import utils.MathUtils.max
 import utils.PrimeGetter.primes
+
 
 class VectorContainer<T> {
     val vectors = mutableMapOf<T, Vector>()

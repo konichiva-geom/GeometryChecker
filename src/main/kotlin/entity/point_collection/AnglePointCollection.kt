@@ -1,69 +1,22 @@
 package entity.point_collection
 
 import entity.expr.notation.Point3Notation
-import entity.relation.AngleRelations
 import error.SpoofError
 import error.SystemFatalError
-import math.Vector
-import math.mergeWithOperation
 import pipeline.SymbolTable
 
 class AnglePointCollection(var pivot: String, val leftArm: RayPointCollection, val rightArm: RayPointCollection) :
     PointCollection<Point3Notation>() {
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        val (vector, angleRelations) = removeFromMaps(symbolTable)
+        val vector = getValueFromMap(symbolTable.segmentVectors.vectors, this)
 
         leftArm.renameToMinimalAndRemap(symbolTable)
         rightArm.renameToMinimalAndRemap(symbolTable)
         pivot = symbolTable.equalIdentRenamer.getIdentical(pivot)
 
-        addToMaps(symbolTable, angleRelations, vector)
-    }
-
-    fun removeFromMaps(symbolTable: SymbolTable): Pair<Vector?, AngleRelations?> {
-        var vector: Vector? = null
-        var angleRelations: AngleRelations? = null
-        for ((angle, vec) in symbolTable.angleVectors.vectors)
-            if (this == angle) {
-                vector = vec
-                symbolTable.angleVectors.vectors.remove(angle)
-                break
-            }
-        for ((angle, relations) in symbolTable.angles)
-            if (this == angle) {
-                angleRelations = relations
-                symbolTable.angles.remove(angle)
-                break
-            }
-        return vector to angleRelations
-    }
-
-    fun addToMaps(symbolTable: SymbolTable, angleRelations: AngleRelations?, vector: Vector?) {
-        var merged = false
-        for ((angle, relations) in symbolTable.angles) {
-            if (angle == this) {
-                if (angleRelations != null)
-                    relations.merge(null, symbolTable, angleRelations)
-                symbolTable.angles.remove(angle)
-                this.merge(angle, symbolTable)
-                symbolTable.angles[this] = relations
-                merged = true
-                break
-            }
-        }
-        if (!merged && angleRelations != null)
-            symbolTable.angles[this] = angleRelations
-        for ((angle, vec) in symbolTable.angleVectors.vectors) {
-            if (angle == this) {
-                if (vector != null) {
-                    symbolTable.angleVectors.resolveVector(vector.mergeWithOperation(vec, "-"))
-                    return
-                } else break
-            }
-        }
-        if (vector != null)
-            symbolTable.angleVectors.vectors[this] = vector
+        mergeEntitiesInList(symbolTable.angles, symbolTable)
+        addToMap(vector, symbolTable.angleVectors, this)
     }
 
     override fun checkValidityAfterRename(): Exception? {

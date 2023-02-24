@@ -5,20 +5,26 @@ import entity.point_collection.*
 import entity.relation.*
 import error.SpoofError
 import math.*
+import math.Vector
 import pipeline.inference.InferenceProcessor
+import utils.MutablePair
+import utils.with
+import java.util.*
 
 open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     private val points = mutableMapOf<String, PointRelations>()
-    val lines = mutableMapOf<LinePointCollection, LineRelations>()
-    val rays = mutableMapOf<RayPointCollection, RayRelations>()
+
+    val lines = LinkedList<MutablePair<LinePointCollection, LineRelations>>()
+    val rays = LinkedList<MutablePair<RayPointCollection, RayRelations>>()
+    val angles = LinkedList<MutablePair<AnglePointCollection, AngleRelations>>()
+    private val arcToAngleList = LinkedList<MutablePair<ArcPointCollection, AnglePointCollection>>()
+
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
-    val angles = mutableMapOf<AnglePointCollection, AngleRelations>()
-    val circles = mutableMapOf<IdentNotation, CircleRelations>() // IdentNotation is used to rename and remap to work
     val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
+    val circles = mutableMapOf<IdentNotation, CircleRelations>() // IdentNotation is used to rename and remap to work
 
     val segmentVectors = VectorContainer<SegmentPointCollection>()
     val angleVectors = VectorContainer<AnglePointCollection>()
-    private val arcToAngleMap = mutableMapOf<ArcPointCollection, AnglePointCollection>()
 
     val equalIdentRenamer = EqualIdentRenamer()
 
@@ -34,9 +40,9 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
             is PointNotation ->
                 return notation.p to getPoint(notation)
 
-            is RayNotation -> return getKeyValueForLinear<RayRelations, RayNotation, RayPointCollection>(
+            is RayNotation -> return getPair<RayRelations, RayNotation, RayPointCollection>(
                 notation,
-                rays as MutableMap<PointCollection<RayNotation>, RayRelations>,
+                rays as LinkedList<MutablePair<PointCollection<RayNotation>, RayRelations>>,
                 arrayOf(notation.p1, mutableSetOf(notation.p2))
             )
 
@@ -50,9 +56,9 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 arcs as MutableMap<PointCollection<ArcNotation>, ArcRelations>,
                 arrayOf(notation.getPointsAndCircles().toMutableSet(), mutableSetOf<String>(), notation.circle)
             )
-            is Point2Notation -> return getKeyValueForLinear<LineRelations, Point2Notation, LinePointCollection>(
+            is Point2Notation -> return getPair<LineRelations, Point2Notation, LinePointCollection>(
                 notation,
-                lines as MutableMap<PointCollection<Point2Notation>, LineRelations>,
+                lines as LinkedList<MutablePair<PointCollection<Point2Notation>, LineRelations>>,
                 arrayOf(notation.getPointsAndCircles().toMutableSet())
             )
             is Point3Notation -> return getAngleAndRelations(notation)
@@ -85,6 +91,30 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         return collection to linearRelations
     }
 
+    private inline fun <reified T : EntityRelations,
+            reified N : Notation,
+            reified C : PointCollection<N>> getPair(
+        notation: N,
+        list: LinkedList<MutablePair<PointCollection<N>, T>>,
+        constructorArgs: Array<Any>
+    ): Pair<PointCollection<N>, T> {
+        // have to iterate over all collection, because if we find by key, we can't take the key
+        // e.g. can find by RayCollection("A", ("B")), but key is RayCollection("A", ("B", "C"))
+        for ((collection, line) in list) {
+            if (collection.isFromNotation(notation))
+                return collection to line
+        }
+
+        val linearRelations = T::class.constructors.first().call()
+        val collection = C::class.constructors.first().call(*constructorArgs)
+        list.add(collection with linearRelations)
+        equalIdentRenamer.addSubscribers(collection, *notation.getPointsAndCircles().toTypedArray())
+        if (notation is ArcNotation)
+            equalIdentRenamer.addSubscribers(collection, notation.circle)
+
+        return collection to linearRelations
+    }
+
     /**
      * Set newRelations to notation
      * @param notation notation to find what value to set
@@ -94,7 +124,8 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     }
 
     fun resetSegment(newRelations: SegmentRelations, notation: SegmentNotation) {
-        resetLinear(segments, notation, newRelations)
+        val collection = SegmentPointCollection(mutableSetOf(notation.p1, notation.p2))
+        segments[collection] = newRelations
     }
 
     fun resetRay(newRelations: RayRelations, notation: RayNotation) {
@@ -102,13 +133,13 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     }
 
     private fun <T : PointCollection<*>, R : EntityRelations> resetLinear(
-        linearCollection: MutableMap<T, R>,
+        linearCollection: LinkedList<MutablePair<T, R>>,
         notation: Point2Notation,
         newRelations: R
     ) {
-        for ((searchedNotation, _) in linearCollection) {
-            if (searchedNotation.getPointsInCollection().containsAll(notation.getPointsAndCircles())) {
-                linearCollection[searchedNotation] = newRelations
+        for (pair in linearCollection) {
+            if (pair.e1.getPointsInCollection().containsAll(notation.getPointsAndCircles())) {
+                pair.e2 = newRelations
                 return
             }
         }
@@ -125,13 +156,13 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         }
         val newRelations = AngleRelations()
         val collection = getAngleCollectionFromNotation(notation)
-        angles[collection] = newRelations
+        angles.add(collection with newRelations)
         equalIdentRenamer.addSubscribers(collection, *notation.getPointsAndCircles().toTypedArray())
         return collection to newRelations
     }
 
     fun resetAngle(newRelations: AngleRelations, notation: Point3Notation) {
-        angles[getAngleAndRelations(notation).first] = newRelations
+        angles.find { it.e1 == getAngleAndRelations(notation).first }!!.e2 = newRelations
     }
 
     fun getPointSetNotationByNotation(notation: Notation): Set<String> {
@@ -235,7 +266,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         circles.clear()
         arcs.clear()
 
-        arcToAngleMap.clear()
+        arcToAngleList.clear()
         angleVectors.vectors.clear()
         segmentVectors.vectors.clear()
 
@@ -246,10 +277,12 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         when (notation) {
             is NumNotation -> return mutableMapOf(setOf(0) to if (notation.number.isZero()) FractionFactory.one() else notation.number)
             is ArcNotation -> {
-                val angle = arcToAngleMap[ArcPointCollection(
-                    notation.getPointsAndCircles().toMutableSet(), circle = notation.circle
-                )] ?: throw SpoofError("Angle for arc %{arc} not specified", "arc" to notation)
-                return angleVectors.getOrCreate(angle)
+                val angle = arcToAngleList.find {
+                    it.e1 == ArcPointCollection(
+                        notation.getPointsAndCircles().toMutableSet(), circle = notation.circle
+                    )
+                } ?: throw SpoofError("Angle for arc %{arc} not specified", "arc" to notation)
+                return angleVectors.getOrCreate(angle.e2)
             }
             is Point3Notation -> return angleVectors.getOrCreate(getKeyByNotation(notation) as AnglePointCollection)
             is SegmentNotation -> {

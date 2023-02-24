@@ -51,17 +51,18 @@ internal class PointCollectionTest {
         """
         )
         assert(symbolTable.lines.size == 1)
-        assert(symbolTable.lines.keys.first() == LinePointCollection(mutableSetOf("A", "B")))
+        assert(symbolTable.lines.first().e1 == LinePointCollection(mutableSetOf("A", "B")))
         assert(symbolTable.rays.size == 2)
-        assert(symbolTable.rays.keys.contains(RayPointCollection("A", mutableSetOf("A", "B"))))
-        assert(symbolTable.rays.keys.contains(RayPointCollection("B", mutableSetOf("A"))))
+        assert(symbolTable.rays.map { it.e1 }.contains(RayPointCollection("A", mutableSetOf("A", "B"))))
+        assert(symbolTable.rays.map { it.e1 }.contains(RayPointCollection("B", mutableSetOf("A"))))
         assert(symbolTable.segments.size == 1)
         assert(symbolTable.segments.keys.first() == SegmentPointCollection(mutableSetOf("A", "B"), mutableSetOf("A")))
     }
 
     @Test
     fun testAngleCollectionAdding() {
-        val symbolTable = passTask("""
+        val symbolTable = passTask(
+            """
             description:
                 new A; new B; new C; new T
                 ACT == 70
@@ -72,9 +73,11 @@ internal class PointCollectionTest {
                  ray BT == ray BC
                  ray CT == ray CB
             solution:;
-        """)
+        """
+        )
 
-        failTask("""
+        failTask(
+            """
             description:
                 new A; new B; new C; new T
                 T in ray BC
@@ -84,9 +87,11 @@ internal class PointCollectionTest {
                  ACT == ACB
                  ray CT == ray CB
             solution:;
-        """, "Relation ACT == ACB unknown")
+        """, "Relation ACT == ACB unknown"
+        )
 
-        failTask("""
+        failTask(
+            """
             description:
                 new A; new B; new C; new T
                 T in line BC
@@ -96,19 +101,22 @@ internal class PointCollectionTest {
                  ACT == ACB
                  ray CT == ray CB
             solution:;
-        """, "Relation ABC == ABT unknown")
+        """, "Relation ABC == ABT unknown"
+        )
     }
 
     @Test
     fun testAngleCollectionChangeOnRayChange() {
 
-        passTask("""
+        passTask(
+            """
         description:
             
         prove:
             
         solution:
             
-        """)
+        """
+        )
     }
 }

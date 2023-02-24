@@ -21,7 +21,7 @@ class ArcPointCollection(
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        val arcRelations = getValueFromMapAndDeleteThisKey(symbolTable.arcs)
+        val arcRelations = getValueFromMap(symbolTable.arcs, this)
 
         renamePointSet(bounds, symbolTable.equalIdentRenamer)
         renamePointSet(points, symbolTable.equalIdentRenamer)
