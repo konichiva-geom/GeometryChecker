@@ -67,8 +67,8 @@ class VectorContainer<T> {
                     vector[setOf(nullified)] = vector[setOf(getCurrent())]!!
                 vector.remove(setOf(getCurrent()))
             }
-            removeLast()
         }
+        removeLast()
     }
 
     override fun toString(): String {
