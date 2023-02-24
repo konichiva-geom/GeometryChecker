@@ -6,6 +6,10 @@ import pipeline.SymbolTable
 
 class AngleRelations : EntityRelations() {
     override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) {
-        symbolTable.resetAngle(this, other as Point3Notation)
+        if (other != null)
+            symbolTable.resetAngle(this, other as Point3Notation)
+        else {
+            assert(symbolTable.angles.find { it.e2 == otherRelations } == null)
+        }
     }
 }

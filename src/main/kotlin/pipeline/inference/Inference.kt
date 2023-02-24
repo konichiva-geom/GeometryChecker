@@ -64,6 +64,7 @@ open class Inference(
 
             mapper.clear()
             for (expr in mappedToSideExpressions) {
+                println("inference: $expr")
                 // TODO probably should rename expr. Or not, because all points should be minimal already?
                 Relation.makeRelation(expr as Relation, symbolTable, fromInference = true)
             }

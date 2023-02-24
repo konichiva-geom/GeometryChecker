@@ -16,7 +16,7 @@ class AnglePointCollection(var pivot: String, var leftArm: RayPointCollection, v
         pivot = symbolTable.equalIdentRenamer.getIdentical(pivot)
 
         mergeEntitiesInList(symbolTable.angles, symbolTable)
-        addToMap(vector, symbolTable.angleVectors, this)
+        addToMap(vector, symbolTable.angleVectors, this, symbolTable)
     }
 
     override fun checkValidityAfterRename(): Exception? {

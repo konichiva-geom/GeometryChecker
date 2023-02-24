@@ -75,13 +75,13 @@ abstract class PointCollection<T : Notation> : Renamable {
     }
 
     protected fun <T> getValueFromMap(map: MutableMap<out PointCollection<*>, T>, collection: PointCollection<*>): T? {
-        var relations: T? = null
+        var value: T? = null
         if (map[collection] != null) {
-            relations = map[this]
-            map.remove(this)
+            value = map[collection]
+            map.remove(collection)
         }
 
-        return relations
+        return value
     }
 
     protected fun <T : EntityRelations> setRelationsInMapIfNotNull(
@@ -108,14 +108,20 @@ abstract class PointCollection<T : Notation> : Renamable {
     protected fun <T : PointCollection<*>> addToMap(
         vector: Vector?,
         container: VectorContainer<T>,
-        collection: PointCollection<*>
+        collection: PointCollection<*>,
+        symbolTable: SymbolTable
     ) {
         if (vector == null)
             return
         for ((angle, vec) in container.vectors) {
             if (angle == collection) {
                 container.resolveVector(vector.mergeWithOperation(vec, "-"))
-                return
+                if(angle === collection)
+                    return
+                else {
+                    angle.merge(collection, symbolTable)
+                    return
+                }
             }
         }
         container.vectors[collection as T] = vector

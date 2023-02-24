@@ -13,6 +13,7 @@ import error.SpoofError
 import pipeline.SymbolTable
 import pipeline.inference.InferenceProcessor
 import utils.Utils.catchWithRangeAndArgs
+import java.util.*
 
 class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
@@ -27,6 +28,7 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
             interpretSolution(tree.item[2].t2!!, tree.children[2].children[1])
         if (tree.item[1].t2 != null)
             interpretProve(tree.item[1].t2!!, tree.children[1].children[1])
+        symbolTable.assertCorrectState()
     }
 
     private fun validatePointInitialization(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
@@ -47,7 +49,7 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
         if (expr is Renamable) {
             expr.renameToMinimalAndRemap(symbolTable)
             val exception = expr.checkValidityAfterRename()
-            if(exception != null)
+            if (exception != null)
                 throw exception
         }
         for (child in expr.getChildren())

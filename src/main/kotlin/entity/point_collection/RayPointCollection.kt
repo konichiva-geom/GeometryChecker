@@ -22,7 +22,7 @@ class RayPointCollection(private var start: String, private val points: MutableS
         points.addAll(added)
 
         for ((i, angle) in angles.withIndex())
-            addToMap(angleVectors[i], symbolTable.angleVectors, angle)
+            addToMap(angleVectors[i], symbolTable.angleVectors, angle, symbolTable)
 
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
         mergeEntitiesInList(symbolTable.rays, symbolTable)
@@ -88,7 +88,7 @@ class RayPointCollection(private var start: String, private val points: MutableS
 
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *other.points.toTypedArray())
         for ((i, angle) in angles.withIndex())
-            addToMap(anglePairs[i], symbolTable.angleVectors, angle)
+            addToMap(anglePairs[i], symbolTable.angleVectors, angle, symbolTable)
     }
 
     fun addAngle(angle: AnglePointCollection) {

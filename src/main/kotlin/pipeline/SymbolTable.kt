@@ -17,7 +17,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     val lines = LinkedList<MutablePair<LinePointCollection, LineRelations>>()
     val rays = LinkedList<MutablePair<RayPointCollection, RayRelations>>()
     val angles = LinkedList<MutablePair<AnglePointCollection, AngleRelations>>()
-    private val arcToAngleList = LinkedList<MutablePair<ArcPointCollection, AnglePointCollection>>()
+    val arcToAngleList = LinkedList<MutablePair<ArcPointCollection, AnglePointCollection>>()
 
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
     val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
@@ -303,5 +303,28 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 "notation" to notation
             )
         }
+    }
+
+    fun assertCorrectState() {
+        assert(angleVectors.vectors.size == angleVectors.vectors.keys.toSet().size)
+        assert(segmentVectors.vectors.size == segmentVectors.vectors.keys.toSet().size)
+
+        assertMapCorrect(points)
+        assertMapCorrect(circles)
+        assertMapCorrect(segments)
+        assertMapCorrect(arcs)
+
+        assertLinkedListCorrect(angles)
+        assertLinkedListCorrect(rays)
+        assertLinkedListCorrect(lines)
+        assertLinkedListCorrect(arcToAngleList)
+    }
+
+    private fun <A, B> assertLinkedListCorrect(list: LinkedList<MutablePair<A, B>>) {
+        assert(list.size == list.map { it.e1 }.toSet().size)
+    }
+
+    private fun <A, B> assertMapCorrect(map: Map<A, B>) {
+        assert(map.size == map.keys.toSet().size)
     }
 }

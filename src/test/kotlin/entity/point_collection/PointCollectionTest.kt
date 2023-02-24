@@ -66,12 +66,16 @@ internal class PointCollectionTest {
             description:
                 new A; new B; new C; new T
                 ACT == 70
+                ACB == BAC
                 T in BC
             prove:
                  ABC == ABT
                  ACT == ACB
                  ray BT == ray BC
                  ray CT == ray CB
+                 BAC == 70
+                 ACT == 70
+                 ACB == 70
             solution:;
         """
         )
@@ -106,14 +110,36 @@ internal class PointCollectionTest {
     }
 
     @Test
-    fun testAngleCollectionChangeOnRayChange() {
+    fun testIncorrectEquality() {
+        passTask("""
+        description:
+           new A; new B;
+            AB == 2
+            AB == 1
+        prove:
+            AB == 1
+        solution:
+            
+        """)
+    }
 
+    @Test
+    fun testAngleCollectionChangeOnRayChange() {
         passTask(
             """
         description:
-            
+            new A; new B; new C; new O
+            new K; new L; new M
+
+            AOB == KLM + 2
+            AOC == LMK + 3
+            BOC == LKM - 175
+            B == C
         prove:
-            
+            AOB == AOC
+            KLM + 2 == LMK + 3
+            AOC == KLM + 2
+            BOC == 0
         solution:
             
         """

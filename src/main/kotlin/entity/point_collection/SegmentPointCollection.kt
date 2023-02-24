@@ -2,9 +2,7 @@ package entity.point_collection
 
 import entity.Renamable
 import entity.expr.notation.SegmentNotation
-import entity.relation.EntityRelations
 import error.SpoofError
-import math.mergeWithOperation
 import pipeline.SymbolTable
 
 open class SegmentPointCollection internal constructor(
@@ -31,7 +29,7 @@ open class SegmentPointCollection internal constructor(
         renamePointSet(points, symbolTable.equalIdentRenamer)
 
         setRelationsInMapIfNotNull(symbolTable.segments, symbolTable, segmentRelations)
-        addToMap(vector, symbolTable.segmentVectors, this)
+        addToMap(vector, symbolTable.segmentVectors, this, symbolTable)
     }
 
     override fun checkValidityAfterRename(): Exception? {
