@@ -1,7 +1,7 @@
 // IMPORTANT: do NOT create inferences based on point equality. For more info, refer to [Inference.process] method
 
 //A in BC <=> not A in BC
-B in AC => B in line AC, B in ray AC, B in ray CA
+B in AC => B in line AC, B in ray AC, B in ray CA, ray AB == ray AC, ray CB == ray CA
 A in ray BC => A in line BC
 line AB || line CD, any C, any D, C != A, C != B, D != A, D != B, line CD || line EF => line AB || line EF
 

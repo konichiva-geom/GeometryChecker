@@ -61,9 +61,10 @@ internal class PointCollectionTest {
 
     @Test
     fun testAngleCollectionAdding() {
-        passTask("""
+        val symbolTable = passTask("""
             description:
                 new A; new B; new C; new T
+                ACT == 70
                 T in BC
             prove:
                  ABC == ABT
@@ -96,5 +97,18 @@ internal class PointCollectionTest {
                  ray CT == ray CB
             solution:;
         """, "Relation ABC == ABT unknown")
+    }
+
+    @Test
+    fun testAngleCollectionChangeOnRayChange() {
+
+        passTask("""
+        description:
+            
+        prove:
+            
+        solution:
+            
+        """)
     }
 }

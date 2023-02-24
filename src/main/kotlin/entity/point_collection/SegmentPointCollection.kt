@@ -57,7 +57,7 @@ open class SegmentPointCollection internal constructor(
         return bounds.hashCode()
     }
 
-    override fun merge(other: PointCollection<*>) {
+    override fun merge(other: PointCollection<*>, symbolTable: SymbolTable) {
         other as SegmentPointCollection
         assert(bounds == other.bounds)
         points.addAll(other.points)

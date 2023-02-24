@@ -2,19 +2,29 @@ package entity.point_collection
 
 import entity.Renamable
 import entity.expr.notation.RayNotation
+import entity.relation.AngleRelations
 import entity.relation.RayRelations
 import error.SpoofError
+import math.Vector
 import pipeline.SymbolTable
 
 class RayPointCollection(private var start: String, private val points: MutableSet<String>) :
     PointCollection<RayNotation>() {
+    private val angles = mutableSetOf<AnglePointCollection>()
     override fun getPointsInCollection(): Set<String> = setOf(start) + points
     override fun isFromNotation(notation: RayNotation) = notation.p1 == start && points.contains(notation.p2)
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
         val relations = symbolTable.rays.remove(this)!!
         symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
+        val anglePairs = mutableListOf<Pair<Vector?, AngleRelations?>>()
+        for (angle in angles)
+            anglePairs.add(angle.removeFromMaps(symbolTable))
+
         points.addAll(added)
+
+        for ((i, angle) in angles.withIndex())
+            angle.addToMaps(symbolTable, anglePairs[i].second, anglePairs[i].first)
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
         symbolTable.rays[this] = relations
     }
@@ -35,7 +45,7 @@ class RayPointCollection(private var start: String, private val points: MutableS
         for (rayCollection in symbolTable.rays.keys) {
             if (this == rayCollection) {
                 val oldRelation = symbolTable.rays.remove(rayCollection)!!
-                this.merge(rayCollection)
+                this.merge(rayCollection, symbolTable)
                 if (rayRelations != null)
                     oldRelation.merge(null, symbolTable, rayRelations)
                 symbolTable.rays[this] = oldRelation
@@ -75,9 +85,24 @@ class RayPointCollection(private var start: String, private val points: MutableS
     }
 
     override fun toString(): String = "$start:$points"
-    override fun merge(other: PointCollection<*>) {
+    override fun merge(other: PointCollection<*>, symbolTable: SymbolTable) {
         other as RayPointCollection
         assert(start == other.start)
+        angles.addAll(other.angles)
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *other.points.toTypedArray())
+
+        val anglePairs = mutableListOf<Pair<Vector?, AngleRelations?>>()
+        for (angle in angles)
+            anglePairs.add(angle.removeFromMaps(symbolTable))
+
         points.addAll(other.points)
+
+        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *other.points.toTypedArray())
+        for ((i, angle) in angles.withIndex())
+            angle.addToMaps(symbolTable, anglePairs[i].second, anglePairs[i].first)
+    }
+
+    fun addAngle(angle: AnglePointCollection) {
+        angles.add(angle)
     }
 }

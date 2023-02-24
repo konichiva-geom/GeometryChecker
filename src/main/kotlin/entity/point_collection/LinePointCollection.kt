@@ -14,6 +14,11 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
         symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
         points.addAll(added)
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
+//        for(line in symbolTable.lines.keys) {
+//            if(line == this) {
+//
+//            }
+//        }
         symbolTable.lines[this] = relations
     }
 
@@ -43,7 +48,7 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
 
     override fun toString(): String = "$points"
 
-    override fun merge(other: PointCollection<*>) {
+    override fun merge(other: PointCollection<*>, symbolTable: SymbolTable) {
         other as LinePointCollection
         points.addAll(other.points)
     }

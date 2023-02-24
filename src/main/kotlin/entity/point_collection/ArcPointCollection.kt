@@ -51,7 +51,7 @@ class ArcPointCollection(
         return bounds.hashCode() + 31 * circle.hashCode()
     }
 
-    override fun merge(other: PointCollection<*>) {
+    override fun merge(other: PointCollection<*>, symbolTable: SymbolTable) {
         other as ArcPointCollection
         assert(circle == other.circle)
         assert(bounds == other.bounds)

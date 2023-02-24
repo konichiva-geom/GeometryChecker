@@ -20,7 +20,10 @@ abstract class PointCollection<T : Notation> : Renamable {
      * E.g. there is [SymbolTable].segments = ({A, B, C}, {A, D, E}). Then B == D. Before remapping relations, make sure that
      * [SymbolTable].segments is now ({A, B, C, E})
      */
-    abstract fun merge(other: PointCollection<*>)
+    abstract fun merge(other: PointCollection<*>, symbolTable: SymbolTable)
+    fun dispose(symbolTable: SymbolTable) {
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *getPointsInCollection().toTypedArray())
+    }
 
     /**
      * TODO: it is important that [this] is contained within a key (we don't have to merge key with [this]).
@@ -47,7 +50,8 @@ abstract class PointCollection<T : Notation> : Renamable {
                 val mergedKey = map.keys.find { it.hashCode() == this.hashCode() }!!
                 val oldRelations = map.remove(this)!!
                 relations.merge(null, symbolTable, oldRelations)
-                this.merge(mergedKey)
+                mergedKey.dispose(symbolTable)
+                this.merge(mergedKey, symbolTable)
                 setRelationsInMap(map as MutableMap<PointCollection<*>, EntityRelations>, relations)
             } else setRelationsInMap(map as MutableMap<PointCollection<*>, EntityRelations>, relations)
         }

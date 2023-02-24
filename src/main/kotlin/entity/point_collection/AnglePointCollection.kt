@@ -10,7 +10,18 @@ import pipeline.SymbolTable
 
 class AnglePointCollection(var pivot: String, val leftArm: RayPointCollection, val rightArm: RayPointCollection) :
     PointCollection<Point3Notation>() {
+
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
+        val (vector, angleRelations) = removeFromMaps(symbolTable)
+
+        leftArm.renameToMinimalAndRemap(symbolTable)
+        rightArm.renameToMinimalAndRemap(symbolTable)
+        pivot = symbolTable.equalIdentRenamer.getIdentical(pivot)
+
+        addToMaps(symbolTable, angleRelations, vector)
+    }
+
+    fun removeFromMaps(symbolTable: SymbolTable): Pair<Vector?, AngleRelations?> {
         var vector: Vector? = null
         var angleRelations: AngleRelations? = null
         for ((angle, vec) in symbolTable.angleVectors.vectors)
@@ -25,18 +36,17 @@ class AnglePointCollection(var pivot: String, val leftArm: RayPointCollection, v
                 symbolTable.angles.remove(angle)
                 break
             }
+        return vector to angleRelations
+    }
 
-        leftArm.renameToMinimalAndRemap(symbolTable)
-        rightArm.renameToMinimalAndRemap(symbolTable)
-        pivot = symbolTable.equalIdentRenamer.getIdentical(pivot)
-
+    fun addToMaps(symbolTable: SymbolTable, angleRelations: AngleRelations?, vector: Vector?) {
         var merged = false
         for ((angle, relations) in symbolTable.angles) {
             if (angle == this) {
                 if (angleRelations != null)
                     relations.merge(null, symbolTable, angleRelations)
                 symbolTable.angles.remove(angle)
-                this.merge(angle)
+                this.merge(angle, symbolTable)
                 symbolTable.angles[this] = relations
                 merged = true
                 break
@@ -82,18 +92,18 @@ class AnglePointCollection(var pivot: String, val leftArm: RayPointCollection, v
         throw SystemFatalError("AnglePointCollection.addPoints() shouldn't be called")
     }
 
-    override fun merge(other: PointCollection<*>) {
+    override fun merge(other: PointCollection<*>, symbolTable: SymbolTable) {
         other as AnglePointCollection
         assert(pivot == other.pivot)
 
         if (leftArm == other.leftArm)
-            leftArm.merge(other.leftArm)
+            leftArm.merge(other.leftArm, symbolTable)
         if (leftArm == other.rightArm)
-            leftArm.merge(other.rightArm)
+            leftArm.merge(other.rightArm, symbolTable)
         if (rightArm == other.leftArm)
-            rightArm.merge(other.leftArm)
+            rightArm.merge(other.leftArm, symbolTable)
         if (rightArm == other.rightArm)
-            rightArm.merge(other.rightArm)
+            rightArm.merge(other.rightArm, symbolTable)
     }
 
     override fun toString(): String {

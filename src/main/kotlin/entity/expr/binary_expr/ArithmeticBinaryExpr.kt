@@ -3,7 +3,9 @@ package entity.expr.binary_expr
 import entity.expr.Expr
 import entity.expr.Returnable
 import entity.expr.notation.*
+import entity.point_collection.PointCollection
 import error.SpoofError
+import error.SystemFatalError
 import external.WarnLogger
 import math.ArithmeticExpr
 import math.FractionFactory
@@ -139,8 +141,21 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             if (leftNotation is PointNotation)
                 symbolTable.getPoint(leftNotation.p)
                     .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
-            else
-                symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
+            else {
+                val (collectionLeft, relationsLeft) = symbolTable.getKeyValueByNotation(left.map.keys.first())
+                val (collectionRight, relationsRight) = symbolTable.getKeyValueByNotation(left.map.keys.first())
+                if (collectionLeft is PointCollection<*>) {
+                    if(collectionLeft === collectionRight) {
+                        // do not know how to negate this statement
+                    }
+                    else collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
+                } else {
+                    if (collectionLeft !is IdentNotation)
+                        throw SystemFatalError("Unexpected notation in equals")
+                    throw SystemFatalError("Not done yer for circles")
+                }
+                relationsLeft.merge(null, symbolTable, relationsRight)
+            }
         } else {
             val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
             val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
