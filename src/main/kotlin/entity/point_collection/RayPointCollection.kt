@@ -2,7 +2,6 @@ package entity.point_collection
 
 import entity.Renamable
 import entity.expr.notation.RayNotation
-import entity.relation.AngleRelations
 import error.SpoofError
 import math.Vector
 import pipeline.SymbolTable
@@ -26,6 +25,7 @@ class RayPointCollection(private var start: String, private val points: MutableS
             addToMap(angleVectors[i], symbolTable.angleVectors, angle)
 
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
+        mergeEntitiesInList(symbolTable.rays, symbolTable)
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
@@ -69,6 +69,15 @@ class RayPointCollection(private var start: String, private val points: MutableS
         other as RayPointCollection
         assert(start == other.start)
         angles.addAll(other.angles)
+        other.angles.forEach {
+            val vector = symbolTable.angleVectors.vectors[it]
+            if (it.leftArm === other)
+                it.leftArm = this
+            if (it.rightArm === other)
+                it.rightArm = this
+            if (vector != null)
+                symbolTable.angleVectors.vectors[it] = vector
+        }
         symbolTable.equalIdentRenamer.removeSubscribers(this, *other.points.toTypedArray())
 
         val anglePairs = mutableListOf<Vector?>()

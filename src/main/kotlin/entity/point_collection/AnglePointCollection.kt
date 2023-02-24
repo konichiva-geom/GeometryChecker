@@ -5,7 +5,7 @@ import error.SpoofError
 import error.SystemFatalError
 import pipeline.SymbolTable
 
-class AnglePointCollection(var pivot: String, val leftArm: RayPointCollection, val rightArm: RayPointCollection) :
+class AnglePointCollection(var pivot: String, var leftArm: RayPointCollection, var rightArm: RayPointCollection) :
     PointCollection<Point3Notation>() {
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
