@@ -111,7 +111,7 @@ internal class PointCollectionTest {
 
     @Test
     fun testIncorrectEquality() {
-        passTask("""
+        failTask("""
         description:
            new A; new B;
             AB == 2
@@ -120,7 +120,7 @@ internal class PointCollectionTest {
             AB == 1
         solution:
             
-        """)
+        """, "Expression is incorrect")
     }
 
     @Test

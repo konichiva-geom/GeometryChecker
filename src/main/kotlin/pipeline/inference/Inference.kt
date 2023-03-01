@@ -67,6 +67,7 @@ open class Inference(
                 println("inference: $expr")
                 // TODO probably should rename expr. Or not, because all points should be minimal already?
                 Relation.makeRelation(expr as Relation, symbolTable, fromInference = true)
+                symbolTable.assertCorrectState()
             }
         }
     }

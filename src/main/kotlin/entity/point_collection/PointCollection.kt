@@ -9,7 +9,9 @@ import math.mergeWithOperation
 import pipeline.EqualIdentRenamer
 import pipeline.SymbolTable
 import utils.MutablePair
+import utils.Utils.isSame
 import java.util.*
+import kotlin.math.abs
 
 /**
  * Represents an object, subsequently contains some of its relations.
@@ -32,7 +34,7 @@ abstract class PointCollection<T : Notation> : Renamable {
      */
     abstract fun merge(other: PointCollection<*>, symbolTable: SymbolTable)
     fun dispose(symbolTable: SymbolTable) {
-        symbolTable.equalIdentRenamer.removeSubscribers(this, *getPointsInCollection().toTypedArray())
+        symbolTable.equalIdentRenamer.removeSubscribers(this as Renamable, *getPointsInCollection().toTypedArray())
     }
 
     /**
@@ -64,6 +66,21 @@ abstract class PointCollection<T : Notation> : Renamable {
                 break
             }
         }
+        if (disposed.e1 is RayPointCollection) {
+            (disposed.e1 as RayPointCollection).angles.forEach {
+                if (it.leftArm === disposed.e1)
+                    it.leftArm = this as RayPointCollection
+                if (it.rightArm === disposed.e1)
+                    it.rightArm = this as RayPointCollection
+            }
+            if (symbolTable.angles.size != symbolTable.angles.map { it.e1 }.toSet().size) {
+                // TODO remove assertion, probably wrong
+                assert(abs(symbolTable.angles.size - symbolTable.angles.map { it.e1 }.toSet().size) == 1)
+                (disposed.e1 as RayPointCollection).angles.forEach {
+                    it.mergeEntitiesInList(symbolTable.angles, symbolTable)
+                }
+            }
+        }
 
         current.e1.merge(disposed.e1, symbolTable)
         current.e2.merge(null, symbolTable, disposed.e2)
@@ -74,7 +91,7 @@ abstract class PointCollection<T : Notation> : Renamable {
         set.clear(); set.addAll(newPoints)
     }
 
-    protected fun <T> getValueFromMap(map: MutableMap<out PointCollection<*>, T>, collection: PointCollection<*>): T? {
+    protected fun <T> removeValueFromMap(map: MutableMap<out PointCollection<*>, T>, collection: PointCollection<*>): T? {
         var value: T? = null
         if (map[collection] != null) {
             value = map[collection]
@@ -115,13 +132,11 @@ abstract class PointCollection<T : Notation> : Renamable {
             return
         for ((angle, vec) in container.vectors) {
             if (angle == collection) {
-                container.resolveVector(vector.mergeWithOperation(vec, "-"))
-                if(angle === collection)
-                    return
-                else {
+                if (vector != vec)
+                    container.resolveVector(vector.mergeWithOperation(vec, "-"))
+                if (!isSame(angle, collection))
                     angle.merge(collection, symbolTable)
-                    return
-                }
+                return
             }
         }
         container.vectors[collection as T] = vector

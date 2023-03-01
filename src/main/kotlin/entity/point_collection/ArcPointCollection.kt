@@ -14,14 +14,14 @@ class ArcPointCollection(
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
         val relations = symbolTable.arcs.remove(this)!!
-        symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *points.toTypedArray())
         points.addAll(added)
-        symbolTable.equalIdentRenamer.addSubscribers(this, *added.toTypedArray())
+        symbolTable.equalIdentRenamer.addSubscribers(this, *points.toTypedArray())
         symbolTable.arcs[this] = relations
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        val arcRelations = getValueFromMap(symbolTable.arcs, this)
+        val arcRelations = removeValueFromMap(symbolTable.arcs, this)
 
         renamePointSet(bounds, symbolTable.equalIdentRenamer)
         renamePointSet(points, symbolTable.equalIdentRenamer)

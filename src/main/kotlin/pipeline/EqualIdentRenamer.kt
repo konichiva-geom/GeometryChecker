@@ -4,6 +4,7 @@ import entity.Renamable
 import entity.point_collection.PointCollection
 import error.SpoofError
 import utils.ExtensionUtils.addToOrCreateSet
+import utils.Utils.sortPoints
 
 /**
  * Maps to equal point (or circle) with the least lexicographical order
@@ -30,23 +31,33 @@ class EqualIdentRenamer {
         points.forEach { subscribers.addToOrCreateSet(it, renamable) }
     }
 
-    fun removeSubscribers(collection: PointCollection<*>, vararg points: String) {
+    fun removeSubscribers(renamable: Renamable, vararg points: String) {
         points.forEach {
             if (subscribers[it] != null)
-                subscribers[it]!!.remove(collection)
+                subscribers[it]!!.remove(renamable)
         }
     }
 
     /**
      * Works for points and circles
      */
-    fun renameSubscribersAndPointer(prev: String, current: String, symbolTable: SymbolTable) {
+    fun renameSubscribersAndPointer(first: String, second: String, symbolTable: SymbolTable) {
+        val (prev, current) = sortPoints(first, second)
         pointsAndCircles[prev] = current
+        renameAllPointers(prev, current)
         if (subscribers[prev] != null) {
-            subscribers[prev]!!.forEach { (it as Renamable).renameToMinimalAndRemap(symbolTable) }
-            subscribers.addToOrCreateSet(current, *subscribers[prev]!!.toTypedArray())
+            val prevSubscribers = subscribers[prev]!!.toSet()
             subscribers[prev]!!.clear()
+            prevSubscribers.forEach { (it as Renamable).renameToMinimalAndRemap(symbolTable) }
+            subscribers.addToOrCreateSet(current, *prevSubscribers.toTypedArray())
             subscribers.remove(prev)
+        }
+    }
+
+    private fun renameAllPointers(prev: String, current: String) {
+        pointsAndCircles.forEach { (k, v) ->
+            if (v == prev)
+                pointsAndCircles[k] = current
         }
     }
 

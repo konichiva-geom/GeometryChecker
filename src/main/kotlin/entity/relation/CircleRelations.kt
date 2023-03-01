@@ -22,8 +22,9 @@ class CircleRelations : EntityRelations(), Renamable {
     }
 
     fun addPoints(symbolTable: SymbolTable, vararg addedPoints: String) {
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *points.toTypedArray())
         points.addAll(addedPoints)
-        symbolTable.equalIdentRenamer.addSubscribers(this, *addedPoints)
+        symbolTable.equalIdentRenamer.addSubscribers(this, *points.toTypedArray())
     }
 
     fun getPoints() = points.toSet()

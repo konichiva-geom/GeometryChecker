@@ -157,7 +157,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         val newRelations = AngleRelations()
         val collection = getAngleCollectionFromNotation(notation)
         angles.add(collection with newRelations)
-        equalIdentRenamer.addSubscribers(collection, *notation.getPointsAndCircles().toTypedArray())
+        //equalIdentRenamer.addSubscribers(collection, *notation.getPointsAndCircles().toTypedArray())
         return collection to newRelations
     }
 
@@ -179,7 +179,6 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         val leftArm = getKeyByNotation(RayNotation(notation.p2, notation.p1)) as RayPointCollection
         val rightArm = getKeyByNotation(RayNotation(notation.p2, notation.p3)) as RayPointCollection
         val res = AnglePointCollection(
-            notation.p2,
             leftArm,
             rightArm
         )
@@ -320,7 +319,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         assertLinkedListCorrect(arcToAngleList)
     }
 
-    private fun <A, B> assertLinkedListCorrect(list: LinkedList<MutablePair<A, B>>) {
+    fun <A, B> assertLinkedListCorrect(list: LinkedList<MutablePair<A, B>>) {
         assert(list.size == list.map { it.e1 }.toSet().size)
     }
 

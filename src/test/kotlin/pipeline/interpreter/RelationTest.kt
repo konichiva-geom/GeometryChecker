@@ -53,7 +53,6 @@ internal class RelationTest {
             prove:
                 O == AB ∩ CD
                 K in alpha; K in omega; O in alpha; O in omega; B in omega
-                
             solution:
                 G = AB ∩ CD
                 (E, F) = omega ∩ AB

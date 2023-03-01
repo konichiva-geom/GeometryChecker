@@ -31,6 +31,10 @@ object Utils {
         lambdas[3] to "/"
     )
 
+    fun isSame(a: Any, b: Any): Boolean {
+        return a === b
+    }
+
     fun catchWithRangeAndArgs(block: () -> Any, range: IntRange, vararg args: Pair<String, Any>): Any {
         return if (SHOULD_CATCH)
             try {
@@ -40,6 +44,10 @@ object Utils {
             }
         else
             block()
+    }
+
+    fun sortPoints(vararg points: String): List<String> {
+        return points.sortedDescending()
     }
 
     fun sortLine(notation: Point2Notation): Point2Notation {

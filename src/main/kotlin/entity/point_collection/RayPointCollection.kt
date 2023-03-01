@@ -6,32 +6,38 @@ import error.SpoofError
 import math.Vector
 import pipeline.SymbolTable
 
-class RayPointCollection(private var start: String, private val points: MutableSet<String>) :
+class RayPointCollection(var start: String, private val points: MutableSet<String>) :
     PointCollection<RayNotation>() {
-    private val angles = mutableSetOf<AnglePointCollection>()
+    val angles = mutableSetOf<AnglePointCollection>()
     override fun getPointsInCollection(): Set<String> = setOf(start) + points
     override fun isFromNotation(notation: RayNotation) = notation.p1 == start && points.contains(notation.p2)
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
-        symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
+        withRemappingAnglesAndSubscribers(symbolTable) {
+            points.addAll(added)
+        }
+    }
+
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
+        withRemappingAnglesAndSubscribers(symbolTable) {
+            renamePointSet(points, symbolTable.equalIdentRenamer)
+            start = symbolTable.equalIdentRenamer.getIdentical(start)
+        }
+    }
+
+    private fun withRemappingAnglesAndSubscribers(symbolTable: SymbolTable, block: (SymbolTable) -> Unit) {
+        symbolTable.equalIdentRenamer.removeSubscribers(this as Renamable, *points.toTypedArray())
 
         val angleVectors = mutableListOf<Vector?>()
         for (angle in angles)
-            angleVectors.add(getValueFromMap(symbolTable.angleVectors.vectors, angle))
+            angleVectors.add(removeValueFromMap(symbolTable.angleVectors.vectors, angle))
 
-        points.addAll(added)
+        block(symbolTable)
 
         for ((i, angle) in angles.withIndex())
             addToMap(angleVectors[i], symbolTable.angleVectors, angle, symbolTable)
 
-        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
-        mergeEntitiesInList(symbolTable.rays, symbolTable)
-    }
-
-    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        renamePointSet(points, symbolTable.equalIdentRenamer)
-        start = symbolTable.equalIdentRenamer.getIdentical(start)
-
+        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *points.toTypedArray())
         mergeEntitiesInList(symbolTable.rays, symbolTable)
     }
 
@@ -69,26 +75,7 @@ class RayPointCollection(private var start: String, private val points: MutableS
         other as RayPointCollection
         assert(start == other.start)
         angles.addAll(other.angles)
-        other.angles.forEach {
-            val vector = symbolTable.angleVectors.vectors[it]
-            if (it.leftArm === other)
-                it.leftArm = this
-            if (it.rightArm === other)
-                it.rightArm = this
-            if (vector != null)
-                symbolTable.angleVectors.vectors[it] = vector
-        }
-        symbolTable.equalIdentRenamer.removeSubscribers(this, *other.points.toTypedArray())
-
-        val anglePairs = mutableListOf<Vector?>()
-        for (angle in angles)
-            anglePairs.add(getValueFromMap(symbolTable.angleVectors.vectors, angle))
-
         addPoints(other.points.toList(), symbolTable)
-
-        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *other.points.toTypedArray())
-        for ((i, angle) in angles.withIndex())
-            addToMap(anglePairs[i], symbolTable.angleVectors, angle, symbolTable)
     }
 
     fun addAngle(angle: AnglePointCollection) {

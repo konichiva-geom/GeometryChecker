@@ -15,15 +15,15 @@ open class SegmentPointCollection internal constructor(
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
         val relations = symbolTable.segments.remove(this)!!
-        symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *(points + bounds).toTypedArray())
         points.addAll(added)
-        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
+        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *(points + bounds).toTypedArray())
         symbolTable.segments[this] = relations
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
-        val segmentRelations = getValueFromMap(symbolTable.segments, this)
-        val vector = getValueFromMap(symbolTable.segmentVectors.vectors, this)
+        val segmentRelations = removeValueFromMap(symbolTable.segments, this)
+        val vector = removeValueFromMap(symbolTable.segmentVectors.vectors, this)
 
         renamePointSet(bounds, symbolTable.equalIdentRenamer)
         renamePointSet(points, symbolTable.equalIdentRenamer)

@@ -66,10 +66,7 @@ class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), C
             }
             if (renamedPoints.size != assignedPoints.size) {
                 val pointsDiff = assignedPoints.size - renamedPoints.size
-                renamedPoints.toList().forEachIndexed { i, s ->
-                    symbolTable.getPoint(assignedPoints[i])
-                        .mergeOtherToThisPoint(assignedPoints[i], s, symbolTable)
-                }
+
                 val pointsAddedNewly = assignedPoints.subList(pointsDiff, assignedPoints.size)
                 right.addPointsToCircleOrLinear(symbolTable, right.left as Notation, pointsAddedNewly)
                 right.addPointsToCircleOrLinear(symbolTable, right.right as Notation, pointsAddedNewly)
@@ -100,5 +97,9 @@ class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), C
 
     override fun create(symbolTable: SymbolTable) {
         assignFromSolution(symbolTable)
+    }
+
+    override fun toString(): String {
+        return "$left = $right"
     }
 }

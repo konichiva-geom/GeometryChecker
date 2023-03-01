@@ -13,7 +13,6 @@ import error.SpoofError
 import pipeline.SymbolTable
 import pipeline.inference.InferenceProcessor
 import utils.Utils.catchWithRangeAndArgs
-import java.util.*
 
 class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()

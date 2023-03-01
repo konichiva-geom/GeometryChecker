@@ -7,10 +7,7 @@ import entity.point_collection.PointCollection
 import error.SpoofError
 import error.SystemFatalError
 import external.WarnLogger
-import math.ArithmeticExpr
-import math.FractionFactory
-import math.mergeWithOperation
-import math.vectorFromArithmeticMap
+import math.*
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
@@ -145,10 +142,9 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 val (collectionLeft, relationsLeft) = symbolTable.getKeyValueByNotation(left.map.keys.first())
                 val (collectionRight, relationsRight) = symbolTable.getKeyValueByNotation(left.map.keys.first())
                 if (collectionLeft is PointCollection<*>) {
-                    if(collectionLeft === collectionRight) {
+                    if (collectionLeft === collectionRight) {
                         // do not know how to negate this statement
-                    }
-                    else collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
+                    } else collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
                 } else {
                     if (collectionLeft !is IdentNotation)
                         throw SystemFatalError("Unexpected notation in equals")
@@ -162,24 +158,20 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             val notation = left.map.mergeWithOperation(right.map, "-")
                 .keys.firstOrNull { it !is NumNotation }
                 ?: throw SpoofError("Meaningless arithmetic expression. All non-constant values are zero")
-            var sideEqual = true
-            for ((k, v) in resolveLeft) {
-                if (resolveRight[k].contentEquals(v))
-                    continue
-                else {
-                    sideEqual = false;
-                    break
-                }
-            }
-            if (sideEqual) {
+
+            val result = resolveLeft.mergeWithOperation(resolveRight, "-")
+            if (result.isEmpty()) {
                 WarnLogger.warn("Expression %{expr} is already known", "expr" to this)
                 return
             }
+            if (result.keys.size == 1 && result.keys.first() == mutableSetOf(0)) {
+                throw SpoofError("Expression is incorrect")
+            }
             when (notation) {
                 is SegmentNotation -> symbolTable
-                    .segmentVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
+                    .segmentVectors.resolveVector(result)
                 is Point3Notation -> symbolTable
-                    .angleVectors.resolveVector(resolveLeft.mergeWithOperation(resolveRight, "-"))
+                    .angleVectors.resolveVector(result)
                 else -> throw SpoofError("This notation is not supported in arithmetic expressions, use segments and angles")
             }
         }

@@ -10,9 +10,9 @@ class LinePointCollection(private val points: MutableSet<String>) : PointCollect
     override fun isFromNotation(notation: Point2Notation) = points.containsAll(notation.getPointsAndCircles())
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
-        symbolTable.equalIdentRenamer.removeSubscribers(this, *added.toTypedArray())
+        symbolTable.equalIdentRenamer.removeSubscribers(this, *points.toTypedArray())
         points.addAll(added)
-        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *added.toTypedArray())
+        symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *points.toTypedArray())
 
         mergeEntitiesInList(symbolTable.lines, symbolTable)
     }

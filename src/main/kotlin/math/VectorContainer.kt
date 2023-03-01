@@ -51,7 +51,7 @@ class VectorContainer<T> {
     /**
      * Substitute [nullified] index in all vectors
      */
-    fun simplifyVectorCollection(nullified: Int, substitution: Vector) {
+    private fun simplifyVectorCollection(nullified: Int, substitution: Vector) {
         for (vector in vectors.values) {
             val coeff = vector[setOf(nullified)] ?: continue
             vector.remove(setOf(nullified))
