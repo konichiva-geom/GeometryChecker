@@ -1,6 +1,7 @@
 package math
 
 import utils.ExtensionUtils.addOrCreate
+import utils.multiSetOf
 import utils.PrimeGetter.primes
 
 
@@ -41,8 +42,8 @@ class VectorContainer<T> {
             incompleteVectors.add(v)
         else {
             val nullified = singleKeys.first()
-            val divCoeff = v[setOf(nullified)]!!
-            v.remove(setOf(nullified))
+            val divCoeff = v[multiSetOf(nullified)]!!
+            v.remove(multiSetOf(nullified))
             v.forEach { (_, u) -> u.unaryMinus().inPlaceDiv(divCoeff) }
             return simplifyVectorCollection(nullified, v)
         }
@@ -54,8 +55,8 @@ class VectorContainer<T> {
      */
     private fun simplifyVectorCollection(nullified: Int, substitution: Vector): Pair<Int, Int>? {
         for (vector in vectors.values) {
-            val coeff = vector[setOf(nullified)] ?: continue
-            vector.remove(setOf(nullified))
+            val coeff = vector[multiSetOf(nullified)] ?: continue
+            vector.remove(multiSetOf(nullified))
             val multiplied = substitution.copy().multiplyBy(coeff)
             for ((key, element) in multiplied) {
                 vector.addOrCreate(key, element)
@@ -65,9 +66,9 @@ class VectorContainer<T> {
         val res = if (nullified != getCurrent())  getCurrent() to nullified else null
         if (nullified != getCurrent()) {
             for (vector in vectors.values) {
-                if (vector[setOf(getCurrent())] != null)
-                    vector[setOf(nullified)] = vector[setOf(getCurrent())]!!
-                vector.remove(setOf(getCurrent()))
+                if (vector[multiSetOf(getCurrent())] != null)
+                    vector[multiSetOf(nullified)] = vector[multiSetOf(getCurrent())]!!
+                vector.remove(multiSetOf(getCurrent()))
             }
         }
         removeLast()

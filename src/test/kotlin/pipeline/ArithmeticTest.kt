@@ -6,6 +6,7 @@ import TestFactory.passTask
 import entity.expr.binary_expr.BinaryExpr
 import math.*
 import pipeline.inference.InferenceProcessor
+import utils.multiSetOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -55,9 +56,9 @@ internal class ArithmeticTest {
         val right = vectorFromArithmeticMap(((withMultiplication).right as ArithmeticExpr).map, table)
 
         val expected = mutableMapOf(
-            setOf(2) to FractionFactory.fromInt(-2),
-            setOf(3) to FractionFactory.fromInt(-3),
-            setOf(2, 3) to FractionFactory.fromInt(2)
+            multiSetOf(2) to FractionFactory.fromInt(-2),
+            multiSetOf(3) to FractionFactory.fromInt(-3),
+            multiSetOf(2, 3) to FractionFactory.fromInt(2)
         )
 
         left.mergeWithOperation(right, "-").forEach {

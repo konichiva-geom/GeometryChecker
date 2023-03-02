@@ -10,6 +10,7 @@ import external.WarnLogger
 import math.*
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
+import utils.multiSetOf
 
 class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " === ")
@@ -164,7 +165,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 WarnLogger.warn("Expression %{expr} is already known", "expr" to this)
                 return
             }
-            if (result.keys.size == 1 && result.keys.first() == mutableSetOf(0)) {
+            if (result.keys.size == 1 && result.keys.first() == multiSetOf(0)) {
                 throw SpoofError("Expression is incorrect")
             }
             when (notation) {

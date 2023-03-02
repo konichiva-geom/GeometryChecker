@@ -4,10 +4,12 @@ import entity.expr.notation.Notation
 import error.SystemFatalError
 import pipeline.SymbolTable
 import utils.ExtensionUtils.addOrCreate
+import utils.MultiSet
+import utils.multiSetOf
 import utils.Utils.signToLambda
 
 // TODO change set to multiset
-typealias Vector = MutableMap<Set<Int>, Fraction>
+typealias Vector = MutableMap<MultiSet<Int>, Fraction>
 
 
 /**
@@ -18,17 +20,17 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
         "+", "-" -> mergeWithOperation(other, operation)
         "*" -> {
             // something is a constant numeric value
-            if (this.size == 1 && this.keys.contains(setOf(0))
-                || other.size == 1 && other.keys.contains(setOf(0))
+            if (this.size == 1 && this.keys.contains(multiSetOf(0))
+                || other.size == 1 && other.keys.contains(multiSetOf(0))
             ) {
                 val (numeric, vector) = numericFirst(other)
                 vector.keys.associateWith { vector[it]!!.multiply(numeric) }.toMutableMap()
             } else {
-                val res = mutableMapOf<Set<Int>, Fraction>()
+                val res = mutableMapOf<MultiSet<Int>, Fraction>()
                 this.forEach { (thisKey, thisElement) ->
                     other.forEach { (otherKey, otherElement) ->
                         res.addOrCreate(
-                            setOf(*thisKey.toTypedArray(), *otherKey.toTypedArray()),
+                            multiSetOf(*thisKey.toTypedArray(), *otherKey.toTypedArray()),
                             thisElement.multiply(otherElement)
                         )
                     }
@@ -48,16 +50,16 @@ fun Vector.changeAllPairs(change: Pair<Int, Int>) {
     for (key in oldKeys) {
         if (key.contains(change.first)) {
             val value = remove(key)!!
-            val newKey = key.toMutableSet()
+            val newKey = key.toMutableMultiSet()
             newKey.remove(change.first)
             newKey.add(change.second)
-            this[newKey] = value
+            this[newKey.toMultiSet()] = value
         }
     }
 }
 
 fun Vector.copy(): Vector {
-    val res = mutableMapOf<Set<Int>, Fraction>()
+    val res = mutableMapOf<MultiSet<Int>, Fraction>()
     for ((k, v) in this) {
         res[k] = v.copyOf()
     }
@@ -87,9 +89,9 @@ fun <T> MutableMap<T, Fraction>.mergeWithOperation(
 }
 
 private fun Vector.numericFirst(other: Vector): Pair<Fraction, Vector> {
-    return if (this.size == 1 && this.keys.contains(setOf(0)))
-        this[setOf(0)]!! to other
-    else other[setOf(0)]!! to this
+    return if (this.size == 1 && this.keys.contains(multiSetOf(0)))
+        this[multiSetOf(0)]!! to other
+    else other[multiSetOf(0)]!! to this
 }
 
 /**
@@ -134,7 +136,7 @@ fun vectorFromArithmeticMap(map: MutableMap<Notation, Fraction>, symbolTable: Sy
 fun Vector.getNullifiedAndSubstitution(): Pair<Int, Vector> {
     val max = this.keys.map { it.first() }.max()
     val res = this.toMutableMap()
-    res.remove(setOf(max))
+    res.remove(multiSetOf(max))
     res.forEach { (_, u) -> u.unaryMinus() }
     return max to res
 }
@@ -147,7 +149,7 @@ fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
 }
 
 fun fromInt(number: Int): Vector {
-    return mutableMapOf(setOf(number) to FractionFactory.one())
+    return mutableMapOf(multiSetOf(number) to FractionFactory.one())
 }
 
 fun Vector.asString(): String {

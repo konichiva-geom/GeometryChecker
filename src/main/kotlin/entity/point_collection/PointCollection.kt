@@ -4,11 +4,13 @@ import entity.Renamable
 import entity.expr.notation.Notation
 import entity.relation.AngleRelations
 import entity.relation.EntityRelations
+import math.Fraction
 import math.Vector
 import math.VectorContainer
 import math.mergeWithOperation
 import pipeline.EqualIdentRenamer
 import pipeline.SymbolTable
+import utils.MultiSet
 import utils.MutablePair
 import java.util.*
 import kotlin.math.abs
@@ -157,7 +159,7 @@ abstract class PointCollection<T : Notation> : Renamable {
     }
 
     protected fun <T : PointCollection<*>> addToMap(
-        vector: Vector?,
+        vector: MutableMap<MultiSet<Int>, Fraction>?,
         container: VectorContainer<T>,
         collection: PointCollection<*>,
         symbolTable: SymbolTable

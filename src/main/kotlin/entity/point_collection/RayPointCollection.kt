@@ -6,6 +6,7 @@ import error.SpoofError
 import math.Vector
 import math.changeAllPairs
 import pipeline.SymbolTable
+import utils.multiSetOf
 
 class RayPointCollection(var start: String, private val points: MutableSet<String>) :
     PointCollection<RayNotation>() {
@@ -44,7 +45,7 @@ class RayPointCollection(var start: String, private val points: MutableSet<Strin
             )
             if (changeInVectorIndices != null) {
                 for (j in (i + 1) until angles.size) {
-                    if (angleVectors[j] != null && angleVectors[j]!![setOf(changeInVectorIndices.first)] != null) {
+                    if (angleVectors[j] != null && angleVectors[j]!![multiSetOf(changeInVectorIndices.first)] != null) {
                         angleVectors[j]!!.changeAllPairs(changeInVectorIndices)
                     }
                 }

@@ -1,12 +1,17 @@
 package utils
 
 import error.SystemFatalError
+import utils.ExtensionUtils.addOrCreate
+
+fun <E : Any> multiSetOf(vararg elems: E): MultiSet<E> {
+    return MultiSet(elems as Array<E>)
+}
 
 /**
  * Base taken from: https://leetcode.com/problems/substring-with-concatenation-of-all-words/solutions/906972/kotlin-with-multiset-fast-and-simple/
- *
+ * TODO: make immutable
  */
-class MultiSet<E>(val map: HashMap<E, Int>, override val size: Int) : MutableCollection<E> {
+class MutableMultiSet<E : Any>(val map: HashMap<E, Int>, override val size: Int) : MutableCollection<E> {
     constructor(array: Array<E>) : this(HashMap(), array.size) {
         array.forEach { add(it) }
     }
@@ -16,7 +21,8 @@ class MultiSet<E>(val map: HashMap<E, Int>, override val size: Int) : MutableCol
         return true
     }
 
-    fun copy(): MultiSet<E> = MultiSet(HashMap(map), map.size)
+    fun toMultiSet(): MultiSet<E> = MultiSet(HashMap(map.toMap()), size)
+    fun copy(): MutableMultiSet<E> = MutableMultiSet(HashMap(map), map.size)
 
     override fun isEmpty() = map.isEmpty()
     override fun remove(element: E): Boolean =
@@ -41,7 +47,7 @@ class MultiSet<E>(val map: HashMap<E, Int>, override val size: Int) : MutableCol
     }
 
     override fun iterator(): MutableIterator<E> {
-        throw SystemFatalError("iterator not needed for multiset")
+        return map.keys.toMutableSet().iterator()
     }
 
     override fun removeAll(elements: Collection<E>): Boolean {
@@ -56,9 +62,61 @@ class MultiSet<E>(val map: HashMap<E, Int>, override val size: Int) : MutableCol
         throw SystemFatalError("retainAll not needed for multiset")
     }
 
-    companion object {
-        fun <E : Any> multiSetOf(vararg elems: E): MultiSet<E> {
-            return MultiSet(elems as Array<E>)
-        }
+    override fun hashCode(): Int {
+        return map.hashCode()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is MutableMultiSet<*>)
+            return false
+        return map == other.map
+    }
+
+    override fun toString(): String {
+        return map.toString()
+    }
+}
+
+class MultiSet<E : Any>(val map: Map<E, Int>, override val size: Int) : Collection<E> {
+    constructor(array: Array<E>) : this(initMultiSet(array), array.size)
+
+    fun copy(): MultiSet<E> = MultiSet(map.toMap(), size)
+    fun toMutableMultiSet(): MutableMultiSet<E> = MutableMultiSet(HashMap(map.toMap()), size)
+
+
+    override fun contains(element: E): Boolean {
+        return map.contains(element)
+    }
+
+    override fun containsAll(elements: Collection<E>): Boolean {
+        return map.keys.containsAll(elements)
+    }
+
+    override fun isEmpty(): Boolean {
+        return map.isEmpty()
+    }
+
+    override fun iterator(): Iterator<E> {
+        return map.keys.iterator()
+    }
+
+    override fun hashCode(): Int {
+        return map.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is MultiSet<*>)
+            return false
+        return map == other.map
+    }
+
+    override fun toString(): String {
+        return map.toString()
+    }
+}
+
+private fun <E> initMultiSet(array: Array<E>): Map<E, Int> {
+    val res = mutableMapOf<E, Int>()
+    array.forEach { res.addOrCreate(it, 1) }
+    return res.toMap()
 }

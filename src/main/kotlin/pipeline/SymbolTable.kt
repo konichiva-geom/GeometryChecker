@@ -7,6 +7,7 @@ import error.SpoofError
 import math.*
 import math.Vector
 import pipeline.inference.InferenceProcessor
+import utils.multiSetOf
 import utils.MutablePair
 import utils.with
 import java.util.*
@@ -274,7 +275,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
 
     fun getOrCreateVector(notation: Notation): Vector {
         when (notation) {
-            is NumNotation -> return mutableMapOf(setOf(0) to if (notation.number.isZero()) FractionFactory.one() else notation.number)
+            is NumNotation -> return mutableMapOf(multiSetOf(0) to if (notation.number.isZero()) FractionFactory.one() else notation.number)
             is ArcNotation -> {
                 val angle = arcToAngleList.find {
                     it.e1 == ArcPointCollection(
@@ -293,7 +294,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
             is MulNotation -> {
                 return notation.elements.map {
                     getOrCreateVector(it)
-                }.fold(mutableMapOf(setOf<Int>() to FractionFactory.one())) { acc, i ->
+                }.fold(mutableMapOf(multiSetOf<Int>() to FractionFactory.one())) { acc, i ->
                     acc.mergeWith(i, "*")
                 }
             }
@@ -302,10 +303,6 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 "notation" to notation
             )
         }
-    }
-
-    fun hasACBT(): Any? {
-        return angleVectors.vectors[AnglePointCollection(mutableSetOf("A"),"C", mutableSetOf("B", "T"))]
     }
 
     fun assertCorrectState() {
