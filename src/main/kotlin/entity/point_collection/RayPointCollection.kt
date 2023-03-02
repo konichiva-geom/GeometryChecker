@@ -4,6 +4,7 @@ import entity.Renamable
 import entity.expr.notation.RayNotation
 import error.SpoofError
 import math.Vector
+import math.changeAllPairs
 import pipeline.SymbolTable
 
 class RayPointCollection(var start: String, private val points: MutableSet<String>) :
@@ -34,8 +35,21 @@ class RayPointCollection(var start: String, private val points: MutableSet<Strin
 
         block(symbolTable)
 
-        for ((i, angle) in angles.withIndex())
-            addToMap(angleVectors[i], symbolTable.angleVectors, angle, symbolTable)
+        for ((i, angle) in angles.withIndex()) {
+            val changeInVectorIndices = addToMap(
+                angleVectors[i],
+                symbolTable.angleVectors,
+                angle,
+                symbolTable
+            )
+            if (changeInVectorIndices != null) {
+                for (j in (i + 1) until angles.size) {
+                    if (angleVectors[j] != null && angleVectors[j]!![setOf(changeInVectorIndices.first)] != null) {
+                        angleVectors[j]!!.changeAllPairs(changeInVectorIndices)
+                    }
+                }
+            }
+        }
 
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *points.toTypedArray())
         mergeEntitiesInList(symbolTable.rays, symbolTable)
@@ -80,5 +94,19 @@ class RayPointCollection(var start: String, private val points: MutableSet<Strin
 
     fun addAngle(angle: AnglePointCollection) {
         angles.add(angle)
+    }
+
+    fun removeUnexistingAngles(symbolTable: SymbolTable) {
+        val iter = angles.iterator()
+        val tableAngles = symbolTable.angles.map { it.e1 }
+        while (iter.hasNext()) {
+            val angle = iter.next()
+            if (tableAngles.find { it === angle } == null)
+                iter.remove()
+        }
+
+        val anglesWithoutRepetitions = angles.toMutableSet()
+        angles.clear()
+        angles.addAll(anglesWithoutRepetitions)
     }
 }

@@ -2,6 +2,7 @@ package entity.point_collection
 
 import entity.Renamable
 import entity.expr.notation.Notation
+import entity.relation.AngleRelations
 import entity.relation.EntityRelations
 import math.Vector
 import math.VectorContainer
@@ -9,7 +10,6 @@ import math.mergeWithOperation
 import pipeline.EqualIdentRenamer
 import pipeline.SymbolTable
 import utils.MutablePair
-import utils.Utils.isSame
 import java.util.*
 import kotlin.math.abs
 
@@ -66,12 +66,20 @@ abstract class PointCollection<T : Notation> : Renamable {
                 break
             }
         }
+
         if (disposed.e1 is RayPointCollection) {
+            val raysThatNeedAngleChanges = mutableSetOf(this as RayPointCollection)
             (disposed.e1 as RayPointCollection).angles.forEach {
-                if (it.leftArm === disposed.e1)
-                    it.leftArm = this as RayPointCollection
-                if (it.rightArm === disposed.e1)
-                    it.rightArm = this as RayPointCollection
+                if (it.leftArm === disposed.e1) {
+                    it.leftArm = this
+                    this.angles.add(it)
+                    raysThatNeedAngleChanges.add(it.rightArm)
+                }
+                if (it.rightArm === disposed.e1) {
+                    it.rightArm = this
+                    this.angles.add(it)
+                    raysThatNeedAngleChanges.add(it.leftArm)
+                }
             }
             if (symbolTable.angles.size != symbolTable.angles.map { it.e1 }.toSet().size) {
                 // TODO remove assertion, probably wrong
@@ -80,10 +88,33 @@ abstract class PointCollection<T : Notation> : Renamable {
                     it.mergeEntitiesInList(symbolTable.angles, symbolTable)
                 }
             }
+
+            for (ray in raysThatNeedAngleChanges)
+                ray.removeUnexistingAngles(symbolTable)
         }
 
         current.e1.merge(disposed.e1, symbolTable)
         current.e2.merge(null, symbolTable, disposed.e2)
+    }
+
+    private fun removeAndMergeSpecificEntitiesInList(
+        removed: AnglePointCollection,
+        merged: AnglePointCollection,
+        symbolTable: SymbolTable
+    ) {
+        val iter = symbolTable.angles.iterator()
+        var mergedRelations: AngleRelations? = null
+        var removedRelations: AngleRelations? = null
+        while (iter.hasNext()) {
+            val anglePair = iter.next()
+            if (anglePair.e1 === removed) {
+                removedRelations = anglePair.e2
+                iter.remove()
+            }
+            else if (anglePair.e1 === merged)
+                mergedRelations = anglePair.e2
+        }
+        mergedRelations!!.merge(null, symbolTable, removedRelations!!)
     }
 
     fun renamePointSet(set: MutableSet<String>, equalIdentRenamer: EqualIdentRenamer) {
@@ -91,7 +122,10 @@ abstract class PointCollection<T : Notation> : Renamable {
         set.clear(); set.addAll(newPoints)
     }
 
-    protected fun <T> removeValueFromMap(map: MutableMap<out PointCollection<*>, T>, collection: PointCollection<*>): T? {
+    protected fun <T> removeValueFromMap(
+        map: MutableMap<out PointCollection<*>, T>,
+        collection: PointCollection<*>
+    ): T? {
         var value: T? = null
         if (map[collection] != null) {
             value = map[collection]
@@ -127,18 +161,26 @@ abstract class PointCollection<T : Notation> : Renamable {
         container: VectorContainer<T>,
         collection: PointCollection<*>,
         symbolTable: SymbolTable
-    ) {
+    ): Pair<Int, Int>? {
         if (vector == null)
-            return
-        for ((angle, vec) in container.vectors) {
+            return null
+        val oldAngles = container.vectors.keys
+        for (angle in oldAngles) {
             if (angle == collection) {
-                if (vector != vec)
-                    container.resolveVector(vector.mergeWithOperation(vec, "-"))
-                if (!isSame(angle, collection))
-                    angle.merge(collection, symbolTable)
-                return
+                val res = if (vector != container.vectors[angle]) {
+                    container.resolveVector(vector.mergeWithOperation(container.vectors[angle]!!, "-"))
+                } else null
+                val vectorChanged = container.vectors[angle]!!
+                container.vectors.remove(angle)
+                container.vectors[collection as T] = vectorChanged
+
+                if (collection is AnglePointCollection) {
+                    removeAndMergeSpecificEntitiesInList(angle as AnglePointCollection, collection, symbolTable)
+                }
+                return res
             }
         }
         container.vectors[collection as T] = vector
+        return null
     }
 }

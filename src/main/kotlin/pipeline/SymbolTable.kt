@@ -156,8 +156,8 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         }
         val newRelations = AngleRelations()
         val collection = getAngleCollectionFromNotation(notation)
+        // each AnglePointCollection should be contained in SymbolTable.angles
         angles.add(collection with newRelations)
-        //equalIdentRenamer.addSubscribers(collection, *notation.getPointsAndCircles().toTypedArray())
         return collection to newRelations
     }
 
@@ -302,6 +302,10 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
                 "notation" to notation
             )
         }
+    }
+
+    fun hasACBT(): Any? {
+        return angleVectors.vectors[AnglePointCollection(mutableSetOf("A"),"C", mutableSetOf("B", "T"))]
     }
 
     fun assertCorrectState() {

@@ -168,10 +168,8 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 throw SpoofError("Expression is incorrect")
             }
             when (notation) {
-                is SegmentNotation -> symbolTable
-                    .segmentVectors.resolveVector(result)
-                is Point3Notation -> symbolTable
-                    .angleVectors.resolveVector(result)
+                is SegmentNotation -> symbolTable.segmentVectors.resolveVector(result as Vector)
+                is Point3Notation -> symbolTable.angleVectors.resolveVector(result as Vector)
                 else -> throw SpoofError("This notation is not supported in arithmetic expressions, use segments and angles")
             }
         }

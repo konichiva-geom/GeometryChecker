@@ -24,7 +24,7 @@ class VectorContainer<T> {
         return mutableMapOf(res.keys.first() to res.values.first().copyOf())
     }
 
-    fun resolveVector(v: Vector) {
+    fun resolveVector(v: Vector): Pair<Int, Int>? {
         val primeKeys = mutableSetOf<Int>()
         val multipliedKeys = mutableSetOf<Int>()
         for (key in v.keys) {
@@ -42,16 +42,17 @@ class VectorContainer<T> {
         else {
             val nullified = singleKeys.first()
             val divCoeff = v[setOf(nullified)]!!
-            v.remove(setOf(nullified)) // TODO: divide all other vector values by nullified value here
+            v.remove(setOf(nullified))
             v.forEach { (_, u) -> u.unaryMinus().inPlaceDiv(divCoeff) }
-            simplifyVectorCollection(nullified, v)
+            return simplifyVectorCollection(nullified, v)
         }
+        return null
     }
 
     /**
      * Substitute [nullified] index in all vectors
      */
-    private fun simplifyVectorCollection(nullified: Int, substitution: Vector) {
+    private fun simplifyVectorCollection(nullified: Int, substitution: Vector): Pair<Int, Int>? {
         for (vector in vectors.values) {
             val coeff = vector[setOf(nullified)] ?: continue
             vector.remove(setOf(nullified))
@@ -61,6 +62,7 @@ class VectorContainer<T> {
             }
         }
         // if nullified is not maxCurrentIndex, swap it with maxCurrentIndex
+        val res = if (nullified != getCurrent())  getCurrent() to nullified else null
         if (nullified != getCurrent()) {
             for (vector in vectors.values) {
                 if (vector[setOf(getCurrent())] != null)
@@ -69,6 +71,7 @@ class VectorContainer<T> {
             }
         }
         removeLast()
+        return res
     }
 
     override fun toString(): String {

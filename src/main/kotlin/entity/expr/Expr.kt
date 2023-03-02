@@ -98,6 +98,10 @@ class PointCreation(private val name: String) : Expr, Creation {
         val res = PointNotation(name)
         symbolTable.newPoint(res.p)
     }
+
+    override fun toString(): String {
+        return "new $name"
+    }
 }
 
 class CircleCreation(private val name: String) : Expr, Creation {
@@ -115,5 +119,9 @@ class CircleCreation(private val name: String) : Expr, Creation {
     override fun create(symbolTable: SymbolTable) {
         val res = IdentNotation(name)
         symbolTable.newCircle(res)
+    }
+
+    override fun toString(): String {
+        return "new $name"
     }
 }

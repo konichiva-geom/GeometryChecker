@@ -6,7 +6,9 @@ import pipeline.SymbolTable
 import utils.ExtensionUtils.addOrCreate
 import utils.Utils.signToLambda
 
+// TODO change set to multiset
 typealias Vector = MutableMap<Set<Int>, Fraction>
+
 
 /**
  * Merge current vectors by addition, subtraction or multiplication
@@ -39,6 +41,19 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
         else -> throw SystemFatalError("Unknown operation `$operation`")
     }
     return map
+}
+
+fun Vector.changeAllPairs(change: Pair<Int, Int>) {
+    val oldKeys = keys.toSet()
+    for (key in oldKeys) {
+        if (key.contains(change.first)) {
+            val value = remove(key)!!
+            val newKey = key.toMutableSet()
+            newKey.remove(change.first)
+            newKey.add(change.second)
+            this[newKey] = value
+        }
+    }
 }
 
 fun Vector.copy(): Vector {
@@ -107,8 +122,11 @@ fun vectorFromArithmeticMap(map: MutableMap<Notation, Fraction>, symbolTable: Sy
         mutableMapOf()
     ) { acc, notation ->
         map[notation]
-        acc.mergeWithOperation(fromNotation(symbolTable, notation)
-        .multiplyBy(map[notation]!!), "+") }
+        acc.mergeWithOperation(
+            fromNotation(symbolTable, notation)
+                .multiplyBy(map[notation]!!), "+"
+        )
+    }
 }
 
 

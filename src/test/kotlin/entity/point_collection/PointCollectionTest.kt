@@ -137,9 +137,11 @@ internal class PointCollectionTest {
             B == C
         prove:
             AOB == AOC
+            AOB == LMK + 3
+            AOB == KLM + 2
             KLM + 2 == LMK + 3
             AOC == KLM + 2
-            BOC == 0
+            BOC + 175 == LKM
         solution:
             
         """
