@@ -184,7 +184,7 @@ object GeomGrammar : Grammar<Any>() {
     private val tupleNotation by -leftPar and separatedTerms(notation, comma) and -rightPar map { TupleNotation(it) }
 
     private val assignment by (notation or tupleNotation) and -assignmentToken and relation map {
-        if(it.t2 !is Returnable)
+        if (it.t2 !is Returnable)
             throw SpoofError("Expected returnable as right operand")
         BinaryAssignment(
             it.t1,

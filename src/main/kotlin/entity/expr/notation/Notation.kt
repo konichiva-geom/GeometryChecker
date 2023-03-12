@@ -50,7 +50,9 @@ abstract class Notation : Expr, Comparable<Expr>, Renamable {
         } else if (getPointsAndCircles().size == 2 && getPointsAndCircles().size == 1)
             return SpoofError(
                 "Cannot use notation with same points. %{first} and %{second} points equal to %{point}",
-                "first" to getPointsAndCircles()[0], "second" to getPointsAndCircles()[1], "point" to getPointsAndCircles()[0]
+                "first" to getPointsAndCircles()[0],
+                "second" to getPointsAndCircles()[1],
+                "point" to getPointsAndCircles()[0]
             )
         return null
     }

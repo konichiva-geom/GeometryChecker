@@ -54,6 +54,7 @@ internal class LogicCheckTest {
                 C == E
             prove:
                 C == E
+                ABC == ABD
             solution:;
         """
         )

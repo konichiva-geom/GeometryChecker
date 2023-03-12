@@ -63,7 +63,7 @@ class TheoremParser : Parser() {
 
     fun getSignature(call: Signature): Signature {
         return theorems.keys.find { it.hashCode() == call.hashCode() }
-            ?: throw Exception("signature not found")
+            ?: throw SpoofError("signature not found")
     }
 
     fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody, symbolTable: SymbolTable) {

@@ -35,13 +35,21 @@ import pipeline.interpreter.IdentMapper
 
 class MulNotation(val elements: MutableList<Notation>) : Notation() {
     override fun getOrder() = Int.MAX_VALUE - 1
-    override fun getPointsAndCircles(): MutableList<String> = TODO("Not yet implemented")
+    override fun getPointsAndCircles(): MutableList<String> {
+        return elements.fold(mutableListOf()) { acc: MutableList<String>, notation ->
+            acc.addAll(notation.getPointsAndCircles())
+            acc
+        }
+    }
+
     override fun mergeMapping(mapper: IdentMapper, other: Notation) = TODO("Not yet implemented")
     override fun createLinks(mapper: IdentMapper) = TODO("Not yet implemented")
     override fun getRepr() = TODO("Not yet implemented")
     override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = TODO("Not yet implemented")
     override fun compareTo(other: Expr) = TODO("Not yet implemented")
-    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) = TODO("Not yet implemented")
+    override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
+        elements.forEach { it.renameToMinimalAndRemap(symbolTable) }
+    }
 
     override fun toString(): String {
         return elements.joinToString(separator = "*")

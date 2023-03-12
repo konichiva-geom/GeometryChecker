@@ -1,7 +1,5 @@
 package error
 
-import com.github.h0tk3y.betterParse.lexer.LiteralToken
-import com.github.h0tk3y.betterParse.lexer.Token
 import external.Spoof.changeAllIndicesInOrder
 
 /**

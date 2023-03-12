@@ -1,7 +1,6 @@
 package pipeline
 
 import entity.Renamable
-import entity.point_collection.PointCollection
 import error.SpoofError
 import utils.ExtensionUtils.addToOrCreateSet
 import utils.Utils.sortPoints

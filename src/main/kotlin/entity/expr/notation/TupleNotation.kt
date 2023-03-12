@@ -4,7 +4,7 @@ import entity.expr.Expr
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 
-class TupleNotation<T: Notation>(val notations: List<T>) : Notation() {
+class TupleNotation<T : Notation>(val notations: List<T>) : Notation() {
     override fun getOrder(): Int {
         TODO("Not yet implemented")
     }

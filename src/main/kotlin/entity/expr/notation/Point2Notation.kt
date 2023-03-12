@@ -26,7 +26,9 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("line AA")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = Point2Notation(mapper.get(p1), mapper.get(p2))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        Point2Notation(mapper.get(p1), mapper.get(p2))
+
     override fun toString(): String = "line $p1$p2"
     override fun getPointsAndCircles(): MutableList<String> = mutableListOf(p1, p2)
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {

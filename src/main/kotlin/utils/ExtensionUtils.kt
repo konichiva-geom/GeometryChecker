@@ -4,7 +4,9 @@ import com.github.h0tk3y.betterParse.lexer.CharToken
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
-import math.*
+import math.Fraction
+import math.FractionFactory
+import math.add
 
 object ExtensionUtils {
     fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key: R, vararg elements: T) {

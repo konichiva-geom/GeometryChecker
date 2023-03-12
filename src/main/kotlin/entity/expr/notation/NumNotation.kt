@@ -2,7 +2,6 @@ package entity.expr.notation
 
 import entity.expr.Expr
 import math.Fraction
-import math.asString
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 

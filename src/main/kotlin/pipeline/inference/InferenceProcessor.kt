@@ -17,7 +17,7 @@ class InferenceProcessor {
     fun processInference(expr: Expr, symbolTable: SymbolTable) {
         val currentExpression = expr.toString()
         println(currentExpression)
-        if(processedSet.contains(currentExpression))
+        if (processedSet.contains(currentExpression))
             return
         val repr = expr.getRepr().toString()
         processedSet.add(currentExpression)

@@ -22,9 +22,13 @@ fun Fraction.reduce() {
     this[1] /= gcd
 }
 
-fun Fraction.unaryMinus(): Fraction {
+fun Fraction.inPlaceUnaryMinus(): Fraction {
     this[0] = -this[0]
     return this
+}
+
+fun Fraction.unaryMinus(): Fraction {
+    return FractionFactory.create(-this[0], this[1])
 }
 
 fun Fraction.isZero() = this[0] == 0
@@ -41,7 +45,11 @@ fun Fraction.subtract(other: Fraction): Fraction {
 
 fun Fraction.multiply(other: Fraction) = FractionFactory.create(this[0] * other[0], this[1] * other[1])
 
+fun Fraction.multiply(other: Int) = FractionFactory.create(this[0] * other, this[1])
+
 fun Fraction.divide(other: Fraction) = FractionFactory.create(this[0] * other[1], this[1] * other[0])
+
+fun Fraction.divide(other: Int) = FractionFactory.create(this[0], this[1] * other)
 
 fun Fraction.inPlaceDiv(other: Fraction): Fraction {
     this[0] *= other[1]
@@ -69,6 +77,14 @@ fun Fraction.asString(): String {
         -1 -> "-"
         else -> this[0].toString()
     }
+}
+
+fun Fraction.lessThanZero(): Boolean {
+    return this[0] * this[1] < 0
+}
+
+fun Fraction.moreThanZero(): Boolean {
+    return this[0] * this[1] > 0
 }
 
 fun Fraction.isNegative() = this[0] < 0

@@ -99,12 +99,17 @@ object ArithmeticExpander {
                     numerator = createArithmeticMap(numerator, notationFlattened.denominator, "*")
                         .mergeWithOperation(
                             notationFlattened.numerator.keys
-                                .associateWith { notationFlattened.numerator[it]!!.multiply(fraction) }.toMutableMap(), "+"
+                                .associateWith { notationFlattened.numerator[it]!!.multiply(fraction) }.toMutableMap(),
+                            "+"
                         )
                 } else {
                     val first = createArithmeticMap(numerator, notationFlattened.denominator, "*")
                     val second = createArithmeticMap(
-                        notationFlattened.numerator.keys.associateWith { notationFlattened.numerator[it]!!.multiply(fraction) }
+                        notationFlattened.numerator.keys.associateWith {
+                            notationFlattened.numerator[it]!!.multiply(
+                                fraction
+                            )
+                        }
                             .toMutableMap(),
                         denominator,
                         "*"
@@ -113,7 +118,7 @@ object ArithmeticExpander {
                     denominator = createArithmeticMap(notationFlattened.denominator, denominator, "*")
                 }
             } else {
-                if(denominator.isEmpty())
+                if (denominator.isEmpty())
                     numerator.addOrCreate(notation, fraction)
                 else {
                     val added = createArithmeticMap(mutableMapOf(notation to fraction), denominator, "*")

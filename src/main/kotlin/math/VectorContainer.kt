@@ -1,8 +1,8 @@
 package math
 
 import utils.ExtensionUtils.addOrCreate
-import utils.multiSetOf
 import utils.PrimeGetter.primes
+import utils.multiSetOf
 
 
 class VectorContainer<T> {
@@ -44,7 +44,7 @@ class VectorContainer<T> {
             val nullified = singleKeys.first()
             val divCoeff = v[multiSetOf(nullified)]!!
             v.remove(multiSetOf(nullified))
-            v.forEach { (_, u) -> u.unaryMinus().inPlaceDiv(divCoeff) }
+            v.forEach { (_, u) -> u.inPlaceUnaryMinus().inPlaceDiv(divCoeff) }
             return simplifyVectorCollection(nullified, v)
         }
         return null
@@ -63,7 +63,7 @@ class VectorContainer<T> {
             }
         }
         // if nullified is not maxCurrentIndex, swap it with maxCurrentIndex
-        val res = if (nullified != getCurrent())  getCurrent() to nullified else null
+        val res = if (nullified != getCurrent()) getCurrent() to nullified else null
         if (nullified != getCurrent()) {
             for (vector in vectors.values) {
                 if (vector[multiSetOf(getCurrent())] != null)

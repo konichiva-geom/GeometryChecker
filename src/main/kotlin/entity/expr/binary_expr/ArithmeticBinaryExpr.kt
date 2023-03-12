@@ -11,6 +11,7 @@ import math.*
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
 import utils.multiSetOf
+import kotlin.math.max
 
 class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " === ")
@@ -131,6 +132,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun make(symbolTable: SymbolTable) {
         left as ArithmeticExpr
         right as ArithmeticExpr
+
         if (isEntityEquals(left, right)
             && left.map.keys.first() !is Point3Notation
             && left.map.keys.first() !is SegmentNotation
@@ -171,7 +173,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             when (notation) {
                 is SegmentNotation -> symbolTable.segmentVectors.resolveVector(result as Vector)
                 is Point3Notation -> symbolTable.angleVectors.resolveVector(result as Vector)
-                else -> throw SpoofError("This notation is not supported in arithmetic expressions, use segments and angles")
+                else -> throw SpoofError("Notation is not supported in arithmetic expressions, use segments and angles")
             }
         }
     }
@@ -196,18 +198,24 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun check(symbolTable: SymbolTable): Boolean {
         left as ArithmeticExpr
         right as ArithmeticExpr
+
         if (isEntityEquals(left, right)) {
             val leftNotation = left.map.keys.first()
             val rightNotation = right.map.keys.first()
+
             if (leftNotation is PointNotation && rightNotation is PointNotation) {
                 val leftPoint = symbolTable.getPoint(leftNotation)
                 val rightPoint = symbolTable.getPoint(rightNotation)
-                if (leftPoint == rightPoint)
-                    return false
-                if (leftPoint.unknown.contains(rightNotation.p) || rightPoint.unknown.contains(leftNotation.p))
+
+                if (leftPoint == rightPoint
+                    || leftPoint.unknown.contains(rightNotation.p)
+                    || rightPoint.unknown.contains(leftNotation.p)
+                )
                     return false
                 return !(leftPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(rightPoint)
                         || rightPoint.unknown.map { symbolTable.getPoint(it) }.toSet().contains(leftPoint))
+            } else {
+                TODO("Not yet implemented")
             }
         }
         TODO("Not yet implemented")

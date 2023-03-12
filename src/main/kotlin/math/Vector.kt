@@ -5,8 +5,8 @@ import error.SystemFatalError
 import pipeline.SymbolTable
 import utils.ExtensionUtils.addOrCreate
 import utils.MultiSet
-import utils.multiSetOf
 import utils.Utils.signToLambda
+import utils.multiSetOf
 
 // TODO change set to multiset
 typealias Vector = MutableMap<MultiSet<Int>, Fraction>
@@ -129,16 +129,6 @@ fun vectorFromArithmeticMap(map: MutableMap<Notation, Fraction>, symbolTable: Sy
                 .multiplyBy(map[notation]!!), "+"
         )
     }
-}
-
-
-@Deprecated("Use VectorContainer.resolveVector")
-fun Vector.getNullifiedAndSubstitution(): Pair<Int, Vector> {
-    val max = this.keys.map { it.first() }.max()
-    val res = this.toMutableMap()
-    res.remove(multiSetOf(max))
-    res.forEach { (_, u) -> u.unaryMinus() }
-    return max to res
 }
 
 /**

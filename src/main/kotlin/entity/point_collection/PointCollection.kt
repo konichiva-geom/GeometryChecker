@@ -5,7 +5,6 @@ import entity.expr.notation.Notation
 import entity.relation.AngleRelations
 import entity.relation.EntityRelations
 import math.Fraction
-import math.Vector
 import math.VectorContainer
 import math.mergeWithOperation
 import pipeline.EqualIdentRenamer
@@ -112,8 +111,7 @@ abstract class PointCollection<T : Notation> : Renamable {
             if (anglePair.e1 === removed) {
                 removedRelations = anglePair.e2
                 iter.remove()
-            }
-            else if (anglePair.e1 === merged)
+            } else if (anglePair.e1 === merged)
                 mergedRelations = anglePair.e2
         }
         mergedRelations!!.merge(null, symbolTable, removedRelations!!)

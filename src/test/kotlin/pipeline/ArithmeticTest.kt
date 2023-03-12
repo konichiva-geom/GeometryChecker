@@ -113,4 +113,17 @@ internal class ArithmeticTest {
         """
         )
     }
+
+    @Test
+    fun testMultiset() {
+        passTask("""
+        description:
+            new A; new B; new C;
+            AB * AB + 2 * AB - 1 == 0
+        prove:
+            
+        solution:
+            
+        """)
+    }
 }
