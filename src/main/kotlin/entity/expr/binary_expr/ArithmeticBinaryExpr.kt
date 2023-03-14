@@ -10,8 +10,8 @@ import external.WarnLogger
 import math.*
 import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
+import utils.Utils.isSame
 import utils.multiSetOf
-import kotlin.math.max
 
 class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " === ")
@@ -145,13 +145,13 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 val (collectionLeft, relationsLeft) = symbolTable.getKeyValueByNotation(left.map.keys.first())
                 val (collectionRight, relationsRight) = symbolTable.getKeyValueByNotation(left.map.keys.first())
                 if (collectionLeft is PointCollection<*>) {
-                    if (collectionLeft === collectionRight) {
-                        // do not know how to negate this statement
-                    } else collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
+                    if (!isSame(collectionLeft, collectionRight)) {
+                        collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
+                    }
                 } else {
                     if (collectionLeft !is IdentNotation)
                         throw SystemFatalError("Unexpected notation in equals")
-                    throw SystemFatalError("Not done yer for circles")
+                    throw SystemFatalError("Not done yet for circles")
                 }
                 relationsLeft.merge(null, symbolTable, relationsRight)
             }

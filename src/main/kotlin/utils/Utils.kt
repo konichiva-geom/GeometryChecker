@@ -6,12 +6,15 @@ import entity.expr.notation.Point3Notation
 import error.PosError
 import error.SpoofError
 import math.*
+import java.io.File
 
 object Utils {
     private const val SHOULD_CATCH = false
     const val THEOREMS_PATH = "src/main/resources/theorems.txt"
     const val INFERENCE_PATH = "src/main/resources/inference.txt"
     val keyForArithmeticNumeric = NumNotation(FractionFactory.zero())
+
+    val primes = File("src/main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
 
     private val lambdas = mutableListOf({ a: Fraction, b: Fraction -> a.add(b) },
         { a: Fraction, b: Fraction -> a.subtract(b) },
@@ -40,6 +43,7 @@ object Utils {
             try {
                 block()
             } catch (e: SpoofError) {
+                e.toString()
                 throw PosError(range, e.msg, *e.args, *args)
             }
         else

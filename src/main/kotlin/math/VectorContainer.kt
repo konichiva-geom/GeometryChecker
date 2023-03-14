@@ -1,7 +1,7 @@
 package math
 
 import utils.ExtensionUtils.addOrCreate
-import utils.PrimeGetter.primes
+import utils.Utils.primes
 import utils.multiSetOf
 
 

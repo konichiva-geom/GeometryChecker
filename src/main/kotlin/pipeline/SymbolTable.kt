@@ -8,6 +8,7 @@ import math.*
 import math.Vector
 import pipeline.inference.InferenceProcessor
 import utils.MutablePair
+import utils.NameGenerator
 import utils.multiSetOf
 import utils.with
 import java.util.*
@@ -28,6 +29,7 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     val angleVectors = VectorContainer<AnglePointCollection>()
 
     val equalIdentRenamer = EqualIdentRenamer()
+    val nameGenerator = NameGenerator()
 
     fun getRelationsByNotation(notation: Notation): EntityRelations {
         return getKeyValueByNotation(notation).second

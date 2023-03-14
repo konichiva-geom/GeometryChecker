@@ -20,20 +20,12 @@ object MathUtils {
             first to second else second to first
     }
 
-    fun <T : Comparable<T>?> max(t1: T, t2: T): T {
-        return if (t1!! > t2) t1 else t2
-    }
-
-    fun <T : Comparable<T>?> min(t1: T, t2: T): T {
-        return if (t1!! < t2) t1 else t2
-    }
-
     fun getLCM(first: Int, second: Int): Int = first / getGCD(first, second) * second
 
     fun getGCD(first: Int, second: Int): Int {
         if (first == 0 && second == 0)
             return 1
-        return calcGCD(max(abs(first), abs(second)), min(abs(first), abs(second)))
+        return calcGCD(maxOf(abs(first), abs(second)), minOf(abs(first), abs(second)))
     }
 
     private fun calcGCD(first: Int, second: Int): Int {

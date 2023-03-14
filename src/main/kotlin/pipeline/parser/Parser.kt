@@ -14,7 +14,6 @@ import error.SpoofError
 import pipeline.inference.Inference
 import utils.ExtensionUtils.toRange
 import utils.ExtensionUtils.toViewable
-import utils.MathUtils.min
 
 val filteredFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
 
@@ -46,7 +45,7 @@ open class Parser {
                 throw PosError(
                     IntRange(token.offset, token.input.length),
                     "Couldn't parse input, starting with: %{text}",
-                    "text" to token.input.substring(token.offset - 1, token.offset - 1 + min(20, remainderLength))
+                    "text" to token.input.substring(token.offset - 1, token.offset - 1 + minOf(20, remainderLength))
                 )
             }
             val tokens = getAllErrorTokens(e.errorResult as AlternativesFailure)
@@ -95,21 +94,19 @@ open class Parser {
      */
     protected tailrec fun findProblemToken(error: AlternativesFailure): PosError {
         val tokenizationError = error.errors.filterIsInstance<NoMatchingToken>().firstOrNull()
-        if (tokenizationError != null) {
+        if (tokenizationError != null)
             return PosError(tokenizationError.tokenMismatch.toRange(), "TokenizationError")
-        }
+
         val nextLevel = error.errors.filterIsInstance<AlternativesFailure>()
         if (nextLevel.isEmpty()) {
             val foundToken = (error.errors.last() as MismatchedToken).found
             val expectedTokens = (error.errors.map { (it as MismatchedToken).expected.toViewable() }.distinct())
-            val th = PosError(
+            return PosError(
                 IntRange(foundToken.offset, foundToken.length),
                 "Expected %{expected}, got %{got}",
                 "expected" to expectedTokens.joinToString(separator = " or "),
                 "got" to if (Regex("\\s+").matches(foundToken.text)) "linebreak" else foundToken
             )
-            th.toString()
-            return th
         }
         return findProblemToken(nextLevel.first())
     }

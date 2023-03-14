@@ -15,8 +15,8 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
      * destroying ray structure
      */
     init {
-        this.p1 = MathUtils.min(p1, p2)
-        this.p2 = MathUtils.max(p1, p2)
+        this.p1 = minOf(p1, p2)
+        this.p2 = maxOf(p1, p2)
     }
 
     override fun getOrder(): Int = 5

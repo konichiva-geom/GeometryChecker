@@ -59,8 +59,8 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
             if (intersection.isNotEmpty())
                 intersection.first()
             else if (left is Point2Notation && right is Point2Notation)
-                NameGenerator.getName()
-            else NameGenerator.getUnknownPointQuantityName()
+                symbolTable.nameGenerator.getName()
+            else symbolTable.nameGenerator.getUnknownPointQuantityName()
         )
         if (intersection.isEmpty()) {
             symbolTable.newPoint(intersectionValue.p)

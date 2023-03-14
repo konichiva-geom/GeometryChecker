@@ -1,6 +1,6 @@
 package utils
 
-object NameGenerator {
+class NameGenerator {
     private var index = 0
     private var indexForUnknownPointSize = 0
 
