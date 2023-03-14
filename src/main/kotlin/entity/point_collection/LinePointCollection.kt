@@ -3,7 +3,7 @@ package entity.point_collection
 import entity.Renamable
 import entity.expr.notation.Point2Notation
 import error.SpoofError
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 class LinePointCollection(private val points: MutableSet<String>) : PointCollection<Point2Notation>() {
     override fun getPointsInCollection(): Set<String> = points

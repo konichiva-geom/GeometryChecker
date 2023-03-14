@@ -8,7 +8,7 @@ import math.Fraction
 import math.VectorContainer
 import math.mergeWithOperation
 import pipeline.EqualIdentRenamer
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import utils.MultiSet
 import utils.MutablePair
 import java.util.*

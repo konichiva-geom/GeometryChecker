@@ -1,7 +1,7 @@
 import entity.expr.Expr
 import pipeline.parser.Parser
 import pipeline.Pipeline
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 import kotlin.test.assertFails

@@ -3,7 +3,7 @@ package entity.relation
 import entity.Renamable
 import entity.expr.notation.IdentNotation
 import entity.expr.notation.Notation
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 class CircleRelations : EntityRelations(), Renamable {
     private val points = mutableSetOf<String>()

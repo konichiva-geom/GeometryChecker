@@ -1,6 +1,6 @@
 package entity.expr
 
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 /**
  * Expression that returns some value, e.g. [BinaryIntersects] returns point, or segment, or something else

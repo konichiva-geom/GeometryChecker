@@ -2,7 +2,7 @@ package entity.relation
 
 import entity.expr.notation.Notation
 import entity.expr.notation.RayNotation
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 class RayRelations : LinearRelations() {
     override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) {

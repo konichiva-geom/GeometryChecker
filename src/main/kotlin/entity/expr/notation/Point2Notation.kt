@@ -1,9 +1,8 @@
 package entity.expr.notation
 
 import entity.expr.Expr
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
-import utils.MathUtils
 import utils.Utils
 
 open class Point2Notation(p1: String, p2: String) : RelatableNotation() {

@@ -10,13 +10,13 @@ import entity.expr.notation.Point2Notation
 import entity.expr.notation.Point3Notation
 import entity.expr.notation.PointNotation
 import error.SpoofError
-import pipeline.SymbolTable
 import pipeline.inference.InferenceProcessor
+import pipeline.symbol_table.SymbolTable
 import utils.Utils.catchWithRangeAndArgs
 
 class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
-    private val symbolTable = SymbolTable(inferenceProcessor)
+    private val symbolTable = SymbolTable()
 
     fun interpret(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
         checkHeaders(tree.item as List<Tuple2<String, *>>)
@@ -31,7 +31,7 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     }
 
     private fun validatePointInitialization(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
-        val tempTable = SymbolTable(inferenceProcessor)
+        val tempTable = SymbolTable()
         for ((i, tuple) in tree.item.withIndex()) {
             if (tuple.t2 == null)
                 continue
@@ -99,7 +99,7 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
                 when (expr) {
                     is Invocation -> interpretTheoremUse(expr)
                     is Relation -> {
-                        Relation.makeRelation(expr, symbolTable)
+                        Relation.makeRelation(expr, symbolTable, inferenceProcessor)
                     }
                     is Creation -> expr.create(symbolTable)
                     else -> throw SpoofError("Unexpected expression in description")
@@ -126,7 +126,13 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
             theoremParser.check(expr.signature.args, symbolTable)
         } else {
             val body = theoremParser.getTheoremBodyBySignature(expr.signature)
-            theoremParser.parseTheorem(expr.signature, theoremParser.getSignature(expr.signature), body, symbolTable)
+            theoremParser.parseTheorem(
+                expr.signature,
+                theoremParser.getSignature(expr.signature),
+                body,
+                symbolTable,
+                inferenceProcessor
+            )
         }
     }
 

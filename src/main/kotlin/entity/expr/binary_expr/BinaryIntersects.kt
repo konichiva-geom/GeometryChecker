@@ -8,9 +8,8 @@ import entity.point_collection.PointCollection
 import entity.relation.CircleRelations
 import error.SpoofError
 import external.WarnLogger
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
-import utils.NameGenerator
 
 /**
  * Intersection means that two line objects are not on the same line

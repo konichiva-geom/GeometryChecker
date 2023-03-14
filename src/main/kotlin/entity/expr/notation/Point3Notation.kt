@@ -1,7 +1,7 @@
 package entity.expr.notation
 
 import entity.expr.Expr
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 import utils.Utils
 

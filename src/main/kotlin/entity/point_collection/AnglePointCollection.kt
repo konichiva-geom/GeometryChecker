@@ -3,7 +3,7 @@ package entity.point_collection
 import entity.expr.notation.Point3Notation
 import error.SpoofError
 import error.SystemFatalError
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 class AnglePointCollection(var leftArm: RayPointCollection, var rightArm: RayPointCollection) :
     PointCollection<Point3Notation>() {

@@ -1,7 +1,7 @@
 package entity.relation
 
 import entity.expr.notation.Notation
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 abstract class EntityRelations {
     /**

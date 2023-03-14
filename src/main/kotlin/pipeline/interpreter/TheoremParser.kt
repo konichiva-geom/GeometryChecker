@@ -7,9 +7,10 @@ import entity.expr.Expr
 import entity.expr.Invocation
 import entity.expr.Relation
 import error.SpoofError
-import pipeline.SymbolTable
+import pipeline.inference.InferenceProcessor
 import pipeline.parser.GeomGrammar
 import pipeline.parser.Parser
+import pipeline.symbol_table.SymbolTable
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
     override fun toString(): String {
@@ -66,7 +67,13 @@ class TheoremParser : Parser() {
             ?: throw SpoofError("signature not found")
     }
 
-    fun parseTheorem(call: Signature, theoremSignature: Signature, theoremBody: TheoremBody, symbolTable: SymbolTable) {
+    fun parseTheorem(
+        call: Signature,
+        theoremSignature: Signature,
+        theoremBody: TheoremBody,
+        symbolTable: SymbolTable,
+        inferenceProcessor: InferenceProcessor
+    ) {
         traverseSignature(call, theoremSignature)
         println(signatureMapper.mappings)
         for (expr in theoremBody.body) {
@@ -74,6 +81,7 @@ class TheoremParser : Parser() {
                 is Relation -> Relation.makeRelation(
                     expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation,
                     symbolTable,
+                    inferenceProcessor,
                     fromInference = false
                 )
                 is Invocation -> {
@@ -91,6 +99,7 @@ class TheoremParser : Parser() {
                 Relation.makeRelation(
                     expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation,
                     symbolTable,
+                    inferenceProcessor,
                     fromInference = false
                 )
         }

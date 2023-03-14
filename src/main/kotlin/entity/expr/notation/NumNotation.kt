@@ -2,7 +2,7 @@ package entity.expr.notation
 
 import entity.expr.Expr
 import math.Fraction
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 class NumNotation(val number: Fraction) : Notation() {

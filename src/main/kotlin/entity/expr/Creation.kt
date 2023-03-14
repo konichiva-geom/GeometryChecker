@@ -1,6 +1,6 @@
 package entity.expr
 
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 /**
  * Interface for creation (points, circles)

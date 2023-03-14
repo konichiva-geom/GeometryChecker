@@ -2,6 +2,7 @@ package pipeline
 
 import entity.Renamable
 import error.SpoofError
+import pipeline.symbol_table.SymbolTable
 import utils.ExtensionUtils.addToOrCreateSet
 import utils.Utils.sortPoints
 

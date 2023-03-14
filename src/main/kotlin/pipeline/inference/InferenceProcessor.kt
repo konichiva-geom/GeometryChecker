@@ -1,7 +1,7 @@
 package pipeline.inference
 
 import entity.expr.Expr
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 class InferenceProcessor {
@@ -9,21 +9,19 @@ class InferenceProcessor {
     private val doubleInferenceSets = mutableMapOf<String, MutableSet<Pair<Inference, Boolean>>>()
     private val mapper = IdentMapper()
     private val processedSet = mutableSetOf<String>()
-    // TODO: clear processedSet after each makeRelation
 
     /**
      * Check all inferences for this expression
      */
     fun processInference(expr: Expr, symbolTable: SymbolTable) {
         val currentExpression = expr.toString()
-        println(currentExpression)
         if (processedSet.contains(currentExpression))
             return
         val repr = expr.getRepr().toString()
         processedSet.add(currentExpression)
         val inferences = inferenceSets[repr] ?: return
         for (inference in inferences) {
-            inference.process(expr, symbolTable, mapper)
+            inference.process(expr, symbolTable, mapper, this)
         }
     }
 

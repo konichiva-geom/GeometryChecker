@@ -8,7 +8,7 @@ import error.SpoofError
 import error.SystemFatalError
 import external.WarnLogger
 import math.*
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 import utils.Utils.isSame
 import utils.multiSetOf

@@ -2,7 +2,7 @@ package entity.point_collection
 
 import entity.expr.notation.ArcNotation
 import error.SpoofError
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 class ArcPointCollection(
     private val bounds: MutableSet<String>,

@@ -1,6 +1,6 @@
 package entity
 
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 
 interface Renamable {

@@ -2,7 +2,7 @@ package entity.relation
 
 import entity.expr.notation.Notation
 import error.SystemFatalError
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 abstract class LinearRelations : EntityRelations() {
     // points not in linear

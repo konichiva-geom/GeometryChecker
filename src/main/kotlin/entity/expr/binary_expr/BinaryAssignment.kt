@@ -9,7 +9,7 @@ import entity.expr.notation.Point2Notation
 import entity.expr.notation.PointNotation
 import error.SpoofError
 import error.SystemFatalError
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), Creation {

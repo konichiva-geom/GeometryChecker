@@ -4,7 +4,7 @@ import com.github.h0tk3y.betterParse.utils.Tuple4
 import entity.expr.Expr
 import entity.expr.notation.Point2Notation
 import entity.relation.LineRelations
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 /**

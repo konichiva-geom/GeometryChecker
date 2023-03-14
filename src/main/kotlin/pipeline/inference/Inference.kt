@@ -4,8 +4,8 @@ import entity.expr.AnyExpr
 import entity.expr.Expr
 import entity.expr.Relation
 import entity.expr.notation.Notation
-import pipeline.SymbolTable
 import pipeline.interpreter.IdentMapper
+import pipeline.symbol_table.SymbolTable
 
 /**
  * Convert result of expressions from pipeline.inference.txt
@@ -30,7 +30,12 @@ open class Inference(
     /**
      * Process pipeline.inference by first mapping all the letters from the newly added expression
      */
-    open fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: IdentMapper) {
+    open fun process(
+        newlyAddedExpr: Expr,
+        symbolTable: SymbolTable,
+        mapper: IdentMapper,
+        inferenceProcessor: InferenceProcessor
+    ) {
         val searchedRepr = newlyAddedExpr.getRepr().toString()
         val foundExpr = fromSideExpressions.first { it.getRepr().toString() == searchedRepr }
         mapper.createLinks(newlyAddedExpr, foundExpr)
@@ -42,13 +47,9 @@ open class Inference(
         val quantifierVariants = symbolTable.equalIdentRenamer.getAllNSizedPointLists(fromSideQuantifier.size)
         for (variant in quantifierVariants) {
             mapper.mappings.putAll(copiedMappings)
-            println(this)
-            println(mapper)
             for ((i, point) in variant.withIndex())
                 mapper.mappings[fromSideQuantifier[i].notation.toString()] = mutableSetOf(point)
 
-            println(mapper)
-            println()
             val mappedToSideExpressions = toSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
             if (mappedToSideExpressions.any {
                     it.traverseExpr(symbolTable) { expr, _ ->
@@ -64,9 +65,8 @@ open class Inference(
 
             mapper.clear()
             for (expr in mappedToSideExpressions) {
-                println("inference: $expr")
                 // TODO probably should rename expr. Or not, because all points should be minimal already?
-                Relation.makeRelation(expr as Relation, symbolTable, fromInference = true)
+                Relation.makeRelation(expr as Relation, symbolTable, inferenceProcessor, fromInference = true)
                 symbolTable.assertCorrectState()
             }
         }
@@ -81,6 +81,7 @@ open class Inference(
     }
 }
 
+// TODO: make sure it works correctly
 class DoubleSidedInference(
     fromSide: List<Expr>,
     toSide: List<Expr>
@@ -92,7 +93,12 @@ class DoubleSidedInference(
         toSideExpressions.retainAll { it !is AnyExpr }
     }
 
-    override fun process(newlyAddedExpr: Expr, symbolTable: SymbolTable, mapper: IdentMapper) {
+    override fun process(
+        newlyAddedExpr: Expr,
+        symbolTable: SymbolTable,
+        mapper: IdentMapper,
+        inferenceProcessor: InferenceProcessor
+    ) {
         val searchedRepr = newlyAddedExpr.getRepr().toString()
         toSideExpressions.filter { it.getRepr().toString() == searchedRepr }.forEach {
             mapper.createLinks(newlyAddedExpr, it)
@@ -103,7 +109,7 @@ class DoubleSidedInference(
         }
         mapper.forceUniqueMappings()
         for (expr in toSideExpressions) {
-            Relation.makeRelation(expr as Relation, symbolTable)
+            Relation.makeRelation(expr as Relation, symbolTable, inferenceProcessor)
         }
         mapper.clear()
     }
@@ -112,6 +118,7 @@ class DoubleSidedInference(
         newlyAddedExpr: Expr,
         symbolTable: SymbolTable,
         mapper: IdentMapper,
+        inferenceProcessor: InferenceProcessor,
         isToSide: Boolean = true
     ) {
         val searchedRepr = newlyAddedExpr.getRepr().toString()
@@ -125,7 +132,7 @@ class DoubleSidedInference(
             }
         mapper.forceUniqueMappings()
         for (expr in toSideExpressions) {
-            Relation.makeRelation(expr as Relation, symbolTable)
+            Relation.makeRelation(expr as Relation, symbolTable, inferenceProcessor)
         }
         mapper.clear()
     }

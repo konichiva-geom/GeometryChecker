@@ -4,7 +4,7 @@ import entity.Renamable
 import entity.expr.Expr
 import entity.expr.notation.Notation
 import pipeline.ArithmeticExpander.getArithmeticToString
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 import utils.ExtensionUtils.addOrCreate
 

@@ -5,7 +5,7 @@ import entity.expr.notation.RayNotation
 import error.SpoofError
 import math.Vector
 import math.changeAllPairs
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import utils.multiSetOf
 
 class RayPointCollection(var start: String, private val points: MutableSet<String>) :

@@ -2,7 +2,7 @@ package entity.expr.notation
 
 import entity.expr.Expr
 import entity.relation.CircleRelations
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 class IdentNotation(var text: String) : RelatableNotation() {

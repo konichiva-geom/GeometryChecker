@@ -6,6 +6,7 @@ import TestFactory.passTask
 import entity.expr.binary_expr.BinaryExpr
 import math.*
 import pipeline.inference.InferenceProcessor
+import pipeline.symbol_table.SymbolTable
 import utils.multiSetOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -50,7 +51,7 @@ internal class ArithmeticTest {
     @Test
     fun testVectorCreation() {
         val withMultiplication = parseFirst(" 2 AB * CD == 3AB + 2CD")
-        val table = SymbolTable(InferenceProcessor())
+        val table = SymbolTable()
 
         val left = vectorFromArithmeticMap(((withMultiplication as BinaryExpr).left as ArithmeticExpr).map, table)
         val right = vectorFromArithmeticMap(((withMultiplication).right as ArithmeticExpr).map, table)

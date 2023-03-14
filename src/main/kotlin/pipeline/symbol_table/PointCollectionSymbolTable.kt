@@ -1,21 +1,14 @@
-package pipeline
+package pipeline.symbol_table
 
 import entity.expr.notation.*
 import entity.point_collection.*
 import entity.relation.*
 import error.SpoofError
-import math.*
-import math.Vector
-import pipeline.inference.InferenceProcessor
 import utils.MutablePair
-import utils.NameGenerator
-import utils.multiSetOf
 import utils.with
 import java.util.*
 
-open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
-    private val points = mutableMapOf<String, PointRelations>()
-
+open class PointCollectionSymbolTable : PointSymbolTable() {
     val lines = LinkedList<MutablePair<LinePointCollection, LineRelations>>()
     val rays = LinkedList<MutablePair<RayPointCollection, RayRelations>>()
     val angles = LinkedList<MutablePair<AnglePointCollection, AngleRelations>>()
@@ -23,19 +16,6 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
 
     val segments = mutableMapOf<SegmentPointCollection, SegmentRelations>()
     val arcs = mutableMapOf<ArcPointCollection, ArcRelations>()
-    val circles = mutableMapOf<IdentNotation, CircleRelations>() // IdentNotation is used to rename and remap to work
-
-    val segmentVectors = VectorContainer<SegmentPointCollection>()
-    val angleVectors = VectorContainer<AnglePointCollection>()
-
-    val equalIdentRenamer = EqualIdentRenamer()
-    val nameGenerator = NameGenerator()
-
-    fun getRelationsByNotation(notation: Notation): EntityRelations {
-        return getKeyValueByNotation(notation).second
-    }
-
-    fun getKeyByNotation(notation: Notation): Any = getKeyValueByNotation(notation).first
 
     @Suppress("UNCHECKED_CAST")
     fun getKeyValueByNotation(notation: Notation): Pair<Any, EntityRelations> {
@@ -69,6 +49,12 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
             else -> throw SpoofError(notation.toString())
         }
     }
+
+    fun getRelationsByNotation(notation: Notation): EntityRelations {
+        return getKeyValueByNotation(notation).second
+    }
+
+    fun getKeyByNotation(notation: Notation): Any = getKeyValueByNotation(notation).first
 
     private inline fun <reified T : LinearRelations,
             reified N : Notation,
@@ -148,10 +134,6 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         }
     }
 
-    fun resetPoint(newRelations: PointRelations, notation: String) {
-        points[notation] = newRelations
-    }
-
     private fun getAngleAndRelations(notation: Point3Notation): Pair<AnglePointCollection, AngleRelations> {
         for ((collection, relations) in angles) {
             if (collection.isFromNotation(notation))
@@ -193,52 +175,8 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
     fun getPointObjectsByNotation(notation: Notation): Set<PointRelations> =
         getPointSetNotationByNotation(notation).map { getPoint(it) }.toSet()
 
-    /**
-     * Make point distinct from all others
-     */
-    fun newPoint(point: String): PointRelations {
-        if (points[point] != null)
-            throw SpoofError("Point %{name} already defined", "name" to point)
-        points[point] = PointRelations()
-        equalIdentRenamer.addPoint(point)
-        return points[point]!!
-    }
-
-    fun newCircle(notation: IdentNotation): CircleRelations {
-        if (circles[notation] != null)
-            throw SpoofError("Circle %{name} already defined", "name" to notation.text)
-        circles[notation] = CircleRelations()
-        equalIdentRenamer.addPoint(notation.text)
-        return circles[notation]!!
-    }
-
-    fun hasPoint(pointNotation: PointNotation): Boolean {
-        return points[pointNotation.p] != null
-    }
-
-    fun hasPoint(point: String): Boolean {
-        return points[point] != null
-    }
-
-    fun getPoint(name: String): PointRelations {
-        return points[name] ?: throw SpoofError("Point %{name} is not instantiated", "name" to name)
-    }
-
-    fun getPoint(pointNotation: PointNotation): PointRelations {
-        return getPoint(pointNotation.p)
-    }
-
     fun getLine(notation: Point2Notation): LineRelations {
         return getKeyValueByNotation(notation).second as LineRelations
-    }
-
-    fun getCircle(notation: IdentNotation): CircleRelations {
-        var res = circles[notation]
-        if (res == null) {
-            res = CircleRelations()
-            circles[notation] = res
-        }
-        return res
     }
 
     fun getRay(notation: RayNotation): RayRelations {
@@ -257,76 +195,5 @@ open class SymbolTable(val inferenceProcessor: InferenceProcessor) {
         val res = ArcRelations()
         arcs[ArcPointCollection(notation.getPointsAndCircles().toMutableSet(), circle = notation.circle)] = res
         return res
-    }
-
-    fun clear() {
-        points.clear()
-        lines.clear()
-        rays.clear()
-        segments.clear()
-        angles.clear()
-        circles.clear()
-        arcs.clear()
-
-        arcToAngleList.clear()
-        angleVectors.vectors.clear()
-        segmentVectors.vectors.clear()
-
-        equalIdentRenamer.clear()
-    }
-
-    fun getOrCreateVector(notation: Notation): Vector {
-        when (notation) {
-            is NumNotation -> return mutableMapOf(multiSetOf(0) to if (notation.number.isZero()) FractionFactory.one() else notation.number)
-            is ArcNotation -> {
-                val angle = arcToAngleList.find {
-                    it.e1 == ArcPointCollection(
-                        notation.getPointsAndCircles().toMutableSet(), circle = notation.circle
-                    )
-                } ?: throw SpoofError("Angle for arc %{arc} not specified", "arc" to notation)
-                return angleVectors.getOrCreate(angle.e2)
-            }
-            is Point3Notation -> return angleVectors.getOrCreate(getKeyByNotation(notation) as AnglePointCollection)
-            is SegmentNotation -> {
-                val key = SegmentPointCollection(notation.getPointsAndCircles().toMutableSet())
-                if (segmentVectors.vectors[key] == null)
-                    equalIdentRenamer.addSubscribers(key, *key.getPointsInCollection().toTypedArray())
-                return segmentVectors.getOrCreate(key)
-            }
-            is MulNotation -> {
-                return notation.elements.map {
-                    getOrCreateVector(it)
-                }.fold(mutableMapOf(multiSetOf<Int>() to FractionFactory.one())) { acc, i ->
-                    acc.mergeWith(i, "*")
-                }
-            }
-            else -> throw SpoofError(
-                "Unexpected notation %{notation} in arithmetic expression",
-                "notation" to notation
-            )
-        }
-    }
-
-    fun assertCorrectState() {
-        assert(angleVectors.vectors.size == angleVectors.vectors.keys.toSet().size)
-        assert(segmentVectors.vectors.size == segmentVectors.vectors.keys.toSet().size)
-
-        assertMapCorrect(points)
-        assertMapCorrect(circles)
-        assertMapCorrect(segments)
-        assertMapCorrect(arcs)
-
-        assertLinkedListCorrect(angles)
-        assertLinkedListCorrect(rays)
-        assertLinkedListCorrect(lines)
-        assertLinkedListCorrect(arcToAngleList)
-    }
-
-    fun <A, B> assertLinkedListCorrect(list: LinkedList<MutablePair<A, B>>) {
-        assert(list.size == list.map { it.e1 }.toSet().size)
-    }
-
-    private fun <A, B> assertMapCorrect(map: Map<A, B>) {
-        assert(map.size == map.keys.toSet().size)
     }
 }

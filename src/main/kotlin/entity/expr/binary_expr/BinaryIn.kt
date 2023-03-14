@@ -3,7 +3,7 @@ package entity.expr.binary_expr
 import entity.expr.Relation
 import entity.expr.notation.*
 import entity.point_collection.PointCollection
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 
 /**

@@ -4,7 +4,7 @@ import entity.expr.notation.IdentNotation
 import entity.expr.notation.Notation
 import entity.expr.notation.PointNotation
 import error.SystemFatalError
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 import pipeline.interpreter.Signature
 

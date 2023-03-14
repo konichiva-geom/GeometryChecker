@@ -2,7 +2,7 @@ package math
 
 import entity.expr.notation.Notation
 import error.SystemFatalError
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 import utils.ExtensionUtils.addOrCreate
 import utils.MultiSet
 import utils.Utils.signToLambda

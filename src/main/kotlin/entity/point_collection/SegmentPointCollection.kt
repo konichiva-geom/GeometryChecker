@@ -3,7 +3,7 @@ package entity.point_collection
 import entity.Renamable
 import entity.expr.notation.SegmentNotation
 import error.SpoofError
-import pipeline.SymbolTable
+import pipeline.symbol_table.SymbolTable
 
 open class SegmentPointCollection internal constructor(
     protected val bounds: MutableSet<String>,
