@@ -9,8 +9,9 @@ import entity.expr.notation.Point2Notation
 import entity.expr.notation.PointNotation
 import error.SpoofError
 import error.SystemFatalError
-import pipeline.symbol_table.SymbolTable
+import pipeline.inference.InferenceProcessor
 import pipeline.interpreter.IdentMapper
+import pipeline.symbol_table.SymbolTable
 
 class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), Creation {
     override fun getChildren(): List<Expr> {
@@ -37,13 +38,15 @@ class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), C
         } else throw SpoofError("Assigning non-points is not yet implemented")
     }
 
-    override fun make(symbolTable: SymbolTable) {
+    override fun make(symbolTable: SymbolTable) = throw SystemFatalError("Shouldn't be called, use makeAssignment")
+
+    fun makeAssignment(symbolTable: SymbolTable, inferenceProcessor: InferenceProcessor) {
+        if (!(right as Relation).check(symbolTable))
+            Relation.makeRelation(right, symbolTable, inferenceProcessor, fromInference = false)
         assignFromDescriptionAndTheorem(symbolTable)
     }
 
     private fun assignFromDescriptionAndTheorem(symbolTable: SymbolTable) {
-        if (!(right as Relation).check(symbolTable))
-            right.make(symbolTable)
         val assignedPoints = (left as Notation).getPointsAndCircles()
         val renamedPoints = (right as Returnable).getReturnValue(symbolTable)
         if (renamedPoints.size > assignedPoints.size) {

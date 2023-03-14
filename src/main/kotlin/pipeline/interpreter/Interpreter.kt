@@ -97,6 +97,7 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
             catchWithRangeAndArgs({
                 rename(expr)
                 when (expr) {
+                    is BinaryAssignment -> expr.makeAssignment(symbolTable, inferenceProcessor)
                     is Invocation -> interpretTheoremUse(expr)
                     is Relation -> {
                         Relation.makeRelation(expr, symbolTable, inferenceProcessor)

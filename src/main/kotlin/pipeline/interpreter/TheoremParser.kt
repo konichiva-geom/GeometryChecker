@@ -6,6 +6,7 @@ import com.github.h0tk3y.betterParse.parser.ParseException
 import entity.expr.Expr
 import entity.expr.Invocation
 import entity.expr.Relation
+import entity.expr.binary_expr.BinaryAssignment
 import error.SpoofError
 import pipeline.inference.InferenceProcessor
 import pipeline.parser.GeomGrammar
@@ -75,9 +76,9 @@ class TheoremParser : Parser() {
         inferenceProcessor: InferenceProcessor
     ) {
         traverseSignature(call, theoremSignature)
-        println(signatureMapper.mappings)
         for (expr in theoremBody.body) {
             when (expr) {
+                is BinaryAssignment -> expr.makeAssignment(symbolTable, inferenceProcessor)
                 is Relation -> Relation.makeRelation(
                     expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation,
                     symbolTable,
