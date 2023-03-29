@@ -10,6 +10,7 @@ import external.WarnLogger
 import math.*
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
+import utils.ExtensionUtils.isAlmostZero
 import utils.Utils.isSame
 import utils.multiSetOf
 
@@ -125,7 +126,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
             val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
             val isZeroVector = resolveLeft.mergeWithOperation(resolveRight, "-")
-            return isZeroVector.isEmpty()
+            return isZeroVector.all { it.value.isAlmostZero() }
         }
     }
 
@@ -181,8 +182,8 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 private fun isEntityEquals(left: ArithmeticExpr, right: ArithmeticExpr) =
     left.map.size == 1 && right.map.size == 1
-            && left.map.values.first().contentEquals(FractionFactory.one())
-            && right.map.values.first().contentEquals(FractionFactory.one())
+            && left.map.values.first() == 1.0
+            && right.map.values.first() == 1.0
 
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")

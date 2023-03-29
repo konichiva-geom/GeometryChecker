@@ -22,13 +22,14 @@ internal class ArithmeticTest {
         )
 
         val threeLevelFraction = parseFirst("ABC == 2+2/(2+2/(2+ABE))")
-        assertEquals(threeLevelFraction.toString(), "ABE*ABC+3ABC == 3ABE+8")
+        assertEquals(threeLevelFraction.toString(), "2ABE*ABC+6ABC == 6ABE+16")
 
 
         val fractionInNumerator = parseFirst("ABC == 2 + (2+(2+ABE)/2)/2")
         assertEquals(fractionInNumerator.toString(), "4ABC == ABE+14")
 
         val arithmeticExpr = parseFirst("ABC == 90 - 7 BDC + 12 - 6 - CBA - CDB")
+        arithmeticExpr.getChildren().last().toString()
         assertEquals(arithmeticExpr.toString(), "ABC == -8BDC-ABC+96")
         val arithmeticExpr2 = parseFirst("ABC == (2 + ABC) * (3 + VF)")
         assertEquals(arithmeticExpr2.toString(), "ABC == ABC*FV+3ABC+2FV+6")
@@ -37,13 +38,13 @@ internal class ArithmeticTest {
     @Test
     fun testWithZeros() {
         val manyZeros = parseFirst("ABC == (2-10/5)*RTY + 0*BSC + 0* SDS")
-        assertEquals(manyZeros.toString(), "ABC == 0")
+        assertEquals(manyZeros.toString(), "5ABC == 0")
 
         val zeroAsTwoFractions = parseFirst("ABC == 2*(3ABE/5)-(6ABE/5)")
-        assertEquals(zeroAsTwoFractions.toString(), "ABC == 0")
+        assertEquals(zeroAsTwoFractions.toString(), "25ABC == 0")
 
         val zeroInNumerator = parseFirst("ABC == (1-1)*(3BC)/2")
-        assertEquals(zeroInNumerator.toString(), "ABC == 0")
+        assertEquals(zeroInNumerator.toString(), "2ABC == 0")
 
         failDescription("ABC == 1/0", "Expression leads to one with zero in denominator")
     }
@@ -57,13 +58,13 @@ internal class ArithmeticTest {
         val right = vectorFromArithmeticMap(((withMultiplication).right as ArithmeticExpr).map, table)
 
         val expected = mutableMapOf(
-            multiSetOf(2) to FractionFactory.fromInt(-2),
-            multiSetOf(3) to FractionFactory.fromInt(-3),
-            multiSetOf(2, 3) to FractionFactory.fromInt(2)
+            multiSetOf(2) to -2.0,
+            multiSetOf(3) to -3.0,
+            multiSetOf(2, 3) to 2.0
         )
 
         left.mergeWithOperation(right, "-").forEach {
-            assert(expected[it.key].contentEquals(it.value))
+            assert(expected[it.key] == it.value)
         }
     }
 

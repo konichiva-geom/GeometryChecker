@@ -3,10 +3,10 @@ package math
 import entity.expr.Expr
 import entity.expr.notation.Notation
 import pipeline.ArithmeticExpander.getArithmeticToString
-import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
+import pipeline.symbol_table.SymbolTable
 
-class DivNotation(val numerator: MutableMap<Notation, Fraction>, val denominator: MutableMap<Notation, Fraction>) :
+class DivNotation(val numerator: MutableMap<Notation, Double>, val denominator: MutableMap<Notation, Double>) :
     Notation() {
     override fun getOrder() = Int.MAX_VALUE
     override fun getPointsAndCircles(): MutableList<String> = TODO("Not yet implemented")
@@ -20,17 +20,16 @@ class DivNotation(val numerator: MutableMap<Notation, Fraction>, val denominator
     override fun toString(): String {
         if (denominator.isEmpty())
             return getArithmeticToString(numerator).toString()
-        var numeratorString =
-            if (numerator.size == 1) getArithmeticToString(numerator)
-            else "(${getArithmeticToString(numerator)})"
+        var numeratorString = if (numerator.size == 1) getArithmeticToString(numerator)
+        else "(${getArithmeticToString(numerator)})"
         if (numeratorString.isEmpty())
             numeratorString = "1"
         val denominatorString =
             if (denominator.size == 1) getArithmeticToString(denominator) else "(${
-                getArithmeticToString(
-                    denominator
-                )
+                getArithmeticToString(denominator)
             })"
+        if (denominatorString.toString() == "")
+            return numeratorString.toString()
         return "$numeratorString/$denominatorString"
     }
 }

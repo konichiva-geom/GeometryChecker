@@ -9,7 +9,7 @@ import utils.Utils.signToLambda
 import utils.multiSetOf
 
 // TODO change set to multiset
-typealias Vector = MutableMap<MultiSet<Int>, Fraction>
+typealias Vector = MutableMap<MultiSet<Int>, Double>
 
 
 /**
@@ -24,14 +24,14 @@ fun Vector.mergeWith(other: Vector, operation: String): Vector {
                 || other.size == 1 && other.keys.contains(multiSetOf(0))
             ) {
                 val (numeric, vector) = numericFirst(other)
-                vector.keys.associateWith { vector[it]!!.multiply(numeric) }.toMutableMap()
+                vector.keys.associateWith { vector[it]!! * numeric }.toMutableMap()
             } else {
-                val res = mutableMapOf<MultiSet<Int>, Fraction>()
+                val res = mutableMapOf<MultiSet<Int>, Double>()
                 this.forEach { (thisKey, thisElement) ->
                     other.forEach { (otherKey, otherElement) ->
                         res.addOrCreate(
                             multiSetOf(*thisKey.toTypedArray(), *otherKey.toTypedArray()),
-                            thisElement.multiply(otherElement)
+                            thisElement * otherElement
                         )
                     }
                 }
@@ -59,36 +59,32 @@ fun Vector.changeAllPairs(change: Pair<Int, Int>) {
 }
 
 fun Vector.copy(): Vector {
-    val res = mutableMapOf<MultiSet<Int>, Fraction>()
-    for ((k, v) in this) {
-        res[k] = v.copyOf()
-    }
-    return res
+    return this.toMutableMap()
 }
 
-fun Vector.multiplyBy(coeff: Fraction): Vector {
+fun Vector.multiplyBy(coeff: Double): Vector {
     for ((key, number) in this) {
-        this[key] = number.multiply(coeff)
+        this[key] = number * coeff
     }
     return this
 }
 
-fun <T> MutableMap<T, Fraction>.mergeWithOperation(
-    other: MutableMap<T, Fraction>,
+fun <T> MutableMap<T, Double>.mergeWithOperation(
+    other: MutableMap<T, Double>,
     operation: String
-): MutableMap<T, Fraction> {
+): MutableMap<T, Double> {
     return (keys + other.keys)
         .associateWith {
             signToLambda[operation]!!(
-                this[it] ?: FractionFactory.zero(),
-                other[it] ?: FractionFactory.zero()
+                this[it] ?: 0.0,
+                other[it] ?: 0.0
             )
         }
-        .filter { !it.value.isZero() } // TODO: should really delete zero values?
+        .filter { it.value != 0.0 } // TODO: should really delete zero values?
         .toMutableMap()
 }
 
-private fun Vector.numericFirst(other: Vector): Pair<Fraction, Vector> {
+private fun Vector.numericFirst(other: Vector): Pair<Double, Vector> {
     return if (this.size == 1 && this.keys.contains(multiSetOf(0)))
         this[multiSetOf(0)]!! to other
     else other[multiSetOf(0)]!! to this
@@ -119,7 +115,7 @@ fun Vector.compare(other: Vector): Int {
     return 0
 }
 
-fun vectorFromArithmeticMap(map: MutableMap<Notation, Fraction>, symbolTable: SymbolTable): Vector {
+fun vectorFromArithmeticMap(map: MutableMap<Notation, Double>, symbolTable: SymbolTable): Vector {
     return map.keys.fold(
         mutableMapOf()
     ) { acc, notation ->
@@ -139,9 +135,9 @@ fun fromNotation(symbolTable: SymbolTable, notation: Notation): Vector {
 }
 
 fun fromInt(number: Int): Vector {
-    return mutableMapOf(multiSetOf(number) to FractionFactory.one())
+    return mutableMapOf(multiSetOf(number) to 1.0)
 }
 
 fun Vector.asString(): String {
-    return this.entries.joinToString(separator = ", ") { "${it.key.reduce { acc, i -> acc * i }}:${it.value.asString()}" }
+    return this.entries.joinToString(separator = ", ") { "${it.key.reduce { acc, i -> acc * i }}:${it.value}" }
 }

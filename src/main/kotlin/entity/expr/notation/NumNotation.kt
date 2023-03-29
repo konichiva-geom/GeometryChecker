@@ -1,11 +1,10 @@
 package entity.expr.notation
 
 import entity.expr.Expr
-import math.Fraction
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 
-class NumNotation(val number: Fraction) : Notation() {
+class NumNotation(val number: Double) : Notation() {
     override fun getOrder(): Int = 0
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")

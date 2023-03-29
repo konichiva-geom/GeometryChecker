@@ -38,7 +38,7 @@ object MathUtils {
 //     * solve equation of type a_0 + a_1x + ... + a_{n-1}x^{n-1} = 0
 //     * args is an array [a_{n-1},..., a_1, a_0]
 //     */
-//    fun solve(argsWithZeroes: MutableList<Fraction>): MutableList<Fraction> {
+//    fun solve(argsWithZeroes: MutableList<Double>): MutableList<Double> {
 //        var args = removeFirstZeros(argsWithZeroes)
 //        if (args.size <= 1 || args.size >= 6) {
 //            throw SystemFatalError("Expected from 2 to 5 elements in input array, not counting preceding zeros")
@@ -59,7 +59,7 @@ object MathUtils {
 //    }
 //
 //    // remove all zeros from start of the array
-//    private fun removeFirstZeros(array: MutableList<Fraction>): MutableList<Fraction> {
+//    private fun removeFirstZeros(array: MutableList<Double>): MutableList<Double> {
 //        if (array.size > 0 && array[0].isZero()) {
 //            array.removeAt(0)
 //            return removeFirstZeros(array)
@@ -67,7 +67,7 @@ object MathUtils {
 //        return array
 //    }
 //
-//    private fun firstToOne(array: MutableList<Fraction>): MutableList<Fraction> {
+//    private fun firstToOne(array: MutableList<Double>): MutableList<Double> {
 //        var i = 0
 //        val coeff = array[0]
 //        while (i < array.size) {
@@ -78,7 +78,7 @@ object MathUtils {
 //    }
 //
 //    // x^4 + ax^3 + bx^2 + cx + d = 0
-//    private fun solveQuadratic(a: Fraction, b: Fraction, c: Fraction, d: Fraction): MutableList<Fraction> {
+//    private fun solveQuadratic(a: Double, b: Double, c: Double, d: Double): MutableList<Double> {
 //        if (a.isZero())
 //            return solveQuadraticZeroCube(b, c, d)
 //        if (d.isZero())
@@ -97,14 +97,14 @@ object MathUtils {
 //        return offset
 //    }
 //
-//    private fun m1(p: Fraction, r: Fraction): MutableList<Fraction> {
+//    private fun m1(p: Double, r: Double): MutableList<Double> {
 //        var n = solveSquare(p, r).sorted()
 //        if (n.size == 0) return mutableListOf()
 //        if (n[0] >= 0) {
 //            n[0] = sqrt(n[0])
 //            n[1] = -n[0]
 //        } else
-//            n = mutableListOf<Fraction>()
+//            n = mutableListOf<Double>()
 //        if (n[1] >= 0) {
 //            n.add(sqrt(n[1]))
 //            n.add(-n[n.size - 1])
@@ -113,10 +113,10 @@ object MathUtils {
 //    }
 //
 //    // x^4 + ax^2 + bx + c = 0
-//    private fun solveQuadraticZeroCube(aVal: Fraction, b: Fraction, c: Fraction): MutableList<Fraction> {
+//    private fun solveQuadraticZeroCube(aVal: Double, b: Double, c: Double): MutableList<Double> {
 //        var a = aVal
 //        if (c.isZero()) // x^3 + 0x^2 + ax + b
-//            return (solveCubic(FractionFactory.zero(), a, b) + FractionFactory.zero()).toMutableList()
+//            return (solveCubic(0.0, a, b) + 0.0).toMutableList()
 //        if (b.isZero())
 //            return m1(a, c)
 //        val n = solveCubic(a.multiply(2), a.multiply(a).subtract(c.multiply(4)), b.multiply(b).unaryMinus())
@@ -136,10 +136,10 @@ object MathUtils {
 //    }
 //
 //    // x^3 + ax + b = 0
-//    fun newton(aVal: Fraction, bVal: Fraction): Fraction {
+//    fun newton(aVal: Double, bVal: Double): Double {
 //        var a = aVal
 //        var b = bVal
-//        var s = FractionFactory.one()
+//        var s = 1.0
 //        while (b.add(a) > -1) {
 //            a = a.multiply(4)
 //            b = b.multiply(8)
@@ -160,12 +160,12 @@ object MathUtils {
 //    }
 //
 //    // x^3 + ax^2 + bx + c = 0
-//    private fun solveCubic(aVal: Fraction, bVal: Fraction, c: Fraction): MutableList<Fraction> {
+//    private fun solveCubic(aVal: Double, bVal: Double, c: Double): MutableList<Double> {
 //        var a = aVal
 //        var b= bVal
-//        var solution: Fraction
+//        var solution: Double
 //        if (c.isZero()) {
-//            solution = FractionFactory.zero()
+//            solution = 0.0
 //        } else {
 //            val a3 = a.divide(FractionFactory.fromInt(3))
 //            val p = b.subtract(a3.multiply(a))
@@ -175,7 +175,7 @@ object MathUtils {
 //            } else if (q.moreThanZero()) {
 //                newton(p, q.unaryMinus()).unaryMinus()
 //            } else {
-//                FractionFactory.zero()
+//                0.0
 //            }
 //            solution = solution.subtract(a3)
 //            val t = solution.multiply(solution.multiply(FractionFactory.fromInt(3)).add(a.multiply(2))).add(b)
@@ -189,11 +189,11 @@ object MathUtils {
 //    }
 //
 //    // x^2 + ax + b = 0
-//    private fun solveSquare(a: Fraction, b: Fraction): MutableList<Fraction> {
+//    private fun solveSquare(a: Double, b: Double): MutableList<Double> {
 //        if (b.isZero())
-//            return if (a.isZero()) mutableListOf(FractionFactory.zero(), FractionFactory.zero())
-//            else mutableListOf(FractionFactory.zero(), a.unaryMinus()).sorted()
-//        val solution = mutableListOf<Fraction>()
+//            return if (a.isZero()) mutableListOf(0.0, 0.0)
+//            else mutableListOf(0.0, a.unaryMinus()).sorted()
+//        val solution = mutableListOf<Double>()
 //        var a = a.multiply(FractionFactory.create(-1, 2))
 //        var d = a * a - b
 //        if (d < 0)
@@ -207,29 +207,29 @@ object MathUtils {
 //    /**
 //     * Return array of doubles as a solution of ax^2 + bx + c = 0
 //     */
-//    fun solveSquare(a: Fraction, bVal: Fraction, c: Fraction): MutableList<Fraction> {
+//    fun solveSquare(a: Double, bVal: Double, c: Double): MutableList<Double> {
 //        var b = bVal
-//        val solution = mutableListOf(FractionFactory.zero(), FractionFactory.zero())
+//        val solution = mutableListOf(0.0, 0.0)
 //        if (a.isZero()) {
 //            if (c.isZero()) {
 //                if (b.isZero()) {
-//                    return mutableListOf(FractionFactory.one(), FractionFactory.fromInt(2), FractionFactory.fromInt(3))
+//                    return mutableListOf(1.0, FractionFactory.fromInt(2), FractionFactory.fromInt(3))
 //                }
-//                return mutableListOf(FractionFactory.zero())
+//                return mutableListOf(0.0)
 //            } else {
 //                if (b.isZero()) {
 //                    return mutableListOf()
 //                }
-//                return mutableListOf(FractionFactory.zero())
+//                return mutableListOf(0.0)
 //            }
 //        } else {
 //            if (c.isZero()) {
-//                return mutableListOf(FractionFactory.zero(), b.unaryMinus().divide(a))
+//                return mutableListOf(0.0, b.unaryMinus().divide(a))
 //            } else {
 //                b = b.multiply(FractionFactory.create(-1, 2))
 //                var d = b.multiply(b).subtract(a.multiply(c))
 //                if (d < 0) {
-//                    return FractionFactory.zero()
+//                    return 0.0
 //                }
 //                d = sqrt(d)
 //                val t = if (b > 0) b.add(d) else b.subtract(d)

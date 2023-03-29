@@ -15,11 +15,8 @@ import entity.expr.notation.*
 import error.PosError
 import error.SpoofError
 import math.ArithmeticExpr
-import math.Fraction
-import math.FractionFactory
 import pipeline.ArithmeticExpander.createArithmeticMap
 import pipeline.ArithmeticExpander.mergeMapToDivNotation
-import pipeline.ArithmeticExpander.simplifyTwoMaps
 import pipeline.inference.DoubleSidedInference
 import pipeline.inference.Inference
 import pipeline.interpreter.Signature
@@ -112,7 +109,7 @@ object GeomGrammar : Grammar<Any>() {
     }) or (-arc and linear and -ofToken and ident map {
         ArcNotation(it.t1.first, it.t1.second, it.t2.text)
     }) or (number map {
-        NumNotation(FractionFactory.fromInt(it.text.toIntOrNull() ?: throw Exception("Not a number")))
+        NumNotation(it.text.toIntOrNull()?.toDouble() ?: throw SpoofError("Not a number"))
     })
 
     // relations, creations, comparisons are for notations
@@ -126,23 +123,23 @@ object GeomGrammar : Grammar<Any>() {
         PointNotation(it.text)
     }) or (ident map { IdentNotation(it.text) })
 
-    private val arithmeticTerm: Parser<MutableMap<Notation, Fraction>> by (number and comparableNotation map {
+    private val arithmeticTerm: Parser<MutableMap<Notation, Double>> by (number and comparableNotation map {
         // for terms like 2AB, omitting * operator
         if (it.t2 is NumNotation)
             throw SpoofError("Unexpected 2 numbers in a row")
-        mutableMapOf(it.t2 to FractionFactory.fromInt(it.t1.text.toInt()))
+        mutableMapOf(it.t2 to it.t1.text.toDouble())
     }) or (notation map {
         if (it is NumNotation)
             mutableMapOf((keyForArithmeticNumeric as Notation) to it.number)
         else
-            mutableMapOf(it to FractionFactory.one())
+            mutableMapOf(it to 1.0)
     }) or (-leftPar and parser(GeomGrammar::arithmeticExpression) and -rightPar map { it })
 
-    private val divMulChain: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
+    private val divMulChain: Parser<MutableMap<Notation, Double>> by leftAssociative(
         arithmeticTerm, div or mul
     ) { a, op, b -> createArithmeticMap(a, b, op.text) }
 
-    private val arithmeticExpression: Parser<MutableMap<Notation, Fraction>> by leftAssociative(
+    private val arithmeticExpression: Parser<MutableMap<Notation, Double>> by leftAssociative(
         divMulChain, plus or minus
     ) { a, op, b -> createArithmeticMap(a, b, op.text) }
 
@@ -156,9 +153,9 @@ object GeomGrammar : Grammar<Any>() {
         val divRight = mergeMapToDivNotation(it.t3)
         val leftMap = createArithmeticMap(divLeft.numerator, divRight.denominator, "*")
         val rightMap = createArithmeticMap(divRight.numerator, divLeft.denominator, "*")
-        simplifyTwoMaps(leftMap, rightMap)
         val left = ArithmeticExpr(leftMap)
         val right = ArithmeticExpr(rightMap)
+
         when (it.t2.text) {
             "===" -> BinarySame(left, right)
             "==" -> BinaryEquals(left, right)

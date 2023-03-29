@@ -22,7 +22,7 @@ class VectorContainer<T> {
             return vectors[key]!!.copy()
         val res = fromInt(getNext())
         vectors[key] = res
-        return mutableMapOf(res.keys.first() to res.values.first().copyOf())
+        return mutableMapOf(res.keys.first() to res.values.first())
     }
 
     fun resolveVector(v: Vector): Pair<Int, Int>? {
@@ -44,7 +44,7 @@ class VectorContainer<T> {
             val nullified = singleKeys.first()
             val divCoeff = v[multiSetOf(nullified)]!!
             v.remove(multiSetOf(nullified))
-            v.forEach { (_, u) -> u.inPlaceUnaryMinus().inPlaceDiv(divCoeff) }
+            v.forEach { (k, u) -> v[k] = -u / divCoeff }
             return simplifyVectorCollection(nullified, v)
         }
         return null

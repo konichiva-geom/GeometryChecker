@@ -4,7 +4,6 @@ import entity.Renamable
 import entity.expr.notation.Notation
 import entity.relation.AngleRelations
 import entity.relation.EntityRelations
-import math.Fraction
 import math.VectorContainer
 import math.mergeWithOperation
 import pipeline.EqualIdentRenamer
@@ -157,7 +156,7 @@ abstract class PointCollection<T : Notation> : Renamable {
     }
 
     protected fun <T : PointCollection<*>> addToMap(
-        vector: MutableMap<MultiSet<Int>, Fraction>?,
+        vector: MutableMap<MultiSet<Int>, Double>?,
         container: VectorContainer<T>,
         collection: PointCollection<*>,
         symbolTable: SymbolTable

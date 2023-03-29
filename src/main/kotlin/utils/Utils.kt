@@ -5,21 +5,21 @@ import entity.expr.notation.Point2Notation
 import entity.expr.notation.Point3Notation
 import error.PosError
 import error.SpoofError
-import math.*
 import java.io.File
 
 object Utils {
     private const val SHOULD_CATCH = false
+    const val CONSIDERED_DIGITS_AFTER_POINT = 6
     const val THEOREMS_PATH = "src/main/resources/theorems.txt"
     const val INFERENCE_PATH = "src/main/resources/inference.txt"
-    val keyForArithmeticNumeric = NumNotation(FractionFactory.zero())
+    val keyForArithmeticNumeric = NumNotation(0.0)
 
     val primes = File("src/main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
 
-    private val lambdas = mutableListOf({ a: Fraction, b: Fraction -> a.add(b) },
-        { a: Fraction, b: Fraction -> a.subtract(b) },
-        { a: Fraction, b: Fraction -> a.multiply(b) },
-        { a: Fraction, b: Fraction -> a.divide(b) })
+    private val lambdas = mutableListOf({ a: Double, b: Double -> a + b },
+        { a: Double, b: Double -> a - b },
+        { a: Double, b: Double -> a * b },
+        { a: Double, b: Double -> a / b })
 
     val signToLambda = mutableMapOf(
         "+" to lambdas[0],

@@ -14,7 +14,7 @@ open class VectorSymbolTable : PointCollectionSymbolTable() {
 
     fun getOrCreateVector(notation: Notation): Vector {
         when (notation) {
-            is NumNotation -> return mutableMapOf(multiSetOf(0) to if (notation.number.isZero()) FractionFactory.one() else notation.number)
+            is NumNotation -> return mutableMapOf(multiSetOf(0) to if (notation.number == 0.0) 1.0 else notation.number)
             is ArcNotation -> {
                 val angle = arcToAngleList.find {
                     it.e1 == ArcPointCollection(
@@ -33,7 +33,7 @@ open class VectorSymbolTable : PointCollectionSymbolTable() {
             is MulNotation -> {
                 return notation.elements.map {
                     getOrCreateVector(it)
-                }.fold(mutableMapOf(multiSetOf<Int>() to FractionFactory.one())) { acc, i ->
+                }.fold(mutableMapOf(multiSetOf<Int>() to 1.0)) { acc, i ->
                     acc.mergeWith(i, "*")
                 }
             }

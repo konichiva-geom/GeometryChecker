@@ -8,7 +8,7 @@ import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 import utils.ExtensionUtils.addOrCreate
 
-class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr, Renamable {
+class ArithmeticExpr(val map: MutableMap<Notation, Double>) : Expr, Renamable {
     override fun getChildren(): List<Expr> = map.keys.toList()
 
     override fun getRepr(): StringBuilder {
@@ -16,7 +16,7 @@ class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr, Renamable 
     }
 
     override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
-        val res = mutableMapOf<Notation, Fraction>()
+        val res = mutableMapOf<Notation, Double>()
 
         for ((notation, fraction) in map)
             res[notation.createNewWithMappedPointsAndCircles(mapper) as Notation] = fraction
@@ -34,7 +34,7 @@ class ArithmeticExpr(val map: MutableMap<Notation, Fraction>) : Expr, Renamable 
             renamedKey.renameToMinimalAndRemap(symbolTable)
             renamedKey to it.value
         }
-        val resultingMap = mutableMapOf<Notation, Fraction>()
+        val resultingMap = mutableMapOf<Notation, Double>()
         for ((k, v) in renamedList) {
             resultingMap.addOrCreate(k, v)
         }

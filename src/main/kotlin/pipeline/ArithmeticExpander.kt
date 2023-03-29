@@ -3,32 +3,34 @@ package pipeline
 import entity.expr.notation.Notation
 import entity.expr.notation.NumNotation
 import error.SpoofError
-import math.*
+import math.DivNotation
+import math.MulNotation
+import math.mergeWithOperation
 import utils.ExtensionUtils.addOrCreate
+import utils.ExtensionUtils.asString
 import utils.MathUtils
-import utils.MathUtils.getGCD
 import utils.Utils.keyForArithmeticNumeric
 
 object ArithmeticExpander {
     fun createArithmeticMap(
-        left: MutableMap<Notation, Fraction>,
-        right: MutableMap<Notation, Fraction>,
+        left: MutableMap<Notation, Double>,
+        right: MutableMap<Notation, Double>,
         op: String
-    ): MutableMap<Notation, Fraction> {
+    ): MutableMap<Notation, Double> {
         when (op) {
             "+", "-" -> return left.mergeWithOperation(right, op)
             "*" -> {
-                val res = mutableMapOf<Notation, Fraction>()
+                val res = mutableMapOf<Notation, Double>()
                 for ((key, value) in left) {
                     for ((key2, value2) in right) {
                         val (max, min) = MathUtils.maxToMin(Notation::getOrder, key, key2)
-                        res[mulBy(max, min)] = value.multiply(value2)
+                        res[mulBy(max, min)] = value * value2
                     }
                 }
                 return res
             }
             "/" -> {
-                return mutableMapOf(DivNotation(left, right) to FractionFactory.one())
+                return mutableMapOf(DivNotation(left, right) to 1.0)
             }
         }
         throw SpoofError("Unexpected operator")
@@ -59,7 +61,7 @@ object ArithmeticExpander {
             return DivNotation(
                 createArithmeticMap(
                     first.numerator.toMutableMap(),
-                    mutableMapOf(second to FractionFactory.one()), "*"
+                    mutableMapOf(second to 1.0), "*"
                 ),
                 first.denominator.toMutableMap()
             )
@@ -74,9 +76,9 @@ object ArithmeticExpander {
         }
     }
 
-    fun mergeMapToDivNotation(map: MutableMap<Notation, Fraction>): DivNotation {
-        var numerator = mutableMapOf<Notation, Fraction>()
-        var denominator = mutableMapOf<Notation, Fraction>()
+    fun mergeMapToDivNotation(map: MutableMap<Notation, Double>): DivNotation {
+        var numerator = mutableMapOf<Notation, Double>()
+        var denominator = mutableMapOf<Notation, Double>()
 
         for ((notation, fraction) in map) {
             if (notation is DivNotation) {
@@ -99,16 +101,14 @@ object ArithmeticExpander {
                     numerator = createArithmeticMap(numerator, notationFlattened.denominator, "*")
                         .mergeWithOperation(
                             notationFlattened.numerator.keys
-                                .associateWith { notationFlattened.numerator[it]!!.multiply(fraction) }.toMutableMap(),
+                                .associateWith { notationFlattened.numerator[it]!! * fraction }.toMutableMap(),
                             "+"
                         )
                 } else {
                     val first = createArithmeticMap(numerator, notationFlattened.denominator, "*")
                     val second = createArithmeticMap(
                         notationFlattened.numerator.keys.associateWith {
-                            notationFlattened.numerator[it]!!.multiply(
-                                fraction
-                            )
+                            notationFlattened.numerator[it]!! * fraction
                         }
                             .toMutableMap(),
                         denominator,
@@ -131,31 +131,16 @@ object ArithmeticExpander {
         return DivNotation(numerator, denominator)
     }
 
-    fun simplifyTwoMaps(first: MutableMap<Notation, Fraction>, second: MutableMap<Notation, Fraction>) {
-        first.forEach { it.value.reduce() }
-        second.forEach { it.value.reduce() }
-
-        val firstGCD = first.values.map { it[0] }.reduce { acc, i -> getGCD(acc, i) }
-        val secondGCD = second.values.map { it[0] }.reduce { acc, i -> getGCD(acc, i) }
-
-        val commonGCD = getGCD(firstGCD, secondGCD)
-        assert(commonGCD != 0)
-        if (commonGCD != 1) {
-            first.forEach { it.value[0] /= commonGCD }
-            second.forEach { it.value[0] /= commonGCD }
-        }
-    }
-
     private fun divNotationFromNumeratorDivAndMapDenominator(
         numerator: DivNotation,
-        denominator: MutableMap<Notation, Fraction>
+        denominator: MutableMap<Notation, Double>
     ): DivNotation {
         val resDenominator = createArithmeticMap(numerator.denominator, denominator, "*")
         return DivNotation(numerator.numerator, resDenominator)
     }
 
     private fun divNotationFromDenominatorDivAndMapNumerator(
-        numerator: MutableMap<Notation, Fraction>,
+        numerator: MutableMap<Notation, Double>,
         denominator: DivNotation
     ): DivNotation {
         val resNumerator = createArithmeticMap(numerator, denominator.denominator, "*")
@@ -166,32 +151,35 @@ object ArithmeticExpander {
      * TODO expand this method in future to check if the expression in denominator equals to zero => whole division is
      * incorrect
      */
-    private fun checkForZero(denominator: MutableMap<Notation, Fraction>) {
-        if (denominator.size == 1 && denominator[keyForArithmeticNumeric].contentEquals(FractionFactory.zero()))
+    private fun checkForZero(denominator: MutableMap<Notation, Double>) {
+        if (denominator.size == 1 && denominator[keyForArithmeticNumeric] == 0.0)
             throw SpoofError("Expression leads to one with zero in denominator")
     }
 
-    private fun removeZeros(map: MutableMap<Notation, Fraction>, isNumerator: Boolean = true) {
+    private fun removeZeros(map: MutableMap<Notation, Double>, isNumerator: Boolean = true) {
         if (!isNumerator)
             checkForZero(map)
-        val mapWithoutZeros = map.filterValues { !it.isZero() }
+        val mapWithoutZeros = map.filterValues { it != 0.0 }
         map.clear()
         map.putAll(mapWithoutZeros)
         if (map.isEmpty())
-            map[keyForArithmeticNumeric] = if (isNumerator) FractionFactory.zero() else FractionFactory.one()
+            map[keyForArithmeticNumeric] = if (isNumerator) 0.0 else 1.0
     }
 
-    fun getArithmeticToString(map: MutableMap<Notation, Fraction>): StringBuilder {
+    fun getArithmeticToString(map: MutableMap<Notation, Double>): StringBuilder {
         if (map.isEmpty())
             return StringBuilder("0")
         val res = StringBuilder()
         for ((notation, fraction) in map.entries.sortedBy { -it.key.getOrder() }) {
-            if (fraction.isNegative())
-                res.append(fraction.asString())
-            else res.append("+${fraction.asString()}")
+            if (fraction < 0.0) {
+                if (fraction == -1.0 && notation !is NumNotation)
+                    res.append("-")
+                else
+                    res.append(fraction.asString())
+            } else if (fraction != 1.0) res.append("+${fraction.asString()}")
             res.append(notation)
         }
-        if (res[0] == '+')
+        if (res.isNotEmpty() && res[0] == '+')
             res.deleteCharAt(0)
         return res
     }

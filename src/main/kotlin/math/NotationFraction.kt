@@ -7,7 +7,7 @@ import pipeline.interpreter.IdentMapper
 
 //class NotationFraction(
 //    val numerator: MutableList<Notation>,
-//    val denominator: MutableMap<Notation, Fraction> = mutableMapOf()
+//    val denominator: MutableMap<Notation, Double> = mutableMapOf()
 //) :
 //    Notation() {
 //
