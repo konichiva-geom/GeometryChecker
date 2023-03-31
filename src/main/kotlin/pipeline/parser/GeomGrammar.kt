@@ -37,6 +37,7 @@ object GeomGrammar : Grammar<Any>() {
     private val ofToken by literalToken("of")
     private val negationToken by literalToken("not")
     private val newToken by literalToken("new")
+    private val distinctToken by literalToken("distinct")
     private val thDefStart by literalToken("th")
     private val returnToken by literalToken("return")
     private val comment by regexToken("//.*(\\n[\\t ]*)*", ignore = true)
@@ -95,11 +96,15 @@ object GeomGrammar : Grammar<Any>() {
     // endregion
 
     //region statements
-    private val creation: Parser<Expr> by -newToken and (point or ident) map {
+    private val creation: Parser<Expr> by (-newToken and (point or ident) map {
         if (it.text[0] in 'A'..'Z')
-            PointCreation(it.text)
-        else CircleCreation(it.text)
-    }
+            PointCreation(it.text, isDistinct = false)
+        else CircleCreation(it.text, isDistinct = false)
+    }) or (-distinctToken and (point or ident) map {
+        if (it.text[0] in 'A'..'Z')
+            PointCreation(it.text, isDistinct = true)
+        else CircleCreation(it.text, isDistinct = true)
+    })
 
     // angle, segment, arc
     private val comparableNotation: Parser<Notation> by (angle map {
@@ -164,7 +169,7 @@ object GeomGrammar : Grammar<Any>() {
             "<" -> BinaryGreater(left, right)
             ">=" -> BinaryGEQ(left, right)
             "<=" -> BinaryGEQ(left, right)
-            else -> throw Exception("Unexpected comparison")
+            else -> throw SpoofError("Unexpected comparison")
         }
     })
 

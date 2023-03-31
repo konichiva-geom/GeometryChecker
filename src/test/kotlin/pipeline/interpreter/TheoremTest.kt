@@ -9,9 +9,9 @@ internal class TheoremTest {
         passTask(
             """
             description:
-                new U; new V; new W    //    U       X
-                new X; new Y; new Z    //   / \     / \
-                VUW == YXZ             //  V---W   Y---Z
+                distinct U; distinct V; distinct W    //    U       X
+                distinct X; distinct Y; distinct Z    //   / \     / \
+                VUW == YXZ                            //  V---W   Y---Z
                 VU == XY
                 UW == ZX
             prove:
@@ -36,6 +36,11 @@ internal class TheoremTest {
                 new X; new Y; new Z    //    \ / \
                 ZYX == YXW             //     Y---Z
                 YZ == WX
+                X != Y
+                X != Z
+                X != W
+                Y != Z
+                Y != W
             prove:
                 WY == XZ
                 YWX == YZX

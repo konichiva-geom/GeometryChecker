@@ -7,9 +7,12 @@ import entity.point_collection.PointCollection
 import error.SpoofError
 import error.SystemFatalError
 import external.WarnLogger
-import math.*
-import pipeline.symbol_table.SymbolTable
+import math.ArithmeticExpr
+import math.Vector
+import math.mergeWithOperation
+import math.vectorFromArithmeticMap
 import pipeline.interpreter.IdentMapper
+import pipeline.symbol_table.SymbolTable
 import utils.ExtensionUtils.isAlmostZero
 import utils.Utils.isSame
 import utils.multiSetOf
@@ -208,7 +211,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 val leftPoint = symbolTable.getPoint(leftNotation)
                 val rightPoint = symbolTable.getPoint(rightNotation)
 
-                if (leftPoint == rightPoint
+                if (leftPoint === rightPoint
                     || leftPoint.unknown.contains(rightNotation.p)
                     || rightPoint.unknown.contains(leftNotation.p)
                 )
@@ -223,12 +226,20 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     }
 
     override fun make(symbolTable: SymbolTable) {
-        if (left is PointNotation && right is PointNotation) {
-            val point = symbolTable.getPoint(left.p)
-            point.merge(right, symbolTable) // FIXME it's wrong
-            return
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+
+        if (isEntityEquals(left, right)) {
+            val leftNotation = left.map.keys.first()
+            val rightNotation = right.map.keys.first()
+            if (leftNotation is PointNotation && rightNotation is PointNotation) {
+                symbolTable.getPoint(leftNotation.p).unknown.remove(rightNotation.p)
+                symbolTable.getPoint(rightNotation.p).unknown.remove(leftNotation.p)
+                return
+            }
+        } else {
+            TODO("Not yet implemented")
         }
-        TODO("Not yet implemented")
     }
 }
 

@@ -2,11 +2,10 @@ package entity.expr
 
 import entity.expr.notation.IdentNotation
 import entity.expr.notation.Notation
-import entity.expr.notation.PointNotation
 import error.SystemFatalError
-import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 import pipeline.interpreter.Signature
+import pipeline.symbol_table.SymbolTable
 
 interface Expr : Comparable<Expr> {
     fun getChildren(): List<Expr>
@@ -82,21 +81,23 @@ class PrefixNot(private val expr: Expr) : Expr {
     }
 }
 
-class PointCreation(private val name: String) : Expr, Creation {
+class PointCreation(private val name: String, private val isDistinct: Boolean) : Expr, Creation {
     override fun getChildren(): List<Expr> {
         return emptyList()
     }
 
     override fun getRepr(): StringBuilder = StringBuilder("new A")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PointCreation(mapper.get(name))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PointCreation(mapper.get(name), isDistinct)
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
 
     override fun create(symbolTable: SymbolTable) {
-        val res = PointNotation(name)
-        symbolTable.newPoint(res.p)
+        if (isDistinct)
+            symbolTable.distinctPoint(name)
+        else
+            symbolTable.newPoint(name)
     }
 
     override fun toString(): String {
@@ -104,21 +105,23 @@ class PointCreation(private val name: String) : Expr, Creation {
     }
 }
 
-class CircleCreation(private val name: String) : Expr, Creation {
+class CircleCreation(private val name: String, private val isDistinct: Boolean) : Expr, Creation {
     override fun getChildren(): List<Expr> {
         return emptyList()
     }
 
     override fun getRepr(): StringBuilder = StringBuilder("new c")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PointCreation(mapper.get(name))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = CircleCreation(mapper.get(name), isDistinct)
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
 
     override fun create(symbolTable: SymbolTable) {
-        val res = IdentNotation(name)
-        symbolTable.newCircle(res)
+        if (isDistinct)
+            symbolTable.distinctCircle(IdentNotation(name))
+        else
+            symbolTable.newCircle(IdentNotation(name))
     }
 
     override fun toString(): String {
