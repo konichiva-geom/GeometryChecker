@@ -2,6 +2,7 @@ package entity.expr
 
 import entity.expr.notation.IdentNotation
 import entity.expr.notation.Notation
+import entity.expr.notation.PointNotation
 import error.SystemFatalError
 import pipeline.interpreter.IdentMapper
 import pipeline.interpreter.Signature
@@ -81,13 +82,14 @@ class PrefixNot(private val expr: Expr) : Expr {
     }
 }
 
-class PointCreation(private val name: String, private val isDistinct: Boolean) : Expr, Creation {
+class PointCreation(private val point: PointNotation, private val isDistinct: Boolean) : Expr, Creation {
     override fun getChildren(): List<Expr> {
-        return emptyList()
+        return listOf(point)
     }
 
-    override fun getRepr(): StringBuilder = StringBuilder("new A")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PointCreation(mapper.get(name), isDistinct)
+    override fun getRepr(): StringBuilder = StringBuilder("${if (isDistinct) "distinct" else "new"} A")
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        PointCreation(PointNotation(mapper.get(point.p)), isDistinct)
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -95,23 +97,24 @@ class PointCreation(private val name: String, private val isDistinct: Boolean) :
 
     override fun create(symbolTable: SymbolTable) {
         if (isDistinct)
-            symbolTable.distinctPoint(name)
+            symbolTable.distinctPoint(point.p)
         else
-            symbolTable.newPoint(name)
+            symbolTable.newPoint(point.p)
     }
 
     override fun toString(): String {
-        return "new $name"
+        return "${if (isDistinct) "distinct" else "new"} ${point.p}"
     }
 }
 
-class CircleCreation(private val name: String, private val isDistinct: Boolean) : Expr, Creation {
+class CircleCreation(private val notation: IdentNotation, private val isDistinct: Boolean) : Expr, Creation {
     override fun getChildren(): List<Expr> {
-        return emptyList()
+        return listOf(notation)
     }
 
-    override fun getRepr(): StringBuilder = StringBuilder("new c")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = CircleCreation(mapper.get(name), isDistinct)
+    override fun getRepr(): StringBuilder = StringBuilder(if (isDistinct) "distinct c" else "new c")
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+        CircleCreation(IdentNotation(mapper.get(notation.text)), isDistinct)
 
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
@@ -119,12 +122,12 @@ class CircleCreation(private val name: String, private val isDistinct: Boolean) 
 
     override fun create(symbolTable: SymbolTable) {
         if (isDistinct)
-            symbolTable.distinctCircle(IdentNotation(name))
+            symbolTable.distinctCircle(notation)
         else
-            symbolTable.newCircle(IdentNotation(name))
+            symbolTable.newCircle(notation)
     }
 
     override fun toString(): String {
-        return "new $name"
+        return if (isDistinct) "distinct $notation" else "new $notation"
     }
 }

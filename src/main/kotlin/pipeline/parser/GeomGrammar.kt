@@ -98,12 +98,12 @@ object GeomGrammar : Grammar<Any>() {
     //region statements
     private val creation: Parser<Expr> by (-newToken and (point or ident) map {
         if (it.text[0] in 'A'..'Z')
-            PointCreation(it.text, isDistinct = false)
-        else CircleCreation(it.text, isDistinct = false)
+            PointCreation(PointNotation(it.text), isDistinct = false)
+        else CircleCreation(IdentNotation(it.text), isDistinct = false)
     }) or (-distinctToken and (point or ident) map {
         if (it.text[0] in 'A'..'Z')
-            PointCreation(it.text, isDistinct = true)
-        else CircleCreation(it.text, isDistinct = true)
+            PointCreation(PointNotation(it.text), isDistinct = true)
+        else CircleCreation(IdentNotation(it.text), isDistinct = true)
     })
 
     // angle, segment, arc

@@ -15,8 +15,7 @@ class IdentMapper {
     val mappings = mutableMapOf<String, MutableSet<String>>()
     private val links = mutableMapOf<String, MutableSet<String>>()
 
-    fun get(pointOrIdent: String) =
-        mappings[pointOrIdent]!!.first()
+    fun get(pointOrIdent: String) = mappings[pointOrIdent]!!.first()
 
     /**
      * On inference there might be ambiguous mappings

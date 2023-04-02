@@ -8,8 +8,7 @@ class AngleRelations : EntityRelations() {
     override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) {
         if (other != null)
             symbolTable.resetAngle(this, other as Point3Notation)
-        else {
+        else
             assert(symbolTable.angles.find { it.e2 == otherRelations } == null)
-        }
     }
 }

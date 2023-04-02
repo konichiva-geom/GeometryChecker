@@ -45,6 +45,8 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     }
 
     private fun rename(expr: Expr) {
+        if (expr is Creation && expr !is BinaryAssignment)
+            return
         if (expr is Renamable) {
             expr.renameToMinimalAndRemap(symbolTable)
             val exception = expr.checkValidityAfterRename()
@@ -99,9 +101,7 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
                 when (expr) {
                     is BinaryAssignment -> expr.makeAssignment(symbolTable, inferenceProcessor)
                     is Invocation -> interpretTheoremUse(expr)
-                    is Relation -> {
-                        Relation.makeRelation(expr, symbolTable, inferenceProcessor)
-                    }
+                    is Relation -> Relation.makeRelation(expr, symbolTable, inferenceProcessor)
                     is Creation -> expr.create(symbolTable)
                     else -> throw SpoofError("Unexpected expression in description")
                 }

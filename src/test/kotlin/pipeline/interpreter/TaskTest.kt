@@ -3,7 +3,7 @@ package pipeline.interpreter
 import TestFactory.passTask
 import kotlin.test.Test
 
-internal class TheoremTest {
+internal class TaskTest {
     @Test
     fun testEqualSidedTriangles() {
         passTask(
@@ -48,6 +48,28 @@ internal class TheoremTest {
             solution:
                 equal_sided_triangles_i(XY == XY, YZ == XW, ZYX == WXY) => *
         """.trimIndent()
+        )
+    }
+
+    /**
+     * Дан прямоугольный треугольник ABC, C = 90. Проведена медиана CM. Докажите, что 2CAB = CMB.
+     */
+    @Test
+    fun testRectangularTriangleMedianTask() {
+        passTask(
+            """
+        description:
+            distinct A; distinct B; distinct C
+            ACB == 90
+            mid_point(new M, AB)
+        prove:
+            2CAB == CMB
+        solution:
+            rectangular_median_half_of_hypotenuse(ACB == 90, M in AB)
+            isosceles_triangle_equal_angles(AM == MC)
+            angles_180_in_triangle(AMC)
+            adjacent_angle(AMC, BMC)
+        """
         )
     }
 }

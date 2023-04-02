@@ -19,6 +19,9 @@ th adjacent_angle(AOB, BOC): // new in args cannot be - bad
     check(O in AB)
     return AOB + BOC == 180, AOC == 180, AOB + BOC == AOC
 
+th angles_180_in_triangle(ABC):
+    return ABC + CBA + BAC == 180
+
 th bisector(new D, ABC): // makes a new point distinct from all currently placed
     return ABD == CBD, ABD == ABC / 2
 
@@ -27,19 +30,25 @@ th projection(new H, A, BC): // projection H of A on BC
     return HA ⊥ BC, BHA == 90, CHA == 90
 
 th mid_point(new M, AB):
-    return M in AB
+    M in AB
+    return MA == MB
+
+th rectangular_median_half_of_hypotenuse(ACB == 90, M in AB):
+    check(AM == MB)
+    return CM == AM
 
 th merge_projections(AH, AH1, BC):
     check(BHA == 90)
     check(BH1A == 90)
     return H == H1
 
-// rwefiofjfwoifejfoiw */
 th merge_points_in_line(AP == AP1, BP == BP1):
     check(P in AB)
     check(P1 in AB)
     return P == P1
 
+th isosceles_triangle_equal_angles(AB == BC):
+    return BAC == BCA
 
 //Старое:
 

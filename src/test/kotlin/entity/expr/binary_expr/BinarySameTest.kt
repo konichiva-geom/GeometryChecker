@@ -8,19 +8,22 @@ import kotlin.test.Test
 internal class BinarySameTest {
     @Test
     fun failEqualsNotSame() {
-        failTask("""
+        failTask(
+            """
             description:
                 new A; new B; new C; new D
                 AB == CD
             prove:
                 AB === CD
             solution:;
-        """, "Relation AB == CD unknown")
+        """, "Relation AB == CD unknown"
+        )
     }
 
     @Test
     fun passSameThereforeEquals() {
-        passTask("""
+        passTask(
+            """
             description:
                 new A; new B; new C; new D
                 AB === CD
@@ -28,12 +31,29 @@ internal class BinarySameTest {
                 AB === CD
                 AB == CD
             solution:;
-        """)
+        """
+        )
+    }
+
+    @Test
+    fun failDistinctToEqual() {
+        failTask(
+            """
+        description:
+           distinct A; distinct B 
+           A == B
+        prove:
+            A == B
+        solution:
+            
+        """, "Distinct points A, B cannot be made equal"
+        )
     }
 
     @Test
     fun inferSameSegmentsFromSamePointsAfterEqual() {
-        passTask("""
+        passTask(
+            """
             description:
                 new A; new B; new C; new D
                 A == C
@@ -45,12 +65,14 @@ internal class BinarySameTest {
                 AB == CD
                 AB == 3/2
             solution:;
-        """)
+        """
+        )
     }
 
     @Test
     fun inferSameSegmentsFromSamePointsBeforeEqual() {
-        passTask("""
+        passTask(
+            """
             description:
                 new A; new B; new C; new D
                 AB + CD == 3
@@ -61,6 +83,36 @@ internal class BinarySameTest {
                 AB == CD
                 AB == 3/2
             solution:;
-        """)
+        """
+        )
+    }
+
+    @Test
+    fun testLineEquals() {
+        passTask(
+            """
+        description:
+            new A; new B; new C; new D
+            line AB == line CD
+        prove:
+            line AB == line CD
+        solution:
+            
+        """
+        )
+    }
+
+    @Test
+    fun testCircleEquals() {
+        passTask(
+            """
+        description:
+            
+        prove:
+            
+        solution:
+            
+        """
+        )
     }
 }

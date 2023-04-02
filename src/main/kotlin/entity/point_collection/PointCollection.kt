@@ -29,7 +29,8 @@ abstract class PointCollection<T : Notation> : Renamable {
 
     /**
      * Method to merge point sets when two collections become equal due to the points becoming equal.
-     * E.g. there is [SymbolTable].segments = ({A, B, C}, {A, D, E}). Then B == D. Before remapping relations, make sure that
+     * E.g. there is [SymbolTable].segments = ({A, B, C}, {A, D, E}). Then B == D.
+     * Before remapping relations, make sure that
      * [SymbolTable].segments is now ({A, B, C, E})
      */
     abstract fun merge(other: PointCollection<*>, symbolTable: SymbolTable)

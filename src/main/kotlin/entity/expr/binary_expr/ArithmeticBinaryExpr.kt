@@ -147,12 +147,12 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                     .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
             else {
                 val (collectionLeft, relationsLeft) = symbolTable.getKeyValueByNotation(left.map.keys.first())
-                val (collectionRight, relationsRight) = symbolTable.getKeyValueByNotation(left.map.keys.first())
+                val (collectionRight, relationsRight) = symbolTable.getKeyValueByNotation(right.map.keys.first())
                 if (collectionLeft is PointCollection<*>) {
-                    if (!isSame(collectionLeft, collectionRight)) {
+                    if (!isSame(collectionLeft, collectionRight))
                         collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
-                    }
                 } else {
+                    // won't execute currently, but if something new is added will fail
                     if (collectionLeft !is IdentNotation)
                         throw SystemFatalError("Unexpected notation in equals")
                     throw SystemFatalError("Not done yet for circles")
@@ -164,10 +164,9 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
             val notation = left.map.mergeWithOperation(right.map, "-")
                 .keys.firstOrNull { it !is NumNotation }
-                ?: throw SpoofError("Meaningless arithmetic expression. All non-constant values are zero")
 
             val result = resolveLeft.mergeWithOperation(resolveRight, "-")
-            if (result.isEmpty()) {
+            if (result.all { it.value.isAlmostZero() } || notation == null) {
                 WarnLogger.warn("Expression %{expr} is already known", "expr" to this)
                 return
             }

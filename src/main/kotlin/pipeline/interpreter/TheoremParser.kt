@@ -3,10 +3,12 @@ package pipeline.interpreter
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
+import entity.expr.Creation
 import entity.expr.Expr
 import entity.expr.Invocation
 import entity.expr.Relation
 import entity.expr.binary_expr.BinaryAssignment
+import entity.expr.notation.Notation
 import error.SpoofError
 import pipeline.inference.InferenceProcessor
 import pipeline.parser.GeomGrammar
@@ -75,6 +77,7 @@ class TheoremParser : Parser() {
         symbolTable: SymbolTable,
         inferenceProcessor: InferenceProcessor
     ) {
+        checkSignature(call, symbolTable)
         traverseSignature(call, theoremSignature)
         for (expr in theoremBody.body) {
             when (expr) {
@@ -92,6 +95,9 @@ class TheoremParser : Parser() {
                             symbolTable
                         )
                     else throw SpoofError("Expected relation to check")
+                }
+                is Creation -> {
+                    throw SpoofError("Cannot create new points and circles inside theorem")
                 }
             }
         }
@@ -125,5 +131,19 @@ class TheoremParser : Parser() {
             signatureMapper.createLinks(arg, defSignature.args[i])
         for ((i, arg) in callSignature.args.withIndex())
             signatureMapper.traverseExpr(arg, defSignature.args[i])
+    }
+
+    /**
+     * Check that all relations are correct and make construction relations
+     */
+    private fun checkSignature(callSignature: Signature, symbolTable: SymbolTable) {
+        for (expr in callSignature.args) {
+            when (expr) {
+                is Creation -> expr.create(symbolTable)
+                is Relation -> check(expr, symbolTable)
+                is Notation -> {}
+                else -> throw SpoofError("Expected relation or creation")
+            }
+        }
     }
 }
