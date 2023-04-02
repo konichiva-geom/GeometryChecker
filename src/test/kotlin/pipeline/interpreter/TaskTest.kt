@@ -63,6 +63,8 @@ internal class TaskTest {
             ACB == 90
             mid_point(new M, AB)
         prove:
+            ACM == MAC
+            ACM == BAC
             2CAB == CMB
         solution:
             rectangular_median_half_of_hypotenuse(ACB == 90, M in AB)

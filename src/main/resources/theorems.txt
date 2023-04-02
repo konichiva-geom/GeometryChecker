@@ -16,11 +16,11 @@ th bisector(new D, ABC): // makes a new point distinct from all currently placed
     return ABD == CBD, ABD == ABC / 2, D in AC
 
 th adjacent_angle(AOB, BOC): // new in args cannot be - bad
-    check(O in AB)
+    check(O in AC)
     return AOB + BOC == 180, AOC == 180, AOB + BOC == AOC
 
 th angles_180_in_triangle(ABC):
-    return ABC + CBA + BAC == 180
+    return ABC + BCA + BAC == 180
 
 th bisector(new D, ABC): // makes a new point distinct from all currently placed
     return ABD == CBD, ABD == ABC / 2

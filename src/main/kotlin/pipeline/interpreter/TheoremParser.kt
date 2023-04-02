@@ -131,6 +131,7 @@ class TheoremParser : Parser() {
             signatureMapper.createLinks(arg, defSignature.args[i])
         for ((i, arg) in callSignature.args.withIndex())
             signatureMapper.traverseExpr(arg, defSignature.args[i])
+        signatureMapper.forceUniqueMappings()
     }
 
     /**
