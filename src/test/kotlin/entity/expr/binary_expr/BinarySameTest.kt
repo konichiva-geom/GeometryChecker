@@ -107,9 +107,12 @@ internal class BinarySameTest {
         passTask(
             """
         description:
-            
+            new alpha;
+            new omega;
+            alpha == omega
         prove:
-            
+            alpha == omega
+            alpha === omega
         solution:
             
         """

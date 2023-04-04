@@ -155,7 +155,7 @@ open class PointCollectionSymbolTable : PointSymbolTable() {
             is PointNotation -> setOf(notation.p)
             is Point2Notation -> (getKeyValueByNotation(notation).first as PointCollection<*>).getPointsInCollection()
             is Point3Notation -> setOf(notation.p1, notation.p2, notation.p3)
-            is IdentNotation -> getCircle(notation).getPoints()
+            is IdentNotation -> getCircle(notation).getCirclePoints()
             else -> throw SpoofError("Unexpected notation: %{notation}", "notation" to notation)
         }
     }

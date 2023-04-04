@@ -3,12 +3,22 @@ package entity.relation
 import entity.Renamable
 import entity.expr.notation.IdentNotation
 import entity.expr.notation.Notation
+import error.SystemFatalError
 import pipeline.symbol_table.SymbolTable
 
 class CircleRelations : EntityRelations(), Renamable {
-    private val points = mutableSetOf<String>()
+    val unknown = mutableSetOf<String>()
+    val points = mutableSetOf<String>()
+
     override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) {
-        points.addAll(symbolTable.getCircle(other as IdentNotation).points)
+        throw SystemFatalError("use ")
+    }
+
+    fun mergeOtherToThisCircle(self: IdentNotation, other: IdentNotation, symbolTable: SymbolTable) {
+        points.addAll(symbolTable.getCircle(other).points)
+        unknown.addAll(symbolTable.getCircle(other).unknown)
+        symbolTable.resetCircle(this, other)
+        symbolTable.equalIdentRenamer.renameSubscribersAndPointer(other.text, self.text, symbolTable)
     }
 
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
@@ -27,5 +37,5 @@ class CircleRelations : EntityRelations(), Renamable {
         symbolTable.equalIdentRenamer.addSubscribers(this, *points.toTypedArray())
     }
 
-    fun getPoints() = points.toSet()
+    fun getCirclePoints() = points.toSet()
 }

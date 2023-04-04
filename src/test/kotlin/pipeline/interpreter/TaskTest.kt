@@ -74,4 +74,20 @@ internal class TaskTest {
         """
         )
     }
+
+    @Test
+    fun testMedianHalfOfHypotenuseTask() {
+        passTask(
+            """
+        description:
+            distinct A; distinct B; distinct C
+            ACB == 90
+            mid_point(new M, AB)
+        prove:
+            AM == MC
+        solution:
+            
+        """
+        )
+    }
 }

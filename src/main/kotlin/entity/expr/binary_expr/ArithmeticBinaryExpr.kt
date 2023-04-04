@@ -51,6 +51,9 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
         if (leftNotation is PointNotation)
             symbolTable.getPoint(leftNotation.p)
                 .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
+        else if (leftNotation is IdentNotation)
+            symbolTable.getCircle(leftNotation)
+                .mergeOtherToThisCircle(leftNotation, right.map.keys.first() as IdentNotation, symbolTable)
         else {
             symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
         }
@@ -145,7 +148,10 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             if (leftNotation is PointNotation)
                 symbolTable.getPoint(leftNotation.p)
                     .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
-            else {
+            else if (leftNotation is IdentNotation) {
+                symbolTable.getCircle(leftNotation)
+                    .mergeOtherToThisCircle(leftNotation, right.map.keys.first() as IdentNotation, symbolTable)
+            } else {
                 val (collectionLeft, relationsLeft) = symbolTable.getKeyValueByNotation(left.map.keys.first())
                 val (collectionRight, relationsRight) = symbolTable.getKeyValueByNotation(right.map.keys.first())
                 if (collectionLeft is PointCollection<*>) {

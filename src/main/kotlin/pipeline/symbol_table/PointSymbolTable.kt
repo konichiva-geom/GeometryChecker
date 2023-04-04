@@ -25,6 +25,13 @@ open class PointSymbolTable : BaseSymbolTable() {
 
     }
 
+    fun resetCircle(newRelations: CircleRelations, notation: IdentNotation) {
+        circles[notation]!!.unknown.forEach {
+            circles[IdentNotation(it)]!!.unknown.remove(notation.text)
+        }
+        circles[notation] = newRelations
+    }
+
     /**
      * Make point add all others to unknown
      */

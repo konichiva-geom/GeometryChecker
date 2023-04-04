@@ -50,6 +50,7 @@ th merge_points_in_line(AP == AP1, BP == BP1):
 th isosceles_triangle_equal_angles(AB == BC):
     return BAC == BCA
 
+
 //Старое:
 
 //    Line relations
