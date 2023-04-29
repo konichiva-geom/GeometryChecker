@@ -14,7 +14,7 @@ object Utils {
     const val INFERENCE_PATH = "src/main/resources/inference.txt"
     val keyForArithmeticNumeric = NumNotation(0.0)
 
-    val primes = File("src/main/resources/primes.txt").readText().split(" ", "\n").map { it.toInt() }
+    val primes = File("primes.txt").readText().split(" ", "\n").map { it.toInt() }
 
     private val lambdas = mutableListOf({ a: Double, b: Double -> a + b },
         { a: Double, b: Double -> a - b },

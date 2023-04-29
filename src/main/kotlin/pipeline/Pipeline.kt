@@ -1,11 +1,16 @@
 package pipeline
 
+import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.st.SyntaxTree
 import com.github.h0tk3y.betterParse.utils.Tuple2
 import entity.expr.Expr
 import error.SpoofError
+import pipeline.inference.Inference
 import pipeline.inference.InferenceProcessor
 import pipeline.interpreter.Interpreter
+import pipeline.interpreter.Signature
+import pipeline.interpreter.TheoremBody
+import pipeline.parser.GeomGrammar
 import pipeline.parser.Parser
 import utils.Utils.INFERENCE_PATH
 import utils.Utils.THEOREMS_PATH
@@ -21,6 +26,19 @@ class Pipeline {
     val interpreter = Interpreter(inferenceProcessor)
     private lateinit var tree: SyntaxTree<Any>
     private lateinit var code: String
+    private lateinit var theoremsConcurrent: Map<Signature, TheoremBody>
+    private lateinit var inferenceConcurrent: List<Inference>
+
+    fun addConcurrentTheorems(path: String): Pipeline {
+        theoremsConcurrent = (GeomGrammar.parseToEnd(File(path).readText())
+                as List<Pair<Signature, TheoremBody>>).toMap()
+        return this
+    }
+
+    fun addConcurrentInference(path: String): Pipeline {
+        inferenceConcurrent = parser.parseInference(File(path).readText()).item
+        return this
+    }
 
     fun clearTheorems(): Pipeline {
         interpreter.theoremParser.clearTheorems()
@@ -70,5 +88,13 @@ class Pipeline {
             throw SpoofError("Parse code before interpreting")
         interpreter.interpret(tree as SyntaxTree<List<Tuple2<Any, List<Expr>?>>>)
         return this
+    }
+
+    fun parseAndInterpretWithNewInterpreter(code: String) {
+        val inferenceProcessor = InferenceProcessor()
+        inferenceProcessor.setInference(inferenceConcurrent)
+        val interpreter = Interpreter(inferenceProcessor)
+        interpreter.theoremParser.addTheorems(theoremsConcurrent)
+        interpreter.interpret(parser.parseSolution(code) as SyntaxTree<List<Tuple2<Any, List<Expr>?>>>)
     }
 }

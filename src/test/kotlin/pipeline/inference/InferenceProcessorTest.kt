@@ -24,7 +24,7 @@ internal class InferenceProcessorTest {
         passTask("""
             description:
                 new A; new B; new C;
-                ABC == 90
+                ∠ABC == 90
             prove:
                 AB perpendicular BC
             solution:;

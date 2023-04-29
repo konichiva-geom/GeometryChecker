@@ -50,11 +50,11 @@ internal class LogicCheckTest {
             """
             description:
                 new A; new B; new C; new E; new D;
-                ABE == ABD
+                ∠ABE == ∠ABD
                 C == E
             prove:
                 C == E
-                ABC == ABD
+                ∠ABC == ∠ABD
             solution:;
         """
         )

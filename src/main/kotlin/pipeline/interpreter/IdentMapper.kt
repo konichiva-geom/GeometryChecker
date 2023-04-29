@@ -23,7 +23,11 @@ class IdentMapper {
      *
      */
     fun forceUniqueMappings() {
-        for (key in mappings.keys) {
+        val alreadyUnique = mappings.keys.filter { mappings[it]?.size == 1 }
+        for (key in alreadyUnique)
+            removeFromLinks(key, mappings[key]!!.first())
+        val notUnique = mappings.keys.filter { mappings[it]?.size != 1 }
+        for (key in notUnique) {
             if (mappings[key]!!.size != 1) {
                 mappings[key] = mutableSetOf(mappings[key]!!.first())
                 removeFromLinks(key, mappings[key]!!.first())
@@ -43,10 +47,10 @@ class IdentMapper {
                     "letter" to key
                 )
             mappings[key] = res.toMutableSet()
-            // if one mapping is unique, then it is removed from all the other mappings
-            if (res.size == 1)
-                removeFromLinks(key, res.first())
         }
+        // if one mapping is unique, then it is removed from all the other mappings
+        if (mappings[key]!!.size == 1)
+            removeFromLinks(key, mappings[key]!!.first())
     }
 
     private fun removeFromLinks(key: String, removed: String) {

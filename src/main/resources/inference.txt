@@ -1,4 +1,4 @@
-// IMPORTANT: do NOT create inferences based on point equality. For more info, refer to [Inference.process] method
+// ∠I∠M∠P∠O∠R∠T∠ANT: do ∠NOT create inferences based on point equality. For more info, refer to [Inference.process] method
 
 //A in BC <=> not A in BC
 B in AC => B in line AC, B in ray AC, B in ray CA, ray AB == ray AC, ray CB == ray CA
@@ -8,7 +8,7 @@ line AB || line CD, any C, any D, C != A, C != B, D != A, D != B, line CD || lin
 AB === CD => AB == CD
 ray AB === ray CD => ray AB == ray CD
 line AB === line CD => line AB == line CD
-ABC === DEF => ABC == DEF
+∠ABC === ∠DEF => ∠ABC == ∠DEF
 circle1 === circle2 => circle1 == circle2
 
 // Проходим по всем правым частям (после =>) и ищем A in ray BC. Где нашли, смотрим, какие отношения нужны.
@@ -16,12 +16,12 @@ circle1 === circle2 => circle1 == circle2
 // any - конструкция, начинающая перебор.
 
 line AB ⊥ line CD => line AB ∩ line CD
-line AB ⊥ line CD, any O, O == line AB ∩ line CD => AOC == 90, AOD == 90, BOC == 90, BOD == 90
+line AB ⊥ line CD, any O, O == line AB ∩ line CD => ∠AOC == 90, ∠AOD == 90, ∠BOC == 90, ∠BOD == 90
 
-ABC == 90 => line AB ⊥ line BC
-ABC == 0 => ray BA == ray BC
-ray BA == ray BC => ABC == 0
-ABC == 180 => B in AC, line AB == line BC, line BC == line AC
+∠ABC == 90 => line AB ⊥ line BC
+∠ABC == 0 => ray BA == ray BC
+ray BA == ray BC => ∠ABC == 0
+∠ABC == 180 => B in AC, line AB == line BC, line BC == line AC
 
 // all possible line relations
 //AB || CD <=> not AB ∩ CD, not AB ⊥ CD

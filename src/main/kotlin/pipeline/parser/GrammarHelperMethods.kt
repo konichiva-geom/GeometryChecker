@@ -34,7 +34,7 @@ object GrammarHelperMethods {
             val operator = tuple.t2.text
             val second = tuple.t3
             when (operator) {
-                "in" -> {
+                "in " -> {
                     checkNotNumber(first, operator)
                     checkNotNumber(second, operator)
                     checkNotCircle(first, operator)
@@ -48,7 +48,7 @@ object GrammarHelperMethods {
                     checkNoGreaterOrder(first, second)
                     BinaryIn(first, second)
                 }
-                "intersects", "∩" -> {
+                "intersects ", "∩" -> {
                     checkNotNumber(first, operator)
                     checkNotNumber(second, operator)
                     checkNotPoint(first, operator)
@@ -58,12 +58,12 @@ object GrammarHelperMethods {
                     BinaryIntersects(first, second)
                 }
 
-                "parallel", "||" -> {
+                "parallel ", "||" -> {
                     checkLinear(first, second, operator)
                     BinaryParallel(first as Point2Notation, second as Point2Notation)
                 }
 
-                "perpendicular", "⊥" -> {
+                "perpendicular ", "⊥" -> {
                     checkLinear(first, second, operator)
                     BinaryPerpendicular(first as Point2Notation, second as Point2Notation)
                 }

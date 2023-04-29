@@ -65,17 +65,17 @@ internal class PointCollectionTest {
             """
             description:
                 new A; new B; new C; new T
-                ACT == 70
-                ACB == BAC
+                ∠ACT == 70
+                ∠ACB == ∠BAC
                 T in BC
             prove:
-                 ABC == ABT
-                 ACT == ACB
+                 ∠ABC == ∠ABT
+                 ∠ACT == ∠ACB
                  ray BT == ray BC
                  ray CT == ray CB
-                 BAC == 70
-                 ACT == 70
-                 ACB == 70
+                 ∠BAC == 70
+                 ∠ACT == 70
+                 ∠ACB == 70
             solution:;
         """
         )
@@ -86,12 +86,12 @@ internal class PointCollectionTest {
                 new A; new B; new C; new T
                 T in ray BC
             prove:
-                 ABC == ABT
+                 ∠ABC == ∠ABT
                  ray BT == ray BC
-                 ACT == ACB
+                 ∠ACT == ∠ACB
                  ray CT == ray CB
             solution:;
-        """, "Relation ACT == ACB unknown"
+        """, "Relation ∠ACT == ∠ACB unknown"
         )
 
         failTask(
@@ -100,12 +100,12 @@ internal class PointCollectionTest {
                 new A; new B; new C; new T
                 T in line BC
             prove:
-                 ABC == ABT
+                 ∠ABC == ∠ABT
                  ray BT == ray BC
-                 ACT == ACB
+                 ∠ACT == ∠ACB
                  ray CT == ray CB
             solution:;
-        """, "Relation ABC == ABT unknown"
+        """, "Relation ∠ABC == ∠ABT unknown"
         )
     }
 
@@ -131,17 +131,17 @@ internal class PointCollectionTest {
             new A; new B; new C; new O
             new K; new L; new M
 
-            AOB == KLM + 2
-            AOC == LMK + 3
-            BOC == LKM - 175
+            ∠AOB == ∠KLM + 2
+            ∠AOC == ∠LMK + 3
+            ∠BOC == ∠LKM - 175
             B == C
         prove:
-            AOB == AOC
-            AOB == LMK + 3
-            AOB == KLM + 2
-            KLM + 2 == LMK + 3
-            AOC == KLM + 2
-            BOC + 175 == LKM
+            ∠AOB == ∠AOC
+            ∠AOB == ∠LMK + 3
+            ∠AOB == ∠KLM + 2
+            ∠KLM + 2 == ∠LMK + 3
+            ∠AOC == ∠KLM + 2
+            ∠BOC + 175 == ∠LKM
         solution:
             
         """

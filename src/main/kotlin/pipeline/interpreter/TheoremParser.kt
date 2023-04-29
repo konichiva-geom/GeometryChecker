@@ -3,17 +3,20 @@ package pipeline.interpreter
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.AlternativesFailure
 import com.github.h0tk3y.betterParse.parser.ParseException
+import com.github.h0tk3y.betterParse.parser.UnparsedRemainder
 import entity.expr.Creation
 import entity.expr.Expr
 import entity.expr.Invocation
 import entity.expr.Relation
 import entity.expr.binary_expr.BinaryAssignment
 import entity.expr.notation.Notation
+import error.PosError
 import error.SpoofError
 import pipeline.inference.InferenceProcessor
 import pipeline.parser.GeomGrammar
 import pipeline.parser.Parser
 import pipeline.symbol_table.SymbolTable
+import utils.ExtensionUtils.toRange
 
 data class TheoremBody(val body: List<Expr>, val ret: List<Expr>) {
     override fun toString(): String {
@@ -51,10 +54,17 @@ class TheoremParser : Parser() {
         theorems.clear()
     }
 
+    fun addTheorems(theorems: Map<Signature, TheoremBody>) {
+        this.theorems.putAll(theorems)
+    }
+
     fun addTheorems(theoremsCode: String) {
         try {
             theorems.putAll((GeomGrammar.parseToEnd(theoremsCode) as List<Pair<Signature, TheoremBody>>).toMap())
         } catch (e: ParseException) {
+            if(e.errorResult is UnparsedRemainder) {
+                throw PosError((e.errorResult as UnparsedRemainder).startsWith.toRange(), e.message!!)
+            }
             val tokens = getAllErrorTokens(e.errorResult as AlternativesFailure)
             chooseFurthestUnexpectedToken(tokens)
             throw findProblemToken(e.errorResult as AlternativesFailure)
@@ -88,6 +98,7 @@ class TheoremParser : Parser() {
                     inferenceProcessor,
                     fromInference = false
                 )
+
                 is Invocation -> {
                     if (expr.signature.name == "check")
                         check(
@@ -96,6 +107,7 @@ class TheoremParser : Parser() {
                         )
                     else throw SpoofError("Expected relation to check")
                 }
+
                 is Creation -> {
                     throw SpoofError("Cannot create new points and circles inside theorem")
                 }

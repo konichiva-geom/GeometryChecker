@@ -33,38 +33,42 @@ object GeomGrammar : Grammar<Any>() {
     private val colon by literalToken(":")
     private val comma by literalToken(",")
     private val inferToken by literalToken("=>")
-    private val anyToken by literalToken("any")
-    private val ofToken by literalToken("of")
-    private val negationToken by literalToken("not")
-    private val newToken by literalToken("new")
-    private val distinctToken by literalToken("distinct")
-    private val thDefStart by literalToken("th")
-    private val returnToken by literalToken("return")
+    private val anyToken by literalToken("any ")
+    private val ofToken by literalToken("of ")
+    private val negationToken by literalToken("not ")
+    private val newToken by literalToken("new ")
+    private val distinctToken by literalToken("distinct ")
+    private val thDefStart by literalToken("th ")
+    private val returnToken by literalToken("return ")
     private val comment by regexToken("//.*(\\n[\\t ]*)*", ignore = true)
     private val multilineComment by regexToken("/\\*[.\n]*\\*/", ignore = true)
 
-    // region entity tokens
-    private val ray by literalToken("ray")
-    private val segment by literalToken("segment")
-    private val lineToken by literalToken("line")
-    private val arc by literalToken("arc")
-    private val number by regexToken("((\\d+\\.)?\\d*)|(\\d*)?\\.\\d+")
-    private val angle by 3 times parser(this::point)
-    private val linear by 2 times parser(this::point) map { Pair(it[0].text, it[1].text) }
-    private val line by -lineToken and linear
-    private val point by regexToken("[A-Z][0-9]*")
-    //endregion
-
     //region relation tokens
-    private val intersectsToken by literalToken("intersects")
-    private val perpendicularToken by literalToken("perpendicular")
-    private val parallelToken by literalToken("parallel")
-    private val inToken by literalToken("in")
+    private val intersectsToken by literalToken("intersects ")
+    private val perpendicularToken by literalToken("perpendicular ")
+    private val parallelToken by literalToken("parallel ")
+    private val inToken by literalToken("in ")
     private val shortIntersectsToken by literalToken("∩")
     private val shortPerpendicularToken by literalToken("⊥")
     private val shortParallelToken by literalToken("||")
     private val relationToken by intersectsToken or shortIntersectsToken or inToken or
             perpendicularToken or shortPerpendicularToken or parallelToken or shortParallelToken
+    //endregion
+
+    // region entity tokens
+    private val ray by literalToken("ray ")
+    private val segment by literalToken("segment ")
+    private val lineToken by literalToken("line ")
+    private val angleTokenShort by literalToken("∠")
+    private val angleToken by literalToken("angle ")
+    private val arc by literalToken("arc ")
+
+    private val ident by regexToken("[a-z]+[\\w_]*")
+    private val number by regexToken("((\\d+\\.)?\\d*)|(\\d*)?\\.\\d+")
+    private val angle by 3 times parser(this::point)
+    private val linear by 2 times parser(this::point) map { Pair(it[0].text, it[1].text) }
+    private val line by -lineToken and linear
+    private val point by regexToken("[A-Z][0-9]*")
     //endregion
 
     //region comparison tokens
@@ -89,7 +93,6 @@ object GeomGrammar : Grammar<Any>() {
     private val leftPar by literalToken("(")
     private val rightPar by literalToken(")")
     private val ws by regexToken("[\\t ]+", ignore = true)
-    private val ident by regexToken("[a-z]+[\\w_]*")
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
     private val repeatedSeparator by lineBreak or comment or semicolonToken
     private val statementSeparator by oneOrMore(repeatedSeparator)
@@ -107,7 +110,8 @@ object GeomGrammar : Grammar<Any>() {
     })
 
     // angle, segment, arc
-    private val comparableNotation: Parser<Notation> by (angle map {
+    private val comparableNotation: Parser<Notation> by (-(angleTokenShort or angleToken) and
+            angle map {
         Point3Notation(it[0].text, it[1].text, it[2].text)
     }) or (linear map {
         SegmentNotation(it.first, it.second)

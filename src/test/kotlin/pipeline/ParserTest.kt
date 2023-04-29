@@ -54,14 +54,14 @@ internal class ParserTest {
 
     @Test
     fun failsNotApplicableOperator() {
-        for (op in listOf("intersects", "parallel", "in", "perpendicular"))
+        for (op in listOf("intersects ", "parallel ", "in ", "perpendicular "))
             failTask("AB $op A", "`$op` is not applicable")
     }
 
     @Test
     fun failsAngleInRelations() {
-        for (op in listOf("intersects", "parallel", "in", "perpendicular"))
-            failTask("AB $op ABC", "`$op` is not applicable")
+        for (op in listOf("intersects ", "parallel ", "in ", "perpendicular "))
+            failTask("AB $op ∠ABC", "`$op` is not applicable")
     }
 
     @Test

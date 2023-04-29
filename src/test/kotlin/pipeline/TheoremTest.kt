@@ -12,7 +12,7 @@ class TheoremTest {
         prove:
             
         solution:
-            equal_sided_triangles_i(AB == A1B1, BC == B1C1, ABC == A1B1C1)
+            equal_sided_triangles_i(AB == A1B1, BC == B1C1, ∠ABC == ∠A1B1C1)
         """, "Relation AB == A1B1 unknown")
     }
 }
