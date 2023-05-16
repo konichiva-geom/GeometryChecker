@@ -42,7 +42,7 @@ AB + BC > AC => AB - AC + BC > 0
 
 AB + BC > AC, AB = AC =>
 
-equal_sided_triangles_i(XY == YZ, YM == YN, XYZ == XYZ) =>
+equal_triangles_1(XY == YZ, YM == YN, XYZ == XYZ) =>
 
 A = [X, Y]
 B = [Y, Z]

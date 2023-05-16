@@ -8,7 +8,7 @@ fun main() {
         new D; new D1; new C1; new E; new E1
         AB || CD
        // ECD == D1C1E1
-        equal_sided_triangles_i(CD == D1C1, EC == C1E1, ECD == D1C1E1) => *
+        equal_triangles_1(CD == D1C1, EC == C1E1, ECD == D1C1E1) => *
         //R==2*(3*4+(42-R))+A
        // D==3, R==2*(3*4+(42-R))+A => F==3
        A in AB

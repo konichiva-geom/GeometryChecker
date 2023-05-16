@@ -1,7 +1,7 @@
 package math
 
 import utils.ExtensionUtils.addOrCreate
-import utils.Utils.primes
+import utils.CommonUtils.primes
 import utils.multiSetOf
 
 
@@ -38,9 +38,13 @@ class VectorContainer<T> {
 
         val singleKeys = primeKeys - multipliedKeys
 
-        if (singleKeys.isEmpty())
-            incompleteVectors.add(v)
-        else {
+        if (singleKeys.isEmpty()) {
+            if (multipliedKeys.size == 1) {
+
+            } else {
+                incompleteVectors.add(v)
+            }
+        } else {
             val nullified = singleKeys.first()
             val divCoeff = v[multiSetOf(nullified)]!!
             v.remove(multiSetOf(nullified))

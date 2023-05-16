@@ -6,10 +6,12 @@ import entity.expr.Expr
 import entity.expr.Returnable
 import entity.expr.binary_expr.*
 import entity.expr.notation.*
+import error.PosError
 import error.SpoofError
 import error.SystemFatalError
 import utils.ExtensionUtils.toRange
-import utils.Utils
+import utils.CommonUtils
+import utils.CommonUtils.catchWithRange
 
 object GrammarHelperMethods {
     internal fun getReturnableEquals(returnableRelation: Expr, notation: Notation, sign: String): BinaryExpr {
@@ -29,25 +31,27 @@ object GrammarHelperMethods {
      * Create relation binary expression
      */
     internal fun getBinaryRelationByString(tuple: Tuple3<Notation, TokenMatch, Notation>): BinaryExpr {
-        return Utils.catchWithRangeAndArgs({
+        return catchWithRange({
             val first = tuple.t1
             val operator = tuple.t2.text
             val second = tuple.t3
             when (operator) {
-                "in " -> {
+                "in ", "!in " -> {
                     checkNotNumber(first, operator)
                     checkNotNumber(second, operator)
                     checkNotCircle(first, operator)
                     checkNotPoint(second, operator)
                     checkNotAngle(first, operator)
                     checkNotAngle(second, operator)
-                    if (first is ArcNotation && second !is ArcNotation)
-                        throw SpoofError("If arc is at the first position in `in`, then it should be in the second position too")
-                    if (second is ArcNotation && first !is PointNotation)
-                        throw SpoofError("If arc is at the second position in `in`, then point or arc should be in the first position")
+                    checkArcAndTriangle(first, second, operator)
                     checkNoGreaterOrder(first, second)
-                    BinaryIn(first, second)
+
+                    if (operator == "in ")
+                        BinaryIn(first, second)
+                    else
+                        BinaryNotIn(first, second)
                 }
+
                 "intersects ", "∩" -> {
                     checkNotNumber(first, operator)
                     checkNotNumber(second, operator)
@@ -71,6 +75,24 @@ object GrammarHelperMethods {
                 else -> throw SystemFatalError("Unknown comparison")
             }
         }, tuple.t2.toRange()) as BinaryExpr
+    }
+
+    private fun checkArcAndTriangle(first: Notation, second: Notation, operator: String) {
+        if (first is ArcNotation && second !is ArcNotation)
+            throw SpoofError(
+                "If arc is at the first position in `%{op}`," +
+                        " then it should be in the second position too", "op" to operator
+            )
+        if (second is ArcNotation && first !is PointNotation)
+            throw SpoofError(
+                "If arc is at the second position in `%{op}`," +
+                        " then point or arc should be in the first position", "op" to operator
+            )
+        if (second is TriangleNotation && first !is PointNotation)
+            throw SpoofError(
+                "If triangle is at the second position in `%{op}`," +
+                        " then point should be in the first position", "op" to operator
+            )
     }
 
     private fun checkNoGreaterOrder(first: Notation, second: Notation) {

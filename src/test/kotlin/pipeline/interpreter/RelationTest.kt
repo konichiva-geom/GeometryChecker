@@ -24,6 +24,30 @@ internal class RelationTest {
     }
 
     @Test
+    fun testNotInRelation() {
+        passTask("""
+        description:
+            new A; new B; new C
+            A !in line BC
+        prove:
+            A !in line BC
+            A !in ray BC
+            A !in ray CB
+            A !in BC
+            B !in line AC
+            C !in line AB
+            C !in ray AB
+            C !in ray BA
+            C !in AB
+            B !in ray AC
+            B !in ray CA
+            B !in AC
+        solution:
+            
+        """)
+    }
+
+    @Test
     fun testParallelRelation() {
         passTask(
             """

@@ -1,9 +1,9 @@
 package pipeline.inference
 
-import entity.expr.AnyExpr
-import entity.expr.Expr
-import entity.expr.Relation
+import entity.expr.*
+import entity.expr.notation.IdentNotation
 import entity.expr.notation.Notation
+import entity.expr.notation.PointNotation
 import pipeline.interpreter.IdentMapper
 import pipeline.symbol_table.SymbolTable
 
@@ -45,10 +45,15 @@ open class Inference(
         // remapping expressions
         val copiedMappings = mapper.mappings.toMap()
         val quantifierVariants = symbolTable.equalIdentRenamer.getAllNSizedPointLists(fromSideQuantifier.size)
+        val allInferencePoints = getAllInferencePoints()
         for (variant in quantifierVariants) {
             mapper.mappings.putAll(copiedMappings)
             for ((i, point) in variant.withIndex())
                 mapper.mappings[fromSideQuantifier[i].notation.toString()] = mutableSetOf(point)
+            if (mapper.mappings.size < allInferencePoints.size) {
+                mapper.clear()
+                continue
+            }
 
             val mappedToSideExpressions = toSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
             if (mappedToSideExpressions.any {
@@ -59,8 +64,10 @@ open class Inference(
                             expr.checkValidityAfterRename() != null
                         }
                     }
-                })
+                }) {
+                mapper.clear()
                 continue
+            }
             //mappedToSideExpressions.forEach { (it as Notation).checkValidityAfterRename() }
 
             mapper.clear()
@@ -70,6 +77,17 @@ open class Inference(
                 symbolTable.assertCorrectState()
             }
         }
+    }
+
+    protected fun getAllInferencePoints(): Set<String> {
+        val res = mutableSetOf<String>()
+        fromSideQuantifier.forEach { res.addAll(it.notation.getPointsAndCircles()) }
+        fromSideExpressions.forEach { expr ->
+            res.addAll(expr.getAllChildren()
+                .filter { it is PointNotation || it is IdentNotation }
+                .map { it.toString() })
+        }
+        return res
     }
 
     override fun toString(): String {

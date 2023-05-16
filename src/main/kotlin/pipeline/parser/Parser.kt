@@ -11,7 +11,10 @@ import com.github.h0tk3y.betterParse.utils.Tuple2
 import entity.expr.Expr
 import error.PosError
 import error.SpoofError
+import error.SystemFatalError
 import pipeline.inference.Inference
+import pipeline.interpreter.Signature
+import pipeline.interpreter.TheoremBody
 import utils.ExtensionUtils.toRange
 import utils.ExtensionUtils.toViewable
 
@@ -19,12 +22,19 @@ val filteredFailures = mutableSetOf<Token>(LiteralToken("thDefStart", "th"))
 
 @Suppress("UNCHECKED_CAST")
 open class Parser {
-    fun parseInference(code: String): SyntaxTree<List<Inference>> {
-        return parse(code) as SyntaxTree<List<Inference>>
+    fun parseInference(code: String): List<Inference> {
+        return parse(code).item as List<Inference>
     }
 
     fun parseSolution(code: String): SyntaxTree<List<Tuple2<Any, List<Expr>>>> {
         return parse(code) as SyntaxTree<List<Tuple2<Any, List<Expr>>>>
+    }
+
+    /**
+     * TODO: refactor TheoremParser, remove parsing logic from it
+     */
+    fun parseTheorems(code: String): List<Pair<Signature, TheoremBody>> {
+        return parse(code).item as List<Pair<Signature, TheoremBody>>
     }
 
     /**
@@ -80,6 +90,10 @@ open class Parser {
                     err.startsWith.toRange(),
                     "Parse Error. Couldn't parse remainder"
                 )
+
+                else -> {
+                    println(err)
+                }
             }
         }
         return res

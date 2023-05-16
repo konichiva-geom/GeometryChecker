@@ -3,6 +3,7 @@ package entity.expr.notation
 import entity.expr.Expr
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 
 class TupleNotation<T : Notation>(val notations: List<T>) : Notation() {
     override fun getOrder(): Int {
@@ -34,7 +35,7 @@ class TupleNotation<T : Notation>(val notations: List<T>) : Notation() {
         return res.append(")")
     }
 
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr {
         return TupleNotation(notations.map { it.createNewWithMappedPointsAndCircles(mapper) as Notation })
     }
 

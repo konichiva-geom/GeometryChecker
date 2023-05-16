@@ -7,8 +7,8 @@ import error.PosError
 import error.SpoofError
 import java.io.File
 
-object Utils {
-    private const val SHOULD_CATCH = false
+object CommonUtils {
+    const val SHOULD_CATCH = false
     const val CONSIDERED_DIGITS_AFTER_POINT = 6
     const val THEOREMS_PATH = "src/main/resources/theorems.txt"
     const val INFERENCE_PATH = "src/main/resources/inference.txt"
@@ -38,13 +38,13 @@ object Utils {
         return a === b
     }
 
-    fun catchWithRangeAndArgs(block: () -> Any, range: IntRange, vararg args: Pair<String, Any>): Any {
+    fun catchWithRange(block:() -> Any, range: IntRange): Any {
         return if (SHOULD_CATCH)
             try {
                 block()
             } catch (e: SpoofError) {
                 e.toString()
-                throw PosError(range, e.msg, *e.args, *args)
+                throw PosError(range, e.msg, *e.args)
             }
         else
             block()

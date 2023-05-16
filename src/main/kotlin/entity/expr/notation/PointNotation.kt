@@ -3,6 +3,7 @@ package entity.expr.notation
 import entity.expr.Expr
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 
 class PointNotation(var p: String) : RelatableNotation() {
     override fun getOrder(): Int = 1
@@ -12,7 +13,7 @@ class PointNotation(var p: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("A")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = PointNotation(mapper.get(p))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = PointNotation(mapper.get(p))
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         p = symbolTable.equalIdentRenamer.getIdentical(p)
     }

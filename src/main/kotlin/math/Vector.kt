@@ -5,7 +5,7 @@ import error.SystemFatalError
 import pipeline.symbol_table.SymbolTable
 import utils.ExtensionUtils.addOrCreate
 import utils.MultiSet
-import utils.Utils.signToLambda
+import utils.CommonUtils.signToLambda
 import utils.multiSetOf
 
 // TODO change set to multiset

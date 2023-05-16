@@ -3,7 +3,8 @@ package entity.expr.notation
 import entity.expr.Expr
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
-import utils.Utils
+import pipeline.interpreter.IdentMapperInterface
+import utils.CommonUtils
 
 open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     var p1: String
@@ -25,7 +26,7 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("line AA")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) =
         Point2Notation(mapper.get(p1), mapper.get(p2))
 
     override fun toString(): String = "line $p1$p2"
@@ -47,6 +48,6 @@ open class Point2Notation(p1: String, p2: String) : RelatableNotation() {
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
         p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
-        Utils.sortLine(this)
+        CommonUtils.sortLine(this)
     }
 }

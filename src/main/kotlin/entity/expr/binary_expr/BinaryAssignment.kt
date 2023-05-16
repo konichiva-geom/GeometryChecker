@@ -10,7 +10,7 @@ import entity.expr.notation.PointNotation
 import error.SpoofError
 import error.SystemFatalError
 import pipeline.inference.InferenceProcessor
-import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 import pipeline.symbol_table.SymbolTable
 
 class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), Creation {
@@ -20,7 +20,7 @@ class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), C
 
     override fun getRepr(): StringBuilder = left.getRepr().append(" = ").append(right.getRepr())
 
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr =
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr =
         BinaryAssignment(
             left.createNewWithMappedPointsAndCircles(mapper) as Notation,
             right.createNewWithMappedPointsAndCircles(mapper)
@@ -98,7 +98,7 @@ class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), C
         }
     }
 
-    override fun create(symbolTable: SymbolTable) {
+    override fun create(symbolTable: SymbolTable, inferenceProcessor: InferenceProcessor) {
         assignFromSolution(symbolTable)
     }
 

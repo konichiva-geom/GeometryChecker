@@ -9,7 +9,7 @@ import entity.relation.CircleRelations
 import error.SpoofError
 import external.WarnLogger
 import pipeline.symbol_table.SymbolTable
-import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 
 /**
  * Intersection means that two line objects are not on the same line
@@ -31,7 +31,7 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
     }
 
     override fun getRepr(): StringBuilder = left.getRepr().append(" intersects ").append(right.getRepr())
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) =
         BinaryIntersects(
             left.createNewWithMappedPointsAndCircles(mapper) as Notation,
             right.createNewWithMappedPointsAndCircles(mapper) as Notation

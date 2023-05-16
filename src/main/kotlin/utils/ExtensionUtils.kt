@@ -4,7 +4,7 @@ import com.github.h0tk3y.betterParse.lexer.CharToken
 import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
-import utils.Utils.CONSIDERED_DIGITS_AFTER_POINT
+import utils.CommonUtils.CONSIDERED_DIGITS_AFTER_POINT
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.pow

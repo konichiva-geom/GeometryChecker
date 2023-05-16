@@ -4,6 +4,7 @@ import entity.expr.notation.*
 import entity.point_collection.*
 import entity.relation.*
 import error.SpoofError
+import error.SystemFatalError
 import utils.MutablePair
 import utils.with
 import java.util.*
@@ -20,9 +21,7 @@ open class PointCollectionSymbolTable : PointSymbolTable() {
     @Suppress("UNCHECKED_CAST")
     fun getKeyValueByNotation(notation: Notation): Pair<Any, EntityRelations> {
         when (notation) {
-            is PointNotation ->
-                return notation.p to getPoint(notation)
-
+            is PointNotation -> return notation.p to getPoint(notation)
             is RayNotation -> return getPair<RayRelations, RayNotation, RayPointCollection>(
                 notation,
                 rays as LinkedList<MutablePair<PointCollection<RayNotation>, RayRelations>>,
@@ -34,19 +33,28 @@ open class PointCollectionSymbolTable : PointSymbolTable() {
                 segments as MutableMap<PointCollection<SegmentNotation>, SegmentRelations>,
                 arrayOf(notation.getPointsAndCircles().toMutableSet(), mutableSetOf<String>())
             )
+
             is ArcNotation -> return getKeyValueForLinear<ArcRelations, ArcNotation, ArcPointCollection>(
                 notation,
                 arcs as MutableMap<PointCollection<ArcNotation>, ArcRelations>,
                 arrayOf(notation.getPointsAndCircles().toMutableSet(), mutableSetOf<String>(), notation.circle)
             )
+
             is Point2Notation -> return getPair<LineRelations, Point2Notation, LinePointCollection>(
                 notation,
                 lines as LinkedList<MutablePair<PointCollection<Point2Notation>, LineRelations>>,
                 arrayOf(notation.getPointsAndCircles().toMutableSet())
             )
+
             is Point3Notation -> return getAngleAndRelations(notation)
             is IdentNotation -> return notation to circles[notation]!!
-            else -> throw SpoofError(notation.toString())
+            is TriangleNotation -> {
+                if (triangles[notation] == null)
+                    addTriangle(notation)
+                return notation to triangles[notation]!!
+            }
+
+            else -> throw SystemFatalError("Notation not supported: ${notation.toString()}")
         }
     }
 
@@ -150,12 +158,16 @@ open class PointCollectionSymbolTable : PointSymbolTable() {
         angles.find { it.e1 == getAngleAndRelations(notation).first }!!.e2 = newRelations
     }
 
+    /**
+     * For triangles returns vertices and points inside
+     */
     fun getPointSetNotationByNotation(notation: Notation): Set<String> {
         return when (notation) {
             is PointNotation -> setOf(notation.p)
             is Point2Notation -> (getKeyValueByNotation(notation).first as PointCollection<*>).getPointsInCollection()
             is Point3Notation -> setOf(notation.p1, notation.p2, notation.p3)
             is IdentNotation -> getCircle(notation).getCirclePoints()
+            is TriangleNotation -> getTriangle(notation).pointsInside + notation.getPointsAndCircles()
             else -> throw SpoofError("Unexpected notation: %{notation}", "notation" to notation)
         }
     }
@@ -195,5 +207,9 @@ open class PointCollectionSymbolTable : PointSymbolTable() {
         val res = ArcRelations()
         arcs[ArcPointCollection(notation.getPointsAndCircles().toMutableSet(), circle = notation.circle)] = res
         return res
+    }
+
+    fun getTriangle(notation: TriangleNotation): TriangleRelations {
+        return getKeyValueByNotation(notation).second as TriangleRelations
     }
 }

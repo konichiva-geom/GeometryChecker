@@ -4,7 +4,7 @@ import entity.Renamable
 import error.SpoofError
 import pipeline.symbol_table.SymbolTable
 import utils.ExtensionUtils.addToOrCreateSet
-import utils.Utils.sortPoints
+import utils.CommonUtils.sortPoints
 
 /**
  * Maps to equal point (or circle) with the least lexicographical order

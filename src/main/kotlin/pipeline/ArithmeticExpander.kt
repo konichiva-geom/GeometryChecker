@@ -9,7 +9,8 @@ import math.mergeWithOperation
 import utils.ExtensionUtils.addOrCreate
 import utils.ExtensionUtils.asString
 import utils.MathUtils
-import utils.Utils.keyForArithmeticNumeric
+import utils.CommonUtils.keyForArithmeticNumeric
+import javax.print.DocFlavor.STRING
 
 object ArithmeticExpander {
     fun createArithmeticMap(
@@ -29,6 +30,7 @@ object ArithmeticExpander {
                 }
                 return res
             }
+
             "/" -> {
                 return mutableMapOf(DivNotation(left, right) to 1.0)
             }
@@ -166,7 +168,10 @@ object ArithmeticExpander {
             map[keyForArithmeticNumeric] = if (isNumerator) 0.0 else 1.0
     }
 
-    fun getArithmeticToString(map: MutableMap<Notation, Double>): StringBuilder {
+    fun getArithmeticToString(
+        map: MutableMap<Notation, Double>,
+        notationRepresentation: (n: Notation) -> StringBuilder = { n -> StringBuilder(n.toString()) }
+    ): StringBuilder {
         if (map.isEmpty())
             return StringBuilder("0")
         val res = StringBuilder()
@@ -177,7 +182,7 @@ object ArithmeticExpander {
                 else
                     res.append(fraction.asString())
             } else if (fraction != 1.0) res.append("+${fraction.asString()}")
-            res.append(notation)
+            res.append(notationRepresentation(notation))
         }
         if (res.isNotEmpty() && res[0] == '+')
             res.deleteCharAt(0)

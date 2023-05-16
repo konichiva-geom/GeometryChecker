@@ -5,24 +5,34 @@ import entity.expr.notation.Notation
 import error.SpoofError
 import utils.ExtensionUtils.addToOrCreateSet
 
+interface IdentMapperInterface {
+    fun get(pointOrIdent: String): String
+    fun forceUniqueMappings()
+    fun mergeMapping(key: String, value: List<String>)
+    fun addLink(first: String, second: String)
+    fun createLinks(call: Expr, definition: Expr)
+    fun traverseExpr(call: Expr, definition: Expr)
+    fun clear()
+}
+
 /**
  * Responsible for mapping points in theorem bodies and inference expressions.
  *
  * Previously was mapping one point uniquely to other, but two different points can be mapped to same one,
  * e.g. we use *equal_sided_triangles* for triangles with common points: ABC and BCD.
  */
-class IdentMapper {
+class IdentMapper: IdentMapperInterface {
     val mappings = mutableMapOf<String, MutableSet<String>>()
     private val links = mutableMapOf<String, MutableSet<String>>()
 
-    fun get(pointOrIdent: String) = mappings[pointOrIdent]!!.first()
+    override fun get(pointOrIdent: String) = mappings[pointOrIdent]!!.first()
 
     /**
      * On inference there might be ambiguous mappings
      * This method chooses first mapping and makes all mappings unique
      *
      */
-    fun forceUniqueMappings() {
+    override fun forceUniqueMappings() {
         val alreadyUnique = mappings.keys.filter { mappings[it]?.size == 1 }
         for (key in alreadyUnique)
             removeFromLinks(key, mappings[key]!!.first())
@@ -35,16 +45,16 @@ class IdentMapper {
         }
     }
 
-    fun mergeMapping(key: String, value: List<String>) {
+    override fun mergeMapping(key: String, value: List<String>) {
         if (mappings[key] == null)
             mappings[key] = value.toMutableSet()
         else {
             val res = mappings[key]!!.intersect(value.toSet())
             if (res.isEmpty())
                 throw SpoofError(
-                    "Got empty intersection while resolving theorem " +
-                            "%{signature}. %{letter} maps to nothing.\n\tMappings: %{mappings}",
-                    "letter" to key
+                    "Got empty intersection while resolving theorem" +
+                            ". %{letter} maps to nothing.\n\tMappings: %{mappings}",
+                    "letter" to key, "mappings" to mappings
                 )
             mappings[key] = res.toMutableSet()
         }
@@ -58,12 +68,12 @@ class IdentMapper {
             mappings[linked]?.remove(removed)
     }
 
-    fun addLink(first: String, second: String) {
+    override fun addLink(first: String, second: String) {
         links.addToOrCreateSet(first, second)
         links.addToOrCreateSet(second, first)
     }
 
-    fun createLinks(call: Expr, definition: Expr) {
+    override fun createLinks(call: Expr, definition: Expr) {
         if (call::class != definition::class)
             throw SpoofError("Expected ${definition::class}, got ${call::class}")
         if (definition is Notation) {
@@ -79,7 +89,7 @@ class IdentMapper {
     /**
      * Visit tree of args and build mappings
      */
-    fun traverseExpr(call: Expr, definition: Expr) {
+    override fun traverseExpr(call: Expr, definition: Expr) {
         if (call::class != definition::class)
             throw SpoofError("Expected ${definition::class}, got ${call::class}")
         if (call is Notation)
@@ -92,7 +102,7 @@ class IdentMapper {
             traverseExpr(child, defChildren[i])
     }
 
-    fun clear() {
+    override fun clear() {
         links.clear()
         mappings.clear()
     }

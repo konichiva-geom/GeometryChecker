@@ -4,6 +4,7 @@ import entity.expr.Expr
 import entity.expr.notation.Notation
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 
 //class NotationFraction(
 //    val numerator: MutableList<Notation>,
@@ -44,8 +45,8 @@ class MulNotation(val elements: MutableList<Notation>) : Notation() {
 
     override fun mergeMapping(mapper: IdentMapper, other: Notation) = TODO("Not yet implemented")
     override fun createLinks(mapper: IdentMapper) = TODO("Not yet implemented")
-    override fun getRepr() = TODO("Not yet implemented")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = TODO("Not yet implemented")
+    override fun getRepr() = StringBuilder(elements.map { it.getRepr() }.joinToString(separator = "*"))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = TODO("Not yet implemented")
     override fun compareTo(other: Expr) = TODO("Not yet implemented")
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) {
         elements.forEach { it.renameToMinimalAndRemap(symbolTable) }

@@ -1,13 +1,21 @@
 package pipeline.symbol_table
 
+import entity.expr.binary_expr.BinaryNotEquals
+import entity.expr.binary_expr.BinaryNotIn
 import entity.expr.notation.IdentNotation
+import entity.expr.notation.Point2Notation
 import entity.expr.notation.PointNotation
+import entity.expr.notation.TriangleNotation
 import entity.relation.CircleRelations
 import entity.relation.PointRelations
+import entity.relation.TriangleRelations
 import error.SpoofError
+import math.ArithmeticExpr
+import pipeline.interpreter.TheoremParser
 
 open class PointSymbolTable : BaseSymbolTable() {
     protected val points = mutableMapOf<String, PointRelations>()
+    protected val triangles = mutableMapOf<TriangleNotation, TriangleRelations>()
 
     // IdentNotation is used for `rename and remap` function to work properly
     val circles = mutableMapOf<IdentNotation, CircleRelations>()
@@ -22,7 +30,6 @@ open class PointSymbolTable : BaseSymbolTable() {
             points[it]!!.unknown.remove(notation)
         }
         points[notation] = newRelations
-
     }
 
     fun resetCircle(newRelations: CircleRelations, notation: IdentNotation) {
@@ -30,6 +37,11 @@ open class PointSymbolTable : BaseSymbolTable() {
             circles[IdentNotation(it)]!!.unknown.remove(notation.text)
         }
         circles[notation] = newRelations
+    }
+
+    fun resetTriangle(newRelations: TriangleRelations, notation: TriangleNotation) {
+        triangles[notation]!!.similarTriangles.forEach { it.similarTriangles.remove(it) }
+        triangles[notation] = newRelations
     }
 
     /**
@@ -60,6 +72,40 @@ open class PointSymbolTable : BaseSymbolTable() {
     }
 
     /**
+     * check A !in line BC, C !in line BA, C !in line AB, A != B, A != C, B != C
+     */
+    fun addTriangle(triangleNotation: TriangleNotation, checkRelations: Boolean = false) {
+        triangles[triangleNotation] = TriangleRelations()
+        equalIdentRenamer.addSubscribers(triangleNotation, *triangleNotation.getPointsAndCircles().toTypedArray())
+
+        if(!checkRelations)
+            return
+
+        val p1 = PointNotation(triangleNotation.p1)
+        val p2 = PointNotation(triangleNotation.p2)
+        val p3 = PointNotation(triangleNotation.p3)
+        BinaryNotEquals(
+            ArithmeticExpr(mutableMapOf(p1 to 1.0)),
+            ArithmeticExpr(mutableMapOf(p2 to 1.0))
+        ).check(this as SymbolTable)
+        TheoremParser.check(
+            BinaryNotEquals(
+                ArithmeticExpr(mutableMapOf(p1 to 1.0)),
+                ArithmeticExpr(mutableMapOf(p3 to 1.0))
+            ), this
+        )
+        TheoremParser.check(
+            BinaryNotEquals(
+                ArithmeticExpr(mutableMapOf(p3 to 1.0)),
+                ArithmeticExpr(mutableMapOf(p2 to 1.0))
+            ), this
+        )
+        TheoremParser.check(BinaryNotIn(p1, Point2Notation(p2.p, p3.p)), this)
+        TheoremParser.check(BinaryNotIn(p2, Point2Notation(p1.p, p3.p)), this)
+        TheoremParser.check(BinaryNotIn(p3, Point2Notation(p2.p, p1.p)), this)
+    }
+
+    /**
      * TODO: currently distinct and new circles are identical
      */
     fun distinctCircle(notation: IdentNotation): CircleRelations {
@@ -81,6 +127,9 @@ open class PointSymbolTable : BaseSymbolTable() {
     fun hasPoint(point: String): Boolean {
         return points[point] != null
     }
+
+    fun hasTriangle(triangleNotation: TriangleNotation): Boolean = triangles.containsKey(triangleNotation)
+
 
     fun getPoint(name: String): PointRelations {
         return points[name] ?: throw SpoofError("Point %{name} is not instantiated", "name" to name)

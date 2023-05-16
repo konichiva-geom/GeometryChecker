@@ -117,7 +117,6 @@ internal class ArithmeticTest {
         )
     }
 
-    @Ignore("Change code in arithmetic binary expr")
     @Test
     fun testMultiset() {
         passTask("""

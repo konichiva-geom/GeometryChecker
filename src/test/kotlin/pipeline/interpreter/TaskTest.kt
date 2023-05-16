@@ -20,7 +20,7 @@ internal class TaskTest {
                 ∠UVW == ∠XYZ
                 ∠UWV == ∠XZY
             solution:
-                equal_sided_triangles_i(VU == XY, UW == XZ, ∠VUW == ∠ZXY) => *
+                equal_triangles_1(VU == XY, UW == XZ, ∠VUW == ∠ZXY) => *
         """.trimIndent()
         )
     }
@@ -47,7 +47,7 @@ internal class TaskTest {
                 ∠YWX == ∠YZX
                 ∠YXW == ∠XYZ
             solution:
-                equal_sided_triangles_i(XY == XY, YZ == XW, ∠ZYX == ∠WXY) => *
+                equal_triangles_1(XY == XY, YZ == XW, ∠ZYX == ∠WXY) => *
         """.trimIndent()
         )
     }
@@ -70,7 +70,7 @@ internal class TaskTest {
         solution:
             rectangular_median_half_of_hypotenuse(∠ACB == 90, M in AB)
             isosceles_triangle_equal_angles(AM == MC)
-            angles_180_in_triangle(∠AMC)
+            angles_180_in_triangle(AMC)
             adjacent_angle(∠AMC, ∠BMC)
         """
         )

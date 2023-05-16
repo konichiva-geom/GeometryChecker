@@ -3,19 +3,20 @@ package entity.expr.notation
 import entity.expr.Expr
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
-import utils.Utils
+import pipeline.interpreter.IdentMapperInterface
+import utils.CommonUtils
 
 class Point3Notation(var p1: String, var p2: String, var p3: String) : RelatableNotation() {
     init {
-        Utils.sortAngle(this)
+        CommonUtils.sortAngle(this)
     }
 
     override fun getOrder(): Int = 6
 
     override fun compareTo(other: Expr): Int = super.compareOrSame(other) ?: toString().compareTo(other.toString())
 
-    override fun getRepr() = StringBuilder("AAA")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+    override fun getRepr() = StringBuilder("∠AAA")
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) =
         Point3Notation(mapper.get(p1), mapper.get(p2), mapper.get(p3))
 
     override fun toString(): String = "∠$p1$p2$p3"
@@ -36,6 +37,6 @@ class Point3Notation(var p1: String, var p2: String, var p3: String) : Relatable
         p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
         p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
         p3 = symbolTable.equalIdentRenamer.getIdentical(p3)
-        Utils.sortAngle(this)
+        CommonUtils.sortAngle(this)
     }
 }

@@ -5,14 +5,11 @@ import com.github.h0tk3y.betterParse.utils.Tuple2
 import entity.Renamable
 import entity.expr.*
 import entity.expr.binary_expr.BinaryAssignment
-import entity.expr.notation.Notation
-import entity.expr.notation.Point2Notation
-import entity.expr.notation.Point3Notation
-import entity.expr.notation.PointNotation
+import entity.expr.notation.*
 import error.SpoofError
 import pipeline.inference.InferenceProcessor
 import pipeline.symbol_table.SymbolTable
-import utils.Utils.catchWithRangeAndArgs
+import utils.CommonUtils.catchWithRange
 
 class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
@@ -36,9 +33,10 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
             if (tuple.t2 == null)
                 continue
             for ((j, expr) in tuple.t2!!.withIndex()) {
-                catchWithRangeAndArgs({
-                    validatePointInitialization(expr, tempTable)
-                }, tree.children[i].children[1].children[j].range)
+                catchWithRange(
+                    { validatePointInitialization(expr, tempTable) },
+                    tree.children[i].children[1].children[j].range
+                )
             }
         }
         tempTable.clear()
@@ -62,20 +60,22 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
      */
     private fun validatePointInitialization(expr: Expr, tempTable: SymbolTable) {
         when (expr) {
-            is PointCreation -> expr.create(tempTable)
+            is PointCreation -> expr.create(tempTable, inferenceProcessor)
+            is TriangleCreation -> (expr.getChildren().first() as Notation).getPointsAndCircles()
+                .forEach {
+                    if (!tempTable.hasPoint(it))
+                        PointCreation(
+                            PointNotation(it),
+                            isDistinct = false
+                        ).create(tempTable, inferenceProcessor)
+                }
+
             is BinaryAssignment -> (expr.left as Notation).getPointsAndCircles()
                 .forEach { if (!tempTable.hasPoint(it)) tempTable.newPoint(it) }
-            is PointNotation -> tempTable.getPoint(expr)
-            is Point2Notation -> {
-                tempTable.getPoint(expr.p1)
-                tempTable.getPoint(expr.p2)
-            }
 
-            is Point3Notation -> {
-                tempTable.getPoint(expr.p1)
-                tempTable.getPoint(expr.p2)
-                tempTable.getPoint(expr.p3)
-            }
+            is PointNotation, is Point2Notation, is Point3Notation,
+            is TriangleNotation -> (expr as Notation).getPointsAndCircles()
+                .forEach { tempTable.getPoint(it) }
         }
         for (child in expr.getChildren()) {
             validatePointInitialization(child, tempTable)
@@ -96,13 +96,15 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
 
     private fun interpretDescription(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex())
-            catchWithRangeAndArgs({
+            catchWithRange({
                 rename(expr)
                 when (expr) {
                     is BinaryAssignment -> expr.makeAssignment(symbolTable, inferenceProcessor)
                     is Invocation -> interpretTheoremUse(expr)
-                    is Relation -> Relation.makeRelation(expr, symbolTable, inferenceProcessor)
-                    is Creation -> expr.create(symbolTable)
+                    is Relation -> {
+                        Relation.makeRelation(expr, symbolTable, inferenceProcessor)
+                    }
+                    is Creation -> expr.create(symbolTable, inferenceProcessor)
                     else -> throw SpoofError("Unexpected expression in description")
                 }
             }, syntaxTree.children[i].range)
@@ -110,13 +112,14 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
 
     private fun interpretSolution(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex())
-            catchWithRangeAndArgs({
+            catchWithRange({
                 rename(expr)
                 when (expr) {
                     is Invocation -> interpretTheoremUse(expr)
-                    is Creation -> expr.create(symbolTable)
+                    is Creation -> expr.create(symbolTable, inferenceProcessor)
                     is Relation ->
                         throw SpoofError("Cannot add relation in solution. Use check to check or theorem to add new relation")
+
                     else -> throw SpoofError("Unexpected expression in solution. Use theorems or creation statements")
                 }
             }, syntaxTree.children[i].range)
@@ -128,7 +131,7 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
         } else {
             val body = theoremParser.getTheoremBodyBySignature(expr.signature)
             theoremParser.parseTheorem(
-                expr.signature,
+                expr,
                 theoremParser.getSignature(expr.signature),
                 body,
                 symbolTable,
@@ -139,10 +142,10 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
 
     private fun interpretProve(block: List<Expr>, syntaxTree: SyntaxTree<*>) {
         for ((i, expr) in block.withIndex())
-            catchWithRangeAndArgs({
+            catchWithRange({
                 rename(expr)
                 when (expr) {
-                    is Relation -> theoremParser.check(expr, symbolTable)
+                    is Relation -> TheoremParser.check(expr, symbolTable)
                     else -> {
                         if (expr is Invocation && expr.signature.name == "check")
                             theoremParser.check(expr.signature.args, symbolTable)

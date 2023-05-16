@@ -5,6 +5,7 @@ import entity.expr.notation.RayNotation
 import pipeline.symbol_table.SymbolTable
 
 class RayRelations : LinearRelations() {
+    override val pointsNotContained: MutableSet<String> = mutableSetOf()
     override fun merge(other: Notation?, symbolTable: SymbolTable, otherRelations: EntityRelations?) {
         mergeDifferentPoints((otherRelations ?: symbolTable.getRay(other as RayNotation)) as RayRelations)
         if (other != null)

@@ -62,7 +62,7 @@ class TheoremParser : Parser() {
         try {
             theorems.putAll((GeomGrammar.parseToEnd(theoremsCode) as List<Pair<Signature, TheoremBody>>).toMap())
         } catch (e: ParseException) {
-            if(e.errorResult is UnparsedRemainder) {
+            if (e.errorResult is UnparsedRemainder) {
                 throw PosError((e.errorResult as UnparsedRemainder).startsWith.toRange(), e.message!!)
             }
             val tokens = getAllErrorTokens(e.errorResult as AlternativesFailure)
@@ -81,14 +81,14 @@ class TheoremParser : Parser() {
     }
 
     fun parseTheorem(
-        call: Signature,
+        call: Invocation,
         theoremSignature: Signature,
         theoremBody: TheoremBody,
         symbolTable: SymbolTable,
         inferenceProcessor: InferenceProcessor
     ) {
-        checkSignature(call, symbolTable)
-        traverseSignature(call, theoremSignature)
+        checkSignature(call.signature, symbolTable, inferenceProcessor)
+        traverseSignature(call.signature, theoremSignature)
         for (expr in theoremBody.body) {
             when (expr) {
                 is BinaryAssignment -> expr.makeAssignment(symbolTable, inferenceProcessor)
@@ -108,26 +108,34 @@ class TheoremParser : Parser() {
                     else throw SpoofError("Expected relation to check")
                 }
 
-                is Creation -> {
-                    throw SpoofError("Cannot create new points and circles inside theorem")
-                }
+                is Creation -> throw SpoofError("Cannot create new points and circles inside theorem")
             }
         }
         if (theoremBody.ret.isNotEmpty()) {
-            for (expr in theoremBody.ret)
+            val returnedExpressions = getReturnedExpressions(call.output, theoremBody.ret)
+            for (expr in returnedExpressions) {
                 Relation.makeRelation(
-                    expr.createNewWithMappedPointsAndCircles(signatureMapper) as Relation,
+                    expr as Relation,
                     symbolTable,
                     inferenceProcessor,
                     fromInference = false
                 )
+            }
         }
         signatureMapper.clear()
     }
 
-    fun check(relation: Relation, symbolTable: SymbolTable) {
-        if (!relation.check(symbolTable))
-            throw SpoofError("Relation ${relation as Expr} unknown")
+    private fun getReturnedExpressions(callReturn: List<Expr>, defReturn: List<Expr>): List<Expr> {
+        if (callReturn.isEmpty())
+            return defReturn.map { it.createNewWithMappedPointsAndCircles(signatureMapper) }
+        val res = mutableListOf<Expr>()
+        val mappedDefReturn = defReturn.map { it.createNewWithMappedPointsAndCircles(signatureMapper).toString() }
+        for (expr in callReturn) {
+            if (mappedDefReturn.contains(expr.toString())) {
+                res.add(expr)
+            } else throw SpoofError("Expression $expr is not a return value of theorem")
+        }
+        return res
     }
 
     fun check(expressions: List<Expr>, symbolTable: SymbolTable) {
@@ -149,14 +157,25 @@ class TheoremParser : Parser() {
     /**
      * Check that all relations are correct and make construction relations
      */
-    private fun checkSignature(callSignature: Signature, symbolTable: SymbolTable) {
+    private fun checkSignature(
+        callSignature: Signature,
+        symbolTable: SymbolTable,
+        inferenceProcessor: InferenceProcessor
+    ) {
         for (expr in callSignature.args) {
             when (expr) {
-                is Creation -> expr.create(symbolTable)
+                is Creation -> expr.create(symbolTable, inferenceProcessor)
                 is Relation -> check(expr, symbolTable)
                 is Notation -> {}
                 else -> throw SpoofError("Expected relation or creation")
             }
+        }
+    }
+
+    companion object {
+        fun check(relation: Relation, symbolTable: SymbolTable) {
+            if (!relation.check(symbolTable))
+                throw SpoofError("Relation ${relation as Expr} unknown")
         }
     }
 }

@@ -3,19 +3,20 @@ package math
 import entity.Renamable
 import entity.expr.Expr
 import entity.expr.notation.Notation
+import error.SpoofError
 import pipeline.ArithmeticExpander.getArithmeticToString
 import pipeline.symbol_table.SymbolTable
-import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 import utils.ExtensionUtils.addOrCreate
 
 class ArithmeticExpr(val map: MutableMap<Notation, Double>) : Expr, Renamable {
     override fun getChildren(): List<Expr> = map.keys.toList()
 
     override fun getRepr(): StringBuilder {
-        return getArithmeticToString(map)
+        return getArithmeticToString(map) { n -> n.getRepr() }
     }
 
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr {
         val res = mutableMapOf<Notation, Double>()
 
         for ((notation, fraction) in map)

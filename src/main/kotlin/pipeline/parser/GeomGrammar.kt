@@ -24,7 +24,7 @@ import pipeline.interpreter.TheoremBody
 import pipeline.parser.GrammarHelperMethods.getBinaryRelationByString
 import pipeline.parser.GrammarHelperMethods.getReturnableEquals
 import utils.ExtensionUtils.toRange
-import utils.Utils.keyForArithmeticNumeric
+import utils.CommonUtils.keyForArithmeticNumeric
 
 @Suppress("UNCHECKED_CAST", "UNUSED")
 object GeomGrammar : Grammar<Any>() {
@@ -41,17 +41,21 @@ object GeomGrammar : Grammar<Any>() {
     private val thDefStart by literalToken("th ")
     private val returnToken by literalToken("return ")
     private val comment by regexToken("//.*(\\n[\\t ]*)*", ignore = true)
-    private val multilineComment by regexToken("/\\*[.\n]*\\*/", ignore = true)
+    private val multilineComment by regexToken(
+        Regex("/\\*[\\s\\S]*?\\*/", RegexOption.DOT_MATCHES_ALL),
+        ignore = true
+    )
 
     //region relation tokens
     private val intersectsToken by literalToken("intersects ")
     private val perpendicularToken by literalToken("perpendicular ")
     private val parallelToken by literalToken("parallel ")
+    private val notInToken by literalToken("!in ")
     private val inToken by literalToken("in ")
     private val shortIntersectsToken by literalToken("∩")
     private val shortPerpendicularToken by literalToken("⊥")
     private val shortParallelToken by literalToken("||")
-    private val relationToken by intersectsToken or shortIntersectsToken or inToken or
+    private val relationToken by intersectsToken or shortIntersectsToken or notInToken or inToken or
             perpendicularToken or shortPerpendicularToken or parallelToken or shortParallelToken
     //endregion
 
@@ -63,9 +67,9 @@ object GeomGrammar : Grammar<Any>() {
     private val angleToken by literalToken("angle ")
     private val arc by literalToken("arc ")
 
-    private val ident by regexToken("[a-z]+[\\w_]*")
+    private val ident by regexToken("[a-z]+\\w*")
     private val number by regexToken("((\\d+\\.)?\\d*)|(\\d*)?\\.\\d+")
-    private val angle by 3 times parser(this::point)
+    private val triangle by 3 times parser(this::point)
     private val linear by 2 times parser(this::point) map { Pair(it[0].text, it[1].text) }
     private val line by -lineToken and linear
     private val point by regexToken("[A-Z][0-9]*")
@@ -94,15 +98,21 @@ object GeomGrammar : Grammar<Any>() {
     private val rightPar by literalToken(")")
     private val ws by regexToken("[\\t ]+", ignore = true)
     private val lineBreak by regexToken("(\\n[\\t ]*)+")
-    private val repeatedSeparator by lineBreak or comment or semicolonToken
+    private val repeatedSeparator by lineBreak or comment or multilineComment or semicolonToken
     private val statementSeparator by oneOrMore(repeatedSeparator)
     // endregion
 
     //region statements
-    private val creation: Parser<Expr> by (-newToken and (point or ident) map {
-        if (it.text[0] in 'A'..'Z')
-            PointCreation(PointNotation(it.text), isDistinct = false)
-        else CircleCreation(IdentNotation(it.text), isDistinct = false)
+    private val creation: Parser<Expr> by (-newToken and (triangle or point or ident) map {
+        if (it is List<*>) {
+            it as List<TokenMatch>
+            TriangleCreation(TriangleNotation(it[0].text, it[1].text, it[2].text))
+        } else {
+            it as TokenMatch
+            if (it.text[0] in 'A'..'Z')
+                PointCreation(PointNotation(it.text), isDistinct = false)
+            else CircleCreation(IdentNotation(it.text), isDistinct = false)
+        }
     }) or (-distinctToken and (point or ident) map {
         if (it.text[0] in 'A'..'Z')
             PointCreation(PointNotation(it.text), isDistinct = true)
@@ -111,8 +121,10 @@ object GeomGrammar : Grammar<Any>() {
 
     // angle, segment, arc
     private val comparableNotation: Parser<Notation> by (-(angleTokenShort or angleToken) and
-            angle map {
+            triangle map {
         Point3Notation(it[0].text, it[1].text, it[2].text)
+    }) or (triangle map {
+        TriangleNotation(it[0].text, it[1].text, it[2].text)
     }) or (linear map {
         SegmentNotation(it.first, it.second)
     }) or (-arc and linear and -ofToken and ident map {

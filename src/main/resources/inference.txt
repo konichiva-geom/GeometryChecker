@@ -1,8 +1,14 @@
-// ∠I∠M∠P∠O∠R∠T∠ANT: do ∠NOT create inferences based on point equality. For more info, refer to [Inference.process] method
+// IMPORTANT: do NOT create inferences based on point equality. For more info, refer to [Inference.process] method
+
+ABC == A1B1C1 => AB == A1B1, AC == A1C1, BC == B1C1, ∠ABC == ∠A1B1C1, ∠ACB == ∠A1C1B1, ∠BAC == ∠B1A1C1
 
 //A in BC <=> not A in BC
 B in AC => B in line AC, B in ray AC, B in ray CA, ray AB == ray AC, ray CB == ray CA
 A in ray BC => A in line BC
+
+B !in line AC => B !in ray AC, B !in ray CA, B !in AC, A !in line BC, C !in line AB
+B !in ray AC => B !in AC, C !in ray AB // only these relations because of this position of points on a line: B-A-C
+
 line AB || line CD, any C, any D, C != A, C != B, D != A, D != B, line CD || line EF => line AB || line EF
 
 AB === CD => AB == CD

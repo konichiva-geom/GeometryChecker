@@ -118,4 +118,44 @@ internal class BinarySameTest {
         """
         )
     }
+
+    @Test
+    fun testTriangleEquals() {
+        passTask(
+            """
+        description:
+            new ABC; new ABD; new AEF
+            ABC == ABD
+        prove:
+            ABD == ABC
+            A != B; A != C; A != D;  A != E; A != F;
+            B != C; B != D;
+            E != F;
+            A !in line BC; A !in line EF; A !in line BD
+            B !in line AC; B !in line AD
+            C !in line AB;
+            D !in line AB;
+            E !in line AF;
+            F !in line AE
+            ∠ABD == ∠ABC; ∠BAD == ∠BAC; ∠ADB == ∠ACB
+            AB == AB; AC == AD; BC == BD
+        solution:
+            
+        """
+        )
+    }
+
+    @Test
+    fun failTriangleEqualsWithOtherOperand() {
+        failTask(
+            """
+        description:
+            new A; new B; new C; new D;
+            ABC == ABD + 1
+        prove:
+            ABD == ABC
+        solution:
+        """, "Triangle equations shouldn't contain any expressions besides triangles"
+        )
+    }
 }

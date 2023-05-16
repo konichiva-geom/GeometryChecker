@@ -11,6 +11,7 @@ import entity.expr.binary_expr.BinaryAssignment
 import entity.expr.binary_expr.BinaryIntersects
 import entity.expr.notation.Point2Notation
 import entity.expr.notation.PointNotation
+import pipeline.parser.Parser
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -19,6 +20,48 @@ internal class ParserTest {
     @Test
     fun parseInference() {
         passInference("A in AB, any C => AB == AB")
+    }
+
+    @Test
+    fun parseTheorems() {
+        val parser = Parser()
+
+        parser.parseTheorems("""
+            th equal_triangles_1(AB == A1B1, BC == B1C1, ∠ABC == ∠A1B1C1):
+    check(A != B)
+    check(A != C)
+    check(B != C)
+    check(A1 != B1)
+    check(A1 != C1)
+    check(B1 != C1)
+    return AC == A1C1, ∠ACB == ∠A1C1B1, ∠BAC == ∠C1A1B1
+    // triangle ABC == triangle A1B1C1 // are triangles needed???
+
+th straight_angle(O, AB): // развернутый угол
+    check(O in AB)
+    return ∠AOB == 180
+        """.trimIndent())
+
+        parser.parseTheorems("""
+            
+th straight_angle(O, AB): // развернутый угол
+    check(O in AB)
+    return ∠AOB == 180
+        """.trimIndent())
+
+        parser.parseTheorems("""
+/*
+ * describe theorem here
+ */            
+th name(args):
+/*
+ * describe theorem here
+ */
+    return A
+    /*
+ * describe theorem here
+ */
+        """.trimIndent())
     }
 
     @Test
@@ -71,11 +114,11 @@ internal class ParserTest {
         failTask("omega in AB", "is not applicable to circle in this position")
         failTask(
             "arc AB of omega in line AB",
-            "If arc is at the first position in `in`, then it should be in the second position too"
+            "If arc is at the first position in `in `, then it should be in the second position too"
         )
         failTask(
             "line AB in arc AB of omega",
-            "If arc is at the second position in `in`, then point or arc should be in the first position"
+            "If arc is at the second position in `in `, then point or arc should be in the first position"
         )
     }
 

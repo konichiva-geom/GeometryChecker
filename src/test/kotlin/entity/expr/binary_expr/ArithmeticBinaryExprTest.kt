@@ -1,4 +1,4 @@
-package entity.expr
+package entity.expr.binary_expr
 
 import TestFactory.passDescription
 import kotlin.test.Test

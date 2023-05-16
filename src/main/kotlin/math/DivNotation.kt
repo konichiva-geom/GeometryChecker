@@ -4,6 +4,7 @@ import entity.expr.Expr
 import entity.expr.notation.Notation
 import pipeline.ArithmeticExpander.getArithmeticToString
 import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 import pipeline.symbol_table.SymbolTable
 
 class DivNotation(val numerator: MutableMap<Notation, Double>, val denominator: MutableMap<Notation, Double>) :
@@ -13,7 +14,7 @@ class DivNotation(val numerator: MutableMap<Notation, Double>, val denominator: 
     override fun mergeMapping(mapper: IdentMapper, other: Notation) = TODO("Not yet implemented")
     override fun createLinks(mapper: IdentMapper) = TODO("Not yet implemented")
     override fun getRepr() = TODO("Not yet implemented")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = TODO("Not yet implemented")
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = TODO("Not yet implemented")
     override fun compareTo(other: Expr) = TODO("Not yet implemented")
     override fun renameToMinimalAndRemap(symbolTable: SymbolTable) = TODO("Not yet implemented")
 

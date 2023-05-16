@@ -11,6 +11,7 @@ import utils.multiSetOf
 open class VectorSymbolTable : PointCollectionSymbolTable() {
     val segmentVectors = VectorContainer<SegmentPointCollection>()
     val angleVectors = VectorContainer<AnglePointCollection>()
+    val triangleVectors = VectorContainer<TriangleNotation>()
 
     fun getOrCreateVector(notation: Notation): Vector {
         when (notation) {
@@ -23,13 +24,16 @@ open class VectorSymbolTable : PointCollectionSymbolTable() {
                 } ?: throw SpoofError("Angle for arc %{arc} not specified", "arc" to notation)
                 return angleVectors.getOrCreate(angle.e2)
             }
+
+            is TriangleNotation -> return triangleVectors.getOrCreate(getKeyValueByNotation(notation).first as TriangleNotation)
             is Point3Notation -> return angleVectors.getOrCreate(getKeyByNotation(notation) as AnglePointCollection)
             is SegmentNotation -> {
-                val key = SegmentPointCollection(notation.getPointsAndCircles().toMutableSet())
+                val key = getKeyByNotation(notation) as SegmentPointCollection
                 if (segmentVectors.vectors[key] == null)
                     equalIdentRenamer.addSubscribers(key, *key.getPointsInCollection().toTypedArray())
                 return segmentVectors.getOrCreate(key)
             }
+
             is MulNotation -> {
                 return notation.elements.map {
                     getOrCreateVector(it)
@@ -37,6 +41,7 @@ open class VectorSymbolTable : PointCollectionSymbolTable() {
                     acc.mergeWith(i, "*")
                 }
             }
+
             else -> throw SpoofError(
                 "Unexpected notation %{notation} in arithmetic expression",
                 "notation" to notation

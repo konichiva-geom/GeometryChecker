@@ -4,22 +4,20 @@ import entity.expr.Expr
 import entity.expr.Returnable
 import entity.expr.notation.*
 import entity.point_collection.PointCollection
+import entity.relation.TriangleRelations
 import error.SpoofError
 import error.SystemFatalError
 import external.WarnLogger
-import math.ArithmeticExpr
-import math.Vector
-import math.mergeWithOperation
-import math.vectorFromArithmeticMap
-import pipeline.interpreter.IdentMapper
+import math.*
+import pipeline.interpreter.IdentMapperInterface
 import pipeline.symbol_table.SymbolTable
 import utils.ExtensionUtils.isAlmostZero
-import utils.Utils.isSame
+import utils.CommonUtils.isSame
 import utils.multiSetOf
 
 class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " === ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinarySame(
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = BinarySame(
         left.createNewWithMappedPointsAndCircles(mapper),
         right.createNewWithMappedPointsAndCircles(mapper)
     )
@@ -65,7 +63,7 @@ class ReturnableEquals(left: Notation, right: Expr) : BinaryExpr(left, right) {
         return left.getRepr().append(" == ").append(right.getRepr())
     }
 
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr {
         TODO("Not yet implemented")
     }
 
@@ -94,7 +92,7 @@ class ReturnableNotEquals(left: Notation, right: Expr) : BinaryExpr(left, right)
         TODO("Not yet implemented")
     }
 
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper): Expr {
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr {
         TODO("Not yet implemented")
     }
 
@@ -110,7 +108,7 @@ class ReturnableNotEquals(left: Notation, right: Expr) : BinaryExpr(left, right)
 
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " == ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryEquals(
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = BinaryEquals(
         left.createNewWithMappedPointsAndCircles(mapper),
         right.createNewWithMappedPointsAndCircles(mapper)
     )
@@ -125,6 +123,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         return if (isEntityEquals(left, right)
             && left.map.keys.first() !is Point3Notation
             && left.map.keys.first() !is SegmentNotation
+            && left.map.keys.first() !is TriangleNotation
         )
             symbolTable.getRelationsByNotation(left.map.keys.first()) ==
                     symbolTable.getRelationsByNotation(right.map.keys.first())
@@ -143,27 +142,29 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         if (isEntityEquals(left, right)
             && left.map.keys.first() !is Point3Notation
             && left.map.keys.first() !is SegmentNotation
+            && left.map.keys.first() !is TriangleNotation
         ) {
-            val leftNotation = left.map.keys.first()
-            if (leftNotation is PointNotation)
-                symbolTable.getPoint(leftNotation.p)
+            when (val leftNotation = left.map.keys.first()) {
+                is PointNotation -> symbolTable.getPoint(leftNotation.p)
                     .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
-            else if (leftNotation is IdentNotation) {
-                symbolTable.getCircle(leftNotation)
+
+                is IdentNotation -> symbolTable.getCircle(leftNotation)
                     .mergeOtherToThisCircle(leftNotation, right.map.keys.first() as IdentNotation, symbolTable)
-            } else {
-                val (collectionLeft, relationsLeft) = symbolTable.getKeyValueByNotation(left.map.keys.first())
-                val (collectionRight, relationsRight) = symbolTable.getKeyValueByNotation(right.map.keys.first())
-                if (collectionLeft is PointCollection<*>) {
-                    if (!isSame(collectionLeft, collectionRight))
-                        collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
-                } else {
-                    // won't execute currently, but if something new is added will fail
-                    if (collectionLeft !is IdentNotation)
-                        throw SystemFatalError("Unexpected notation in equals")
-                    throw SystemFatalError("Not done yet for circles")
+
+                else -> {
+                    val (collectionLeft, relationsLeft) = symbolTable.getKeyValueByNotation(left.map.keys.first())
+                    val (collectionRight, relationsRight) = symbolTable.getKeyValueByNotation(right.map.keys.first())
+                    if (collectionLeft is PointCollection<*>) {
+                        if (!isSame(collectionLeft, collectionRight))
+                            collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
+                    } else {
+                        // won't execute currently, but if something new is added will fail
+                        if (collectionLeft !is IdentNotation)
+                            throw SystemFatalError("Unexpected notation in equals")
+                        throw SystemFatalError("Not done yet for circles")
+                    }
+                    relationsLeft.merge(null, symbolTable, relationsRight)
                 }
-                relationsLeft.merge(null, symbolTable, relationsRight)
             }
         } else {
             val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
@@ -182,7 +183,33 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             when (notation) {
                 is SegmentNotation -> symbolTable.segmentVectors.resolveVector(result as Vector)
                 is Point3Notation -> symbolTable.angleVectors.resolveVector(result as Vector)
-                else -> throw SpoofError("Notation is not supported in arithmetic expressions, use segments and angles")
+                is TriangleNotation -> {
+                    if (left.map.size != 1 || right.map.size != 1
+                        || left.map.keys.first() !is TriangleNotation
+                        || right.map.keys.first() !is TriangleNotation
+                    ) {
+                        throw SpoofError("Triangle equations shouldn't contain any expressions besides triangles")
+                    }
+                    symbolTable.triangleVectors.resolveVector(result as Vector)
+                }
+
+                is MulNotation -> {
+                    if (notation.elements.first() is SegmentNotation) {
+                        symbolTable.segmentVectors.resolveVector(result as Vector)
+                    } else if (notation.elements.first() is PointNotation) {
+                        symbolTable.angleVectors.resolveVector(result as Vector)
+                    } else throw SpoofError(
+                        "Notation %{notation} is not supported in arithmetic expressions, " +
+                                "use segments and angles",
+                        "notation" to notation.elements.first()
+                    )
+                }
+
+                else -> throw SpoofError(
+                    "Notation %{notation} is not supported in arithmetic expressions, " +
+                            "use segments and angles",
+                    "notation" to notation
+                )
             }
         }
     }
@@ -195,7 +222,7 @@ private fun isEntityEquals(left: ArithmeticExpr, right: ArithmeticExpr) =
 
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryNotEquals(
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = BinaryNotEquals(
         left.createNewWithMappedPointsAndCircles(mapper),
         right.createNewWithMappedPointsAndCircles(mapper)
     )
@@ -250,7 +277,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " > ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = BinaryGreater(
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = BinaryGreater(
         left.createNewWithMappedPointsAndCircles(mapper),
         right.createNewWithMappedPointsAndCircles(mapper)
     )
@@ -270,7 +297,7 @@ class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
 
 class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " >= ")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) =
         BinaryGEQ(left.createNewWithMappedPointsAndCircles(mapper), right.createNewWithMappedPointsAndCircles(mapper))
 
     override fun toString(): String {

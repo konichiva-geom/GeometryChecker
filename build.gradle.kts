@@ -1,14 +1,12 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.8.10"
     `maven-publish`
     `java-library`
     signing
 }
 
 group = "konichiva.geom"
-version = "0.8"
+version = "0.9"
 
 java {
     withJavadocJar()
@@ -17,6 +15,7 @@ java {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 publishing {
@@ -71,7 +70,6 @@ publishing {
     }
 }
 
-
 signing {
     sign(publishing.publications["mavenJava"])
 }
@@ -80,15 +78,14 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("com.github.h0tk3y.betterParse:better-parse:0.4.4")
     implementation(kotlin("reflect"))
-    implementation("org.postgresql:postgresql:42.3.1")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
-}
+//tasks.withType<KotlinCompile> {
+//    kotlinOptions.jvmTarget = "11"
+//}
 
-tasks.javadoc {
-    if (JavaVersion.current().isJava9Compatible) {
-        (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
-    }
-}
+//tasks.javadoc {
+//    if (JavaVersion.current().isJava9Compatible) {
+//        (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+//    }
+//}

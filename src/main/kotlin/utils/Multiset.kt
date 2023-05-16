@@ -111,7 +111,7 @@ class MultiSet<E : Any>(val map: Map<E, Int>, override val size: Int) : Collecti
     }
 
     override fun toString(): String {
-        return map.toString()
+        return "Multiset:${map}"
     }
 }
 

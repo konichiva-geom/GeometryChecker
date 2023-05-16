@@ -12,8 +12,8 @@ import pipeline.interpreter.Signature
 import pipeline.interpreter.TheoremBody
 import pipeline.parser.GeomGrammar
 import pipeline.parser.Parser
-import utils.Utils.INFERENCE_PATH
-import utils.Utils.THEOREMS_PATH
+import utils.CommonUtils.INFERENCE_PATH
+import utils.CommonUtils.THEOREMS_PATH
 import java.io.File
 
 /**
@@ -26,18 +26,37 @@ class Pipeline {
     val interpreter = Interpreter(inferenceProcessor)
     private lateinit var tree: SyntaxTree<Any>
     private lateinit var code: String
-    private lateinit var theoremsConcurrent: Map<Signature, TheoremBody>
-    private lateinit var inferenceConcurrent: List<Inference>
+    private lateinit var theoremsConcurrent: MutableMap<Signature, TheoremBody>
+    private lateinit var inferenceConcurrent: MutableList<Inference>
 
     fun addConcurrentTheorems(path: String): Pipeline {
         theoremsConcurrent = (GeomGrammar.parseToEnd(File(path).readText())
-                as List<Pair<Signature, TheoremBody>>).toMap()
+                as List<Pair<Signature, TheoremBody>>).toMap().toMutableMap()
         return this
     }
 
-    fun addConcurrentInference(path: String): Pipeline {
-        inferenceConcurrent = parser.parseInference(File(path).readText()).item
+    fun updateConcurrentTheorems(theorems: String): Pipeline {
+        theoremsConcurrent.putAll(parser.parseTheorems(theorems))
         return this
+    }
+
+    fun getConcurrentTheorems(): Map<Signature, TheoremBody> {
+        return theoremsConcurrent.toMap()
+    }
+
+
+    fun addConcurrentInference(path: String): Pipeline {
+        inferenceConcurrent = parser.parseInference(File(path).readText()).toMutableList()
+        return this
+    }
+
+    fun updateConcurrentInference(inference: String): Pipeline {
+        inferenceConcurrent.addAll(parser.parseInference(inference))
+        return this
+    }
+
+    fun getConcurrentInference(): List<Inference> {
+        return inferenceConcurrent.toList()
     }
 
     fun clearTheorems(): Pipeline {
@@ -51,12 +70,12 @@ class Pipeline {
     }
 
     fun addInference(code: String): Pipeline {
-        inferenceProcessor.setInference(parser.parseInference(code).item)
+        inferenceProcessor.setInference(parser.parseInference(code))
         return this
     }
 
     fun addInferenceFromFile(path: String = INFERENCE_PATH): Pipeline {
-        inferenceProcessor.setInference(parser.parseInference(File(path).readText()).item)
+        inferenceProcessor.setInference(parser.parseInference(File(path).readText()))
         return this
     }
 

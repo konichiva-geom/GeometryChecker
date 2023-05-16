@@ -4,6 +4,7 @@ import entity.expr.Expr
 import entity.relation.CircleRelations
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 
 class IdentNotation(var text: String) : RelatableNotation() {
     override fun getOrder(): Int = 7
@@ -12,7 +13,7 @@ class IdentNotation(var text: String) : RelatableNotation() {
     }
 
     override fun getRepr() = StringBuilder("c")
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) = IdentNotation(mapper.get(text))
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = IdentNotation(mapper.get(text))
     override fun toString(): String = text
     override fun getPointsAndCircles(): MutableList<String> = mutableListOf(text)
     override fun mergeMapping(mapper: IdentMapper, other: Notation) {

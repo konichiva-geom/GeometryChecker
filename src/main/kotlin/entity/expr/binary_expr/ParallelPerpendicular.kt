@@ -5,14 +5,14 @@ import entity.expr.Expr
 import entity.expr.notation.Point2Notation
 import entity.relation.LineRelations
 import pipeline.symbol_table.SymbolTable
-import pipeline.interpreter.IdentMapper
+import pipeline.interpreter.IdentMapperInterface
 
 /**
  * `||` relation in tree
  */
 class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder = left.getRepr().append(" parallel ").append(right.getRepr())
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) =
         BinaryParallel(
             left.createNewWithMappedPointsAndCircles(mapper) as Point2Notation,
             right.createNewWithMappedPointsAndCircles(mapper) as Point2Notation
@@ -45,7 +45,7 @@ class BinaryParallel(left: Point2Notation, right: Point2Notation) : BinaryExpr(l
  */
 class BinaryPerpendicular(left: Point2Notation, right: Point2Notation) : BinaryExpr(left, right) {
     override fun getRepr(): StringBuilder = left.getRepr().append(" perpendicular ").append(right.getRepr())
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapper) =
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) =
         BinaryPerpendicular(
             left.createNewWithMappedPointsAndCircles(mapper) as Point2Notation,
             right.createNewWithMappedPointsAndCircles(mapper) as Point2Notation
