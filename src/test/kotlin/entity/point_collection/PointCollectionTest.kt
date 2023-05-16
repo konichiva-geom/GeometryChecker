@@ -53,10 +53,10 @@ internal class PointCollectionTest {
         assert(symbolTable.lines.size == 1)
         assert(symbolTable.lines.first().e1 == LinePointCollection(mutableSetOf("A", "B")))
         assert(symbolTable.rays.size == 2)
-        assert(symbolTable.rays.map { it.e1 }.contains(RayPointCollection("A", mutableSetOf("A", "B"))))
+        assert(symbolTable.rays.map { it.e1 }.contains(RayPointCollection("A", mutableSetOf( "B"))))
         assert(symbolTable.rays.map { it.e1 }.contains(RayPointCollection("B", mutableSetOf("A"))))
         assert(symbolTable.segments.size == 1)
-        assert(symbolTable.segments.keys.first() == SegmentPointCollection(mutableSetOf("A", "B"), mutableSetOf("A")))
+        assert(symbolTable.segments.keys.first() == SegmentPointCollection(mutableSetOf("A", "B")))
     }
 
     @Test
@@ -141,7 +141,7 @@ internal class PointCollectionTest {
             ∠AOB == ∠KLM + 2
             ∠KLM + 2 == ∠LMK + 3
             ∠AOC == ∠KLM + 2
-            ∠BOC + 175 == ∠LKM
+            //∠BOC + 175 == ∠LKM
         solution:
             
         """

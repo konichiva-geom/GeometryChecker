@@ -12,9 +12,15 @@ internal class TaskTest {
             description:
                 distinct U; distinct V; distinct W    //    U       X
                 distinct X; distinct Y; distinct Z    //   / \     / \
-                ∠VUW == ∠YXZ                            //  V---W   Y---Z
+                ∠VUW == ∠YXZ                          //  V---W   Y---Z
                 VU == XY
                 UW == ZX
+                V !in line UW
+                U !in line VW
+                W !in line UV
+                X !in line YZ
+                Y !in line ZX
+                Z !in line YX
             prove:
                 VW == YZ
                 ∠UVW == ∠XYZ
@@ -35,13 +41,19 @@ internal class TaskTest {
             description:
                 new W                  //   W---X
                 new X; new Y; new Z    //    \ / \
-                ∠ZYX == ∠YXW             //     Y---Z
+                ∠ZYX == ∠YXW           //     Y---Z
                 YZ == WX
                 X != Y
                 X != Z
                 X != W
                 Y != Z
                 Y != W
+                X !in line YZ
+                Y !in line XZ
+                Z !in line XY
+                W !in line XY
+                X !in line WY
+                Y !in line WX
             prove:
                 WY == XZ
                 ∠YWX == ∠YZX

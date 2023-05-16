@@ -2,15 +2,8 @@ package pipeline
 
 import TestFactory.failInference
 import TestFactory.failTask
-import TestFactory.passDescription
 import TestFactory.passInference
 import TestFactory.passTask
-import entity.expr.Creation
-import entity.expr.Relation
-import entity.expr.binary_expr.BinaryAssignment
-import entity.expr.binary_expr.BinaryIntersects
-import entity.expr.notation.Point2Notation
-import entity.expr.notation.PointNotation
 import pipeline.parser.Parser
 import kotlin.test.Ignore
 import kotlin.test.Test

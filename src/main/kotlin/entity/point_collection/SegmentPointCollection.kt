@@ -14,9 +14,10 @@ open class SegmentPointCollection internal constructor(
     override fun isFromNotation(notation: SegmentNotation) = bounds.containsAll(notation.getPointsAndCircles())
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
+        val filtered = added.filter {it !in bounds}
         val relations = symbolTable.segments.remove(this)!!
         symbolTable.equalIdentRenamer.removeSubscribers(this, *(points + bounds).toTypedArray())
-        points.addAll(added)
+        points.addAll(filtered)
         symbolTable.equalIdentRenamer.addSubscribers(this as Renamable, *(points + bounds).toTypedArray())
         symbolTable.segments[this] = relations
     }

@@ -15,8 +15,9 @@ class RayPointCollection(var start: String, private val points: MutableSet<Strin
     override fun isFromNotation(notation: RayNotation) = notation.p1 == start && points.contains(notation.p2)
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
+        val filtered = added.filter { it != start }
         withRemappingAnglesAndSubscribers(symbolTable) {
-            points.addAll(added)
+            points.addAll(filtered)
         }
     }
 

@@ -56,22 +56,19 @@ open class Inference(
             }
 
             val mappedToSideExpressions = toSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
-            if (mappedToSideExpressions.any {
-                    it.traverseExpr(symbolTable) { expr, _ ->
-                        if (expr !is Notation)
-                            false
-                        else {
-                            expr.checkValidityAfterRename() != null
-                        }
+            val removedNonValid = mappedToSideExpressions.filter {
+                !it.traverseExpr(symbolTable) { expr, _ ->
+                    if (expr !is Notation)
+                        false
+                    else {
+                        expr.checkValidityAfterRename() != null
                     }
-                }) {
-                mapper.clear()
-                continue
+                }
             }
             //mappedToSideExpressions.forEach { (it as Notation).checkValidityAfterRename() }
 
             mapper.clear()
-            for (expr in mappedToSideExpressions) {
+            for (expr in removedNonValid) {
                 // TODO probably should rename expr. Or not, because all points should be minimal already?
                 Relation.makeRelation(expr as Relation, symbolTable, inferenceProcessor, fromInference = true)
                 symbolTable.assertCorrectState()
