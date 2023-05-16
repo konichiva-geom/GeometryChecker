@@ -10,7 +10,6 @@ import utils.ExtensionUtils.addOrCreate
 import utils.ExtensionUtils.asString
 import utils.MathUtils
 import utils.CommonUtils.keyForArithmeticNumeric
-import javax.print.DocFlavor.STRING
 
 object ArithmeticExpander {
     fun createArithmeticMap(
