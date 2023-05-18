@@ -100,12 +100,28 @@ class TheoremParser : Parser() {
                 )
 
                 is Invocation -> {
-                    if (expr.signature.name == "check")
+                    if (expr.signature.name == "check") {
                         check(
-                            expr.signature.args.map { it.createNewWithMappedPointsAndCircles(signatureMapper) },
-                            symbolTable
+                            expr.signature
+                                .args.map { it.createNewWithMappedPointsAndCircles(signatureMapper) }, symbolTable
                         )
-                    else throw SpoofError("Expected relation to check")
+                    } else {
+                        val mappedExpr = Invocation(
+                            Signature(expr.signature.name,
+                                expr.signature.args.map { it.createNewWithMappedPointsAndCircles(signatureMapper) }
+                            ), expr.output.map { it.createNewWithMappedPointsAndCircles(signatureMapper) })
+                        val mappings = signatureMapper.mappings.toMap()
+                        signatureMapper.clear()
+                        parseTheorem(
+                            mappedExpr,
+                            getSignature(expr.signature),
+                            getTheoremBodyBySignature(expr.signature),
+                            symbolTable,
+                            inferenceProcessor
+                        )
+                        signatureMapper.mappings.putAll(mappings)
+                    }
+                    //else throw SpoofError("Expected relation to check")
                 }
 
                 is Creation -> throw SpoofError("Cannot create new points and circles inside theorem")

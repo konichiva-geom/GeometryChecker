@@ -130,7 +130,7 @@ object GeomGrammar : Grammar<Any>() {
     }) or (-arc and linear and -ofToken and ident map {
         ArcNotation(it.t1.first, it.t1.second, it.t2.text)
     }) or (number map {
-        NumNotation(it.text.toIntOrNull()?.toDouble() ?: throw SpoofError("Not a number"))
+        NumNotation(it.text.toDoubleOrNull() ?: throw SpoofError("Not a number"))
     })
 
     // relations, creations, comparisons are for notations

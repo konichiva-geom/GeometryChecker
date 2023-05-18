@@ -84,6 +84,20 @@ internal class ArithmeticTest {
     }
 
     @Test
+    fun testArithmetic() {
+        passTask("""
+        description:
+           new A; new B; new C; new D
+           AB == 10
+           AB + 2CD == 15
+        prove:
+            CD == 2.5
+        solution:
+            
+        """)
+    }
+
+    @Test
     fun testInferenceInVectors() {
         passTask(
             """

@@ -1,66 +1,96 @@
+/* Первый признак равенства треугольников */
 th equal_triangles_1(AB == A1B1, BC == B1C1, ∠ABC == ∠A1B1C1):
-    check(A != B); check(A != C); check(B != C)
-    check(A1 != B1); check(A1 != C1); check(B1 != C1)
-    check(A !in line BC); check(B !in line AC); check(C !in line AB)
-    check(A1 !in line B1C1); check(B1 !in line A1C1); check(C1 !in line A1B1)
+    checkPointsFormTriangle(A, B, C)
+    checkPointsFormTriangle(A1, B1, C1)
     return ABC == A1B1C1
 
-th straight_angle(O, AB): // развернутый угол
+/* Второй признак равенства треугольников */
+th equal_angles_2(AB == A1B1, ∠CAB == ∠C1A1B1, ∠CBA == ∠C1B1A1):
+    checkPointsFormTriangle(A, B, C)
+    checkPointsFormTriangle(A1, B1, C1)
+    return ABC == A1B1C1
+
+th checkPointsFormTriangle(A, B, C):
+    check(A != B); check(A != C); check(B != C)
+    check(A !in line BC); check(B !in line AC); check(C !in line AB)
+
+/* Третий признак равенства треугольников */
+th equal_angles_3(AB == A1B1, AC == A1C1, BC == B1C1):
+    checkPointsFormTriangle(A, B, C)
+    checkPointsFormTriangle(A1, B1, C1)
+    return ABC == A1B1C1
+
+/* Развернутый угол */
+th straight_angle(O, AB):
     check(O in AB)
     return ∠AOB == 180
 
+/* Построение биссектрисы BD в угле ABC */
 th bisector(new D, ∠ABC): // makes a new point distinct from all currently placed
     return ∠ABD == ∠CBD, ∠ABD == ∠ABC / 2, D in AC
 
+/* Теорема о смежном угле */
 th adjacent_angle(∠AOB, ∠BOC): // new in args cannot be - bad
     check(O in AC)
     return ∠AOC == 180, ∠AOB + ∠BOC == ∠AOC
 
+/* Теорема о вертикальном угле */
 th vertical_angle(∠AOB, ∠DOC, line BD):
     check(O in BD)
     check(O in AC)
     return ∠AOB == ∠DOC
 
+/* Теорема о сумме углов треугольника, равна 180 */
 th angles_180_in_triangle(ABC):
     return ∠ABC + ∠BCA + ∠BAC == 180
 
-th bisector(new D, ∠ABC): // makes a new point distinct from all currently placed
-    return ∠ABD == ∠CBD, ∠ABD == ∠ABC / 2
-
+/* Построение высоты AH на прямую BC */
 th projection(new H, A, line BC): // projection H of A on BC
     check(A !in line BC)
     H in line BC
     return HA ⊥ BC, ∠BHA == 90, ∠CHA == 90
 
+/* Построение середины отрезка */
 th mid_point(new M, AB):
     M in AB
     return MA == MB
 
+/* В прямоугольном треугольнике медиана равна половине гипотенузы */
 th rectangular_median_half_of_hypotenuse(∠ACB == 90, M in AB):
     check(AM == MB)
     return CM == AM
 
-th merge_projections(AH, AH1, BC):
+/* Объединение точек H и H1 проекций, построенных из одной точки на одну прямую */
+th merge_projections(AH, AH1, line BC):
     check(∠BHA == 90)
     check(∠BH1A == 90)
     return H == H1
 
+/* Объединение точек P и P1 на прямой, отложенных на равное расстояние от A и B */
 th merge_points_in_line(AP == AP1, BP == BP1):
     check(P in AB)
     check(P1 in AB)
     return P == P1
 
+/* В равнобедренном треугольнике углы при основании равны */
 th isosceles_triangle_equal_angles(AB == BC):
     return ∠BAC == ∠BCA
 
+/* Если углы при основании равны, то треугольник равнобедренный */
+th equal_angles_sign_of_isosceles_triangle(∠BAC == ∠BCA):
+    return AB == BC
+
+/* В равнобедренном треугольнике высота является медианой и биссектрисой */
 th isosceles_triangle_median_is_projection_and_bisector(AB == BC, M in AC):
     check(AM == MC)
     return ABM == MBC, BM ⊥ AC
 
+/* В равнобедренном треугольнике высота является медианой и биссектрисой */
 th isosceles_triangle_projection_is_median_and_bisector(AB == BC, BH ⊥ AC):
     check(H in AC)
     return ABM == MBC, AH == HC
 
+/* В равнобедренном треугольнике высота является медианой и биссектрисой */
 th isosceles_triangle_bisector_is_median_and_projection(AB == BC, ABD == DBC):
     check(D in AC)
     return BD ⊥ AC, AD == DC
