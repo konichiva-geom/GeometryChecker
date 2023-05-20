@@ -191,7 +191,7 @@ class TheoremParser : Parser() {
     companion object {
         fun check(relation: Relation, symbolTable: SymbolTable) {
             if (!relation.check(symbolTable))
-                throw SpoofError("Relation ${relation as Expr} unknown")
+                throw SpoofError("Relation %{rel} unknown", "rel" to relation)
         }
     }
 }

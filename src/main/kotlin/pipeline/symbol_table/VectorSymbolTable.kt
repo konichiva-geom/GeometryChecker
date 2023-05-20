@@ -10,7 +10,9 @@ import utils.multiSetOf
 
 open class VectorSymbolTable : PointCollectionSymbolTable() {
     val segmentVectors = VectorContainer<SegmentPointCollection>()
+    val segmentNotEquals = VectorContainer<SegmentPointCollection>()
     val angleVectors = VectorContainer<AnglePointCollection>()
+    val angleNotEquals = VectorContainer<AnglePointCollection>()
     val triangleVectors = VectorContainer<TriangleNotation>()
 
     fun getOrCreateVector(notation: Notation): Vector {

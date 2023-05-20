@@ -1,5 +1,7 @@
 package math
 
+import error.SpoofError
+import external.WarnLogger
 import utils.ExtensionUtils.addOrCreate
 import utils.CommonUtils.primes
 import utils.multiSetOf
@@ -8,6 +10,8 @@ import utils.multiSetOf
 class VectorContainer<T> {
     val vectors = mutableMapOf<T, Vector>()
     val incompleteVectors = mutableSetOf<Vector>()
+    val notEqualVectors = mutableSetOf<Vector>()
+    val biggerVectors = mutableListOf<Vector>()
     private var currentIndex = 0
 
     fun getNext() = primes[currentIndex++]
@@ -81,5 +85,21 @@ class VectorContainer<T> {
 
     override fun toString(): String {
         return vectors.entries.joinToString { it.key.toString() + "->" + it.value.asString() }
+    }
+
+    fun addNotEqualVector(value: Vector) {
+        if (!notEqualVectors.contains(value)) {
+            notEqualVectors.add(value)
+        }
+    }
+
+    fun addBiggerVector(value: Vector) {
+        for (vec in biggerVectors) {
+            if (value.isBigger(vec)) {
+                return
+            } else {
+
+            }
+        }
     }
 }

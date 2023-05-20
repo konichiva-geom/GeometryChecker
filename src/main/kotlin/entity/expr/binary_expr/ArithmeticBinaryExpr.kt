@@ -167,12 +167,8 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 }
             }
         } else {
-            val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
-            val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
-            val notation = left.map.mergeWithOperation(right.map, "-")
-                .keys.firstOrNull { it !is NumNotation }
+            val (notation, result) = arithmeticExpressionsToVector(left, right, symbolTable)
 
-            val result = resolveLeft.mergeWithOperation(resolveRight, "-")
             if (result.all { it.value.isAlmostZero() } || notation == null) {
                 WarnLogger.warn("Expression %{expr} is already known", "expr" to this)
                 return
@@ -180,16 +176,12 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
             if (result.keys.size == 1 && result.keys.first() == multiSetOf(0)) {
                 throw SpoofError("Expression is incorrect")
             }
+
             when (notation) {
                 is SegmentNotation -> symbolTable.segmentVectors.resolveVector(result as Vector)
                 is Point3Notation -> symbolTable.angleVectors.resolveVector(result as Vector)
                 is TriangleNotation -> {
-                    if (left.map.size != 1 || right.map.size != 1
-                        || left.map.keys.first() !is TriangleNotation
-                        || right.map.keys.first() !is TriangleNotation
-                    ) {
-                        throw SpoofError("Triangle equations shouldn't contain any expressions besides triangles")
-                    }
+                    checkTriangleEquation(left, right)
                     symbolTable.triangleVectors.resolveVector(result as Vector)
                 }
 
@@ -220,6 +212,29 @@ private fun isEntityEquals(left: ArithmeticExpr, right: ArithmeticExpr) =
             && left.map.values.first() == 1.0
             && right.map.values.first() == 1.0
 
+private fun arithmeticExpressionsToVector(
+    left: ArithmeticExpr,
+    right: ArithmeticExpr,
+    symbolTable: SymbolTable
+): Pair<Notation?, Vector> {
+    val resolveLeft = vectorFromArithmeticMap(left.map, symbolTable)
+    val resolveRight = vectorFromArithmeticMap(right.map, symbolTable)
+    val notation = left.map.mergeWithOperation(right.map, "-")
+        .keys.firstOrNull { it !is NumNotation }
+
+    val result = resolveLeft.mergeWithOperation(resolveRight, "-")
+    return notation to result
+}
+
+private fun checkTriangleEquation(left: ArithmeticExpr, right: ArithmeticExpr) {
+    if (left.map.size != 1 || right.map.size != 1
+        || left.map.keys.first() !is TriangleNotation
+        || right.map.keys.first() !is TriangleNotation
+    ) {
+        throw SpoofError("Triangle equations shouldn't contain any expressions besides triangles")
+    }
+}
+
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
     override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = BinaryNotEquals(
@@ -235,7 +250,11 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         left as ArithmeticExpr
         right as ArithmeticExpr
 
-        if (isEntityEquals(left, right)) {
+        if (isEntityEquals(left, right)
+            && left.map.keys.first() !is Point3Notation
+            && left.map.keys.first() !is SegmentNotation
+            && left.map.keys.first() !is TriangleNotation
+        ) {
             val leftNotation = left.map.keys.first()
             val rightNotation = right.map.keys.first()
 
@@ -254,14 +273,34 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 TODO("Not yet implemented")
             }
         }
-        TODO("Not yet implemented")
+        val (notation, vector) = arithmeticExpressionsToVector(left, right, symbolTable)
+        val negated = vector.minus()
+        when (notation) {
+            is SegmentNotation -> return symbolTable.segmentVectors.notEqualVectors.contains(vector)
+                    || symbolTable.segmentVectors.notEqualVectors.contains(negated)
+
+            is Point3Notation -> return symbolTable.angleVectors.notEqualVectors.contains(vector)
+                    || symbolTable.angleVectors.notEqualVectors.contains(negated)
+
+            is TriangleNotation -> {
+                checkTriangleEquation(left, right)
+                return symbolTable.triangleVectors.notEqualVectors.contains(vector)
+                        || symbolTable.triangleVectors.notEqualVectors.contains(negated)
+            }
+
+            else -> throw SystemFatalError("Not implemented error")
+        }
     }
 
     override fun make(symbolTable: SymbolTable) {
         left as ArithmeticExpr
         right as ArithmeticExpr
 
-        if (isEntityEquals(left, right)) {
+        if (isEntityEquals(left, right)
+            && left.map.keys.first() !is Point3Notation
+            && left.map.keys.first() !is SegmentNotation
+            && left.map.keys.first() !is TriangleNotation
+        ) {
             val leftNotation = left.map.keys.first()
             val rightNotation = right.map.keys.first()
             if (leftNotation is PointNotation && rightNotation is PointNotation) {
@@ -270,7 +309,33 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                 return
             }
         } else {
-            TODO("Not yet implemented")
+            val (notation, vector) = arithmeticExpressionsToVector(left, right, symbolTable)
+
+            if (vector.all { it.value.isAlmostZero() }) {
+                throw SpoofError("Expression is incorrect")
+            }
+
+            if (notation == null || (vector.keys.size == 1 && vector.keys.first() == multiSetOf(0)))
+                return
+
+            when (notation) {
+                is SegmentNotation -> symbolTable.segmentVectors.addNotEqualVector(vector)
+                is Point3Notation -> symbolTable.angleVectors.addNotEqualVector(vector)
+                is TriangleNotation -> {
+                    checkTriangleEquation(left, right)
+                    symbolTable.triangleVectors.addNotEqualVector(vector)
+                }
+
+                is MulNotation -> {
+                    TODO("Not yet implemented")
+                }
+
+                else -> throw SpoofError(
+                    "Notation %{notation} is not supported in arithmetic expressions, " +
+                            "use segments and angles",
+                    "notation" to notation
+                )
+            }
         }
     }
 }

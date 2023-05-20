@@ -11,6 +11,19 @@ import utils.multiSetOf
 // TODO change set to multiset
 typealias Vector = MutableMap<MultiSet<Int>, Double>
 
+fun MutableMap<MultiSet<Int>, Double>.isBigger(other: MutableMap<MultiSet<Int>, Double>): Boolean {
+    return true
+}
+
+fun Vector.minus(): Vector {
+    val copy = this.copy()
+    val keys = copy.keys
+    for (key in keys) {
+        copy[key] = -copy[key]!!
+    }
+    return copy
+}
+
 
 /**
  * Merge current vectors by addition, subtraction or multiplication
@@ -120,10 +133,7 @@ fun vectorFromArithmeticMap(map: MutableMap<Notation, Double>, symbolTable: Symb
         mutableMapOf()
     ) { acc, notation ->
         map[notation]
-        acc.mergeWithOperation(
-            fromNotation(symbolTable, notation)
-                .multiplyBy(map[notation]!!), "+"
-        )
+        acc.mergeWithOperation(fromNotation(symbolTable, notation).multiplyBy(map[notation]!!), "+")
     }
 }
 

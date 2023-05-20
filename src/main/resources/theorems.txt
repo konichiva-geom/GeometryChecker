@@ -94,3 +94,30 @@ th isosceles_triangle_projection_is_median_and_bisector(AB == BC, BH ⊥ AC):
 th isosceles_triangle_bisector_is_median_and_projection(AB == BC, ABD == DBC):
     check(D in AC)
     return BD ⊥ AC, AD == DC
+
+/* Медианы в треугольнике пересекаются в одной точке */
+th medians_intersect_in_one_point(ABC, M in AB, N in AC, K in BC, new O):
+    check(AM == MB)
+    check(AN == NC)
+    check(KB == KC)
+    return O in CM, O in NB, O in AK
+
+/* Биссектрисы в треугольнике пересекаются в одной точке */
+th bisectors_intersect_in_one_point(ABC, M in AB, N in AC, K in BC, new O):
+    check(BCM == ACM)
+    check(ABN == CBN)
+    check(BAK == CAK)
+    return O in CM, O in NB, O in AK
+
+/* Высоты в треугольнике пересекаются в одной точке */
+th projections_intersect_in_one_point(ABC, M in AB, N in AC, K in BC, new O):
+    check(CM ⊥ AB)
+    check(BN ⊥ AC)
+    check(AK ⊥ BC)
+    return O in CM, O in NB, O in AK
+
+th in_parallel_lines_alternate_angles_are_equal(line AB || line CD):
+    return ∠ABC == ∠BCD
+
+/*th alternate_angles_are_equal_lines_are_parallel(∠ABC == ∠BCD):
+*/
