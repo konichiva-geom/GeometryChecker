@@ -4,7 +4,6 @@ import entity.expr.Expr
 import entity.expr.Returnable
 import entity.expr.notation.*
 import entity.point_collection.PointCollection
-import entity.relation.TriangleRelations
 import error.SpoofError
 import error.SystemFatalError
 import external.WarnLogger
@@ -22,9 +21,7 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
         right.createNewWithMappedPointsAndCircles(mapper)
     )
 
-    override fun toString(): String {
-        return "$left == $right"
-    }
+    override fun toString(): String = "$left == $right"
 
     override fun check(symbolTable: SymbolTable): Boolean {
         left as ArithmeticExpr
@@ -34,7 +31,7 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
         val leftNotation = left.map.keys.first()
         if (leftNotation is Point3Notation)
             throw SpoofError("Cannot use this operator for angles. To make points same, use == for points")
-        if (leftNotation !is Point3Notation && leftNotation !is SegmentNotation)
+        if (leftNotation !is SegmentNotation)
             WarnLogger.warn("Use === only for segments, for other relations use ==")
         return symbolTable.getRelationsByNotation(leftNotation) ==
                 symbolTable.getRelationsByNotation(right.map.keys.first())
@@ -45,27 +42,22 @@ class BinarySame(left: Expr, right: Expr) : BinaryExpr(left, right) {
         right as ArithmeticExpr
         if (!isEntityEquals(left, right))
             throw SpoofError("=== operator can only be used for two notations, not arithmetic expressions")
-        val leftNotation = left.map.keys.first()
-        if (leftNotation is PointNotation)
-            symbolTable.getPoint(leftNotation.p)
+        when (val leftNotation = left.map.keys.first()) {
+            is PointNotation -> symbolTable.getPoint(leftNotation.p)
                 .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
-        else if (leftNotation is IdentNotation)
-            symbolTable.getCircle(leftNotation)
+
+            is IdentNotation -> symbolTable.getCircle(leftNotation)
                 .mergeOtherToThisCircle(leftNotation, right.map.keys.first() as IdentNotation, symbolTable)
-        else {
-            symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
+
+            else -> symbolTable.getRelationsByNotation(left.map.keys.first()).merge(right.map.keys.first(), symbolTable)
         }
     }
 }
 
 class ReturnableEquals(left: Notation, right: Expr) : BinaryExpr(left, right) {
-    override fun getRepr(): StringBuilder {
-        return left.getRepr().append(" == ").append(right.getRepr())
-    }
+    override fun getRepr(): StringBuilder = left.getRepr().append(" == ").append(right.getRepr())
 
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr {
-        TODO("Not yet implemented")
-    }
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr = TODO("Not yet implemented")
 
     override fun check(symbolTable: SymbolTable): Boolean {
         val returnValue = (right as Returnable).getReturnValue(symbolTable)
@@ -79,31 +71,16 @@ class ReturnableEquals(left: Notation, right: Expr) : BinaryExpr(left, right) {
         val returnValue = (right as Returnable).getReturnValue(symbolTable)
         if (left::class != returnValue::class)
             throw SpoofError("Cannot make a relation because they are of different classes")
-
     }
 
-    override fun toString(): String {
-        return "$left == $right"
-    }
+    override fun toString(): String = "$left == $right"
 }
 
 class ReturnableNotEquals(left: Notation, right: Expr) : BinaryExpr(left, right) {
-    override fun getRepr(): StringBuilder {
-        TODO("Not yet implemented")
-    }
-
-    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr {
-        TODO("Not yet implemented")
-    }
-
-    override fun check(symbolTable: SymbolTable): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun make(symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
-    }
-
+    override fun getRepr(): StringBuilder = TODO("Not yet implemented")
+    override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface): Expr = TODO("Not yet implemented")
+    override fun check(symbolTable: SymbolTable): Boolean = TODO("Not yet implemented")
+    override fun make(symbolTable: SymbolTable) = TODO("Not yet implemented")
 }
 
 class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
@@ -120,11 +97,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun check(symbolTable: SymbolTable): Boolean {
         left as ArithmeticExpr
         right as ArithmeticExpr
-        return if (isEntityEquals(left, right)
-            && left.map.keys.first() !is Point3Notation
-            && left.map.keys.first() !is SegmentNotation
-            && left.map.keys.first() !is TriangleNotation
-        )
+        return if (isNotArithmeticEntityEquals(left, right))
             symbolTable.getRelationsByNotation(left.map.keys.first()) ==
                     symbolTable.getRelationsByNotation(right.map.keys.first())
         else {
@@ -139,11 +112,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         left as ArithmeticExpr
         right as ArithmeticExpr
 
-        if (isEntityEquals(left, right)
-            && left.map.keys.first() !is Point3Notation
-            && left.map.keys.first() !is SegmentNotation
-            && left.map.keys.first() !is TriangleNotation
-        ) {
+        if (isNotArithmeticEntityEquals(left, right)) {
             when (val leftNotation = left.map.keys.first()) {
                 is PointNotation -> symbolTable.getPoint(leftNotation.p)
                     .mergeOtherToThisPoint(leftNotation.p, (right.map.keys.first() as PointNotation).p, symbolTable)
@@ -212,6 +181,12 @@ private fun isEntityEquals(left: ArithmeticExpr, right: ArithmeticExpr) =
             && left.map.values.first() == 1.0
             && right.map.values.first() == 1.0
 
+private fun isNotArithmeticEntityEquals(left: ArithmeticExpr, right: ArithmeticExpr) =
+    isEntityEquals(left, right)
+            && left.map.keys.first() !is Point3Notation
+            && left.map.keys.first() !is SegmentNotation
+            && left.map.keys.first() !is TriangleNotation
+
 private fun arithmeticExpressionsToVector(
     left: ArithmeticExpr,
     right: ArithmeticExpr,
@@ -235,6 +210,14 @@ private fun checkTriangleEquation(left: ArithmeticExpr, right: ArithmeticExpr) {
     }
 }
 
+private fun incorrectNotation(notation: Notation, isAngleCorrect: Boolean = true): Nothing {
+    throw SpoofError(
+        "Notation %{notation} is not supported in arithmetic expressions, " +
+                "use segments, angles${if (isAngleCorrect) " and angles" else ""}",
+        "notation" to notation
+    )
+}
+
 class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
     override fun getRepr() = getReprForBinaryWithExpressions(left, right, " != ")
     override fun createNewWithMappedPointsAndCircles(mapper: IdentMapperInterface) = BinaryNotEquals(
@@ -250,11 +233,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         left as ArithmeticExpr
         right as ArithmeticExpr
 
-        if (isEntityEquals(left, right)
-            && left.map.keys.first() !is Point3Notation
-            && left.map.keys.first() !is SegmentNotation
-            && left.map.keys.first() !is TriangleNotation
-        ) {
+        if (isNotArithmeticEntityEquals(left, right)) {
             val leftNotation = left.map.keys.first()
             val rightNotation = right.map.keys.first()
 
@@ -275,20 +254,25 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         }
         val (notation, vector) = arithmeticExpressionsToVector(left, right, symbolTable)
         val negated = vector.minus()
-        when (notation) {
-            is SegmentNotation -> return symbolTable.segmentVectors.notEqualVectors.contains(vector)
+        if (vector.all { it.value.isAlmostZero() }) {
+            throw SpoofError("Expression is incorrect")
+        }
+        if (notation == null)
+            return true
+        return when (notation) {
+            is SegmentNotation -> symbolTable.segmentVectors.notEqualVectors.contains(vector)
                     || symbolTable.segmentVectors.notEqualVectors.contains(negated)
 
-            is Point3Notation -> return symbolTable.angleVectors.notEqualVectors.contains(vector)
+            is Point3Notation -> symbolTable.angleVectors.notEqualVectors.contains(vector)
                     || symbolTable.angleVectors.notEqualVectors.contains(negated)
 
             is TriangleNotation -> {
                 checkTriangleEquation(left, right)
-                return symbolTable.triangleVectors.notEqualVectors.contains(vector)
-                        || symbolTable.triangleVectors.notEqualVectors.contains(negated)
+                (symbolTable.triangleVectors.notEqualVectors.contains(vector)
+                        || symbolTable.triangleVectors.notEqualVectors.contains(negated))
             }
 
-            else -> throw SystemFatalError("Not implemented error")
+            else -> incorrectNotation(notation)
         }
     }
 
@@ -296,11 +280,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
         left as ArithmeticExpr
         right as ArithmeticExpr
 
-        if (isEntityEquals(left, right)
-            && left.map.keys.first() !is Point3Notation
-            && left.map.keys.first() !is SegmentNotation
-            && left.map.keys.first() !is TriangleNotation
-        ) {
+        if (isNotArithmeticEntityEquals(left, right)) {
             val leftNotation = left.map.keys.first()
             val rightNotation = right.map.keys.first()
             if (leftNotation is PointNotation && rightNotation is PointNotation) {
@@ -330,11 +310,7 @@ class BinaryNotEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                     TODO("Not yet implemented")
                 }
 
-                else -> throw SpoofError(
-                    "Notation %{notation} is not supported in arithmetic expressions, " +
-                            "use segments and angles",
-                    "notation" to notation
-                )
+                else -> incorrectNotation(notation)
             }
         }
     }
@@ -352,11 +328,46 @@ class BinaryGreater(left: Expr, right: Expr) : BinaryExpr(left, right) {
     }
 
     override fun check(symbolTable: SymbolTable): Boolean {
-        TODO("Not yet implemented")
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+
+        val (notation, vector) = arithmeticExpressionsToVector(left, right, symbolTable)
+
+        if (vector.all { it.value.isAlmostZero() }
+            || (vector.keys.size == 1 && vector.keys.first() == multiSetOf(0) && vector.values.first() <= 0)) {
+            throw SpoofError("Expression is incorrect")
+        }
+        // vector is majorly bigger than zero
+        if (vector.all { it.value >= 0 })
+            return true
+        if (notation == null)
+            return true
+        return when (notation) {
+            is SegmentNotation -> symbolTable.segmentVectors.isBiggerContained(vector)
+            is Point3Notation -> symbolTable.angleVectors.isBiggerContained(vector)
+            is MulNotation -> TODO("Not yet implemented")
+            else -> incorrectNotation(notation, false)
+        }
     }
 
     override fun make(symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+
+        val (notation, vector) = arithmeticExpressionsToVector(left, right, symbolTable)
+
+        if (vector.all { it.value.isAlmostZero() }
+            || (vector.keys.size == 1 && vector.keys.first() == multiSetOf(0) && vector.values.first() <= 0)) {
+            throw SpoofError("Expression is incorrect")
+        }
+        if (notation == null)
+            return
+        when (notation) {
+            is SegmentNotation -> symbolTable.segmentVectors.addBiggerVector(vector)
+            is Point3Notation -> symbolTable.angleVectors.addBiggerVector(vector)
+            is MulNotation -> TODO("Not yet implemented")
+            else -> incorrectNotation(notation, false)
+        }
     }
 }
 
@@ -370,11 +381,42 @@ class BinaryGEQ(left: Expr, right: Expr) : BinaryExpr(left, right) {
     }
 
     override fun check(symbolTable: SymbolTable): Boolean {
-        TODO("Not yet implemented")
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+
+        val (notation, vector) = arithmeticExpressionsToVector(left, right, symbolTable)
+
+        if (vector.keys.size == 1 && vector.keys.first() == multiSetOf(0) && vector.values.first() <= 0) {
+            throw SpoofError("Expression is incorrect")
+        }
+        // vector is majorly bigger than zero
+        if (notation == null || vector.all { it.value.isAlmostZero() || it.value >= 0.0 })
+            return true
+        return when (notation) {
+            is SegmentNotation -> symbolTable.segmentVectors.isBiggerOrEqualContained(vector)
+            is Point3Notation -> symbolTable.angleVectors.isBiggerOrEqualContained(vector)
+            is MulNotation -> TODO("Not yet implemented")
+            else -> incorrectNotation(notation, false)
+        }
     }
 
     override fun make(symbolTable: SymbolTable) {
-        TODO("Not yet implemented")
+        left as ArithmeticExpr
+        right as ArithmeticExpr
+
+        val (notation, vector) = arithmeticExpressionsToVector(left, right, symbolTable)
+
+        if (vector.keys.size == 1 && vector.keys.first() == multiSetOf(0) && vector.values.first() < 0) {
+            throw SpoofError("Expression is incorrect")
+        }
+        if (notation == null || vector.all { it.value.isAlmostZero() || it.value >= 0.0 })
+            return
+        when (notation) {
+            is SegmentNotation -> symbolTable.segmentVectors.addBiggerOrEqualVector(vector)
+            is Point3Notation -> symbolTable.angleVectors.addBiggerOrEqualVector(vector)
+            is MulNotation -> TODO("Not yet implemented")
+            else -> incorrectNotation(notation, false)
+        }
     }
 }
 

@@ -12,6 +12,7 @@ class VectorContainer<T> {
     val incompleteVectors = mutableSetOf<Vector>()
     val notEqualVectors = mutableSetOf<Vector>()
     val biggerVectors = mutableListOf<Vector>()
+    val biggerOrEqualVectors = mutableListOf<Vector>()
     private var currentIndex = 0
 
     fun getNext() = primes[currentIndex++]
@@ -93,13 +94,86 @@ class VectorContainer<T> {
         }
     }
 
-    fun addBiggerVector(value: Vector) {
-        for (vec in biggerVectors) {
-            if (value.isBigger(vec)) {
-                return
-            } else {
+    fun isBiggerContained(value: Vector): Boolean {
+        for (vec in biggerVectors)
+            when (value.compareWith(vec)) {
+                0, 1 -> return true
+                null, -1 -> continue
+            }
+        for (vec in biggerOrEqualVectors)
+            when (value.compareWith(vec)) {
+                0, -1, null -> continue
+                1 -> return true
+            }
+        return false
+    }
 
+    fun isBiggerOrEqualContained(value: Vector): Boolean {
+        for (vec in biggerVectors)
+            when (value.compareWith(vec)) {
+                0, 1 -> return true
+                null, -1 -> continue
+            }
+        for (vec in biggerOrEqualVectors)
+            when (value.compareWith(vec)) {
+                -1, null -> continue
+                0, 1 -> return true
+            }
+        return false
+    }
+
+    fun addBiggerVector(value: Vector) {
+        var removed: Vector? = null
+        for (vec in biggerVectors)
+            when (value.compareWith(vec)) {
+                null -> continue
+                -1 -> {
+                    removed = vec
+                    break
+                }
+
+                0, 1 -> return
+            }
+        var removedFromBiggerOrEqual: Vector? = null
+        for (vec in biggerOrEqualVectors) {
+            when (value.compareWith(vec)) {
+                0, null -> continue
+                1 -> return
+                -1 -> {
+                    removedFromBiggerOrEqual = vec
+                    break
+                }
             }
         }
+        if (removed != null) {
+            biggerVectors.remove(removed)
+        }
+        if (removedFromBiggerOrEqual != null) {
+            biggerOrEqualVectors.remove(removedFromBiggerOrEqual)
+        }
+        biggerVectors.add(value)
+    }
+
+    fun addBiggerOrEqualVector(value: Vector) {
+        for (vec in biggerVectors)
+            when (value.compareWith(vec)) {
+                null -> continue
+                0, 1 -> return
+            }
+        var removedFromBiggerOrEqual: Vector? = null
+        for (vec in biggerOrEqualVectors) {
+            when (value.compareWith(vec)) {
+                0, 1 -> return
+                null -> continue
+                -1 -> {
+                    removedFromBiggerOrEqual = vec
+                    break
+                }
+            }
+        }
+        if (removedFromBiggerOrEqual != null) {
+            biggerOrEqualVectors.remove(removedFromBiggerOrEqual)
+        }
+        biggerOrEqualVectors.add(value)
     }
 }

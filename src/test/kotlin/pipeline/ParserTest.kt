@@ -101,6 +101,18 @@ th name(args):
     }
 
     @Test
+    fun parseUnaryMinus() {
+        passTask("""
+        description:
+            
+        prove:
+           -12 == -12 
+        solution:
+            
+        """)
+    }
+
+    @Test
     fun failsInRelations() {
         failTask("AB in A", "is not applicable to points in this position")
         failTask("line AB in AB", "is 'smaller' than")

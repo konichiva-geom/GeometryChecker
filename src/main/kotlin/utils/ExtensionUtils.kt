@@ -5,6 +5,7 @@ import com.github.h0tk3y.betterParse.lexer.LiteralToken
 import com.github.h0tk3y.betterParse.lexer.Token
 import com.github.h0tk3y.betterParse.lexer.TokenMatch
 import utils.CommonUtils.CONSIDERED_DIGITS_AFTER_POINT
+import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.pow
@@ -24,7 +25,7 @@ object ExtensionUtils {
      *
      */
     fun Double.isAlmostZero(): Boolean {
-        return floor(this * 10.0.pow(CONSIDERED_DIGITS_AFTER_POINT)) <= 0
+        return floor(abs(this * 10.0.pow(CONSIDERED_DIGITS_AFTER_POINT))) <= 0
     }
 
     fun <R, T> MutableMap<R, MutableSet<T>>.addToOrCreateSet(key: R, vararg elements: T) {

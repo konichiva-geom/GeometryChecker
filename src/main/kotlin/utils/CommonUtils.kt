@@ -8,7 +8,7 @@ import error.SpoofError
 import java.io.File
 
 object CommonUtils {
-    const val SHOULD_CATCH = true
+    const val SHOULD_CATCH = false
     const val CONSIDERED_DIGITS_AFTER_POINT = 6
     const val THEOREMS_PATH = "src/main/resources/theorems.txt"
     const val INFERENCE_PATH = "src/main/resources/inference.txt"

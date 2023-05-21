@@ -144,7 +144,17 @@ object GeomGrammar : Grammar<Any>() {
         PointNotation(it.text)
     }) or (ident map { IdentNotation(it.text) })
 
-    private val arithmeticTerm: Parser<MutableMap<Notation, Double>> by (number and comparableNotation map {
+    private val arithmeticTerm: Parser<MutableMap<Notation, Double>> by (-minus and number and comparableNotation map {
+        // for terms like -2AB, omitting * operator
+        if (it.t2 is NumNotation)
+            throw SpoofError("Unexpected 2 numbers in a row")
+        mutableMapOf(it.t2 to -(it.t1.text.toDouble()))
+    }) or (-minus and comparableNotation map {
+        if (it is NumNotation)
+            mutableMapOf((keyForArithmeticNumeric as Notation) to -it.number)
+        else
+            mutableMapOf(it to -1.0)
+    }) or (number and comparableNotation map {
         // for terms like 2AB, omitting * operator
         if (it.t2 is NumNotation)
             throw SpoofError("Unexpected 2 numbers in a row")
@@ -182,9 +192,9 @@ object GeomGrammar : Grammar<Any>() {
             "==" -> BinaryEquals(left, right)
             "!=" -> BinaryNotEquals(left, right)
             ">" -> BinaryGreater(left, right)
-            "<" -> BinaryGreater(left, right)
+            "<" -> BinaryGreater(right, left)
             ">=" -> BinaryGEQ(left, right)
-            "<=" -> BinaryGEQ(left, right)
+            "<=" -> BinaryGEQ(right, right)
             else -> throw SpoofError("Unexpected comparison")
         }
     })
