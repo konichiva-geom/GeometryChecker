@@ -1,9 +1,11 @@
 package pipeline.symbol_table
 
+import pipeline.inference.InferenceProcessor
 import utils.MutablePair
 import java.util.*
 
-open class SymbolTable : VectorSymbolTable() {
+open class SymbolTable(val inferenceProcessor: InferenceProcessor) : VectorSymbolTable() {
+
     fun clear() {
         points.clear()
         lines.clear()

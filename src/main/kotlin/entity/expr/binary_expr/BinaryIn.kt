@@ -28,6 +28,7 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
     override fun make(symbolTable: SymbolTable) {
         if (right is IdentNotation) {
             symbolTable.getCircle(right).addPoints(symbolTable, (left as PointNotation).p)
+            return
         } else if (right is ArcNotation) {
             TODO("not yet implemented")
 //            val arcCollection = symbolTable.getKeyByNotation(right as Notation) as SegmentPointCollection
@@ -38,6 +39,7 @@ class BinaryIn(left: Notation, right: Notation) : BinaryExpr(left, right), Relat
 //            else arcCollection.points.addAll((collection as SegmentPointCollection).getPointsInCollection())
         } else if (right is TriangleNotation) {
             symbolTable.getTriangle(right).pointsInside.add((left as PointNotation).p)
+            return
         }
         val pointList = if (left is PointNotation) listOf(left.p) else (left as Point2Notation).getPointsAndCircles()
         val collection = symbolTable.getKeyByNotation(right as Point2Notation) as PointCollection<*>

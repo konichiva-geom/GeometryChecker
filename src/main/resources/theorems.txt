@@ -116,8 +116,7 @@ th projections_intersect_in_one_point(ABC, M in AB, N in AC, K in BC, new O):
     check(AK ⊥ BC)
     return O in CM, O in NB, O in AK
 
-th in_parallel_lines_alternate_angles_are_equal(line AB || line CD):
-    return ∠ABC == ∠BCD
-
-/*th alternate_angles_are_equal_lines_are_parallel(∠ABC == ∠BCD):
-*/
+/* Если точка B лежит между A и C, тогда сумма углов AOB и BOC равна AOC */
+th merge_angles_in_triangle(∠AOB, ∠BOC):
+    check(B in AC)
+    return ∠AOB + ∠BOC == ∠AOC

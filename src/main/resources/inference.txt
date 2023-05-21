@@ -25,8 +25,8 @@ line AB ⊥ line CD => line AB ∩ line CD
 line AB ⊥ line CD, any O, O == line AB ∩ line CD => ∠AOC == 90, ∠AOD == 90, ∠BOC == 90, ∠BOD == 90
 
 ∠ABC == 90 => line AB ⊥ line BC
-∠ABC == 0 => ray BA == ray BC
-ray BA == ray BC => ∠ABC == 0
+//∠ABC == 0 => ray BA == ray BC
+//ray BA == ray BC => ∠ABC == 0
 ∠ABC == 180 => B in AC, line AB == line BC, line BC == line AC
 
 // all possible line relations

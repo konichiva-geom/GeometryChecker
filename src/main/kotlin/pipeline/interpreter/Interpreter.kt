@@ -13,7 +13,7 @@ import utils.CommonUtils.catchWithRange
 
 class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     val theoremParser = TheoremParser()
-    private val symbolTable = SymbolTable()
+    private val symbolTable = SymbolTable(inferenceProcessor)
 
     fun interpret(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
         checkHeaders(tree.item as List<Tuple2<String, *>>)
@@ -28,7 +28,7 @@ class Interpreter(private val inferenceProcessor: InferenceProcessor) {
     }
 
     private fun validatePointInitialization(tree: SyntaxTree<List<Tuple2<Any, List<Expr>?>>>) {
-        val tempTable = SymbolTable()
+        val tempTable = SymbolTable(inferenceProcessor)
         for ((i, tuple) in tree.item.withIndex()) {
             if (tuple.t2 == null)
                 continue

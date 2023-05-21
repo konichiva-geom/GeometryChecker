@@ -53,7 +53,7 @@ internal class ArithmeticTest {
     @Test
     fun testVectorCreation() {
         val withMultiplication = parseFirst(" 2 AB * CD == 3AB + 2CD")
-        val table = SymbolTable()
+        val table = SymbolTable(InferenceProcessor())
 
         val left = vectorFromArithmeticMap(((withMultiplication as BinaryExpr).left as ArithmeticExpr).map, table)
         val right = vectorFromArithmeticMap(((withMultiplication).right as ArithmeticExpr).map, table)

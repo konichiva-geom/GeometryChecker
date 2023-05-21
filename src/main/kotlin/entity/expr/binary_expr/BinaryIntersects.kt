@@ -1,5 +1,6 @@
 package entity.expr.binary_expr
 
+import entity.expr.Relation.Companion.makeRelation
 import entity.expr.Returnable
 import entity.expr.notation.Notation
 import entity.expr.notation.Point2Notation
@@ -81,10 +82,14 @@ class BinaryIntersects(left: Notation, right: Notation) : BinaryExpr(left, right
         notation: Notation,
         intersectionValue: List<String>
     ) {
-        val (collection, relations) = symbolTable.getKeyValueByNotation(notation)
-        if (collection is PointCollection<*>)
-            collection.addPoints(intersectionValue, symbolTable)
-        else
-            (relations as CircleRelations).addPoints(symbolTable, *intersectionValue.toTypedArray())
+        //val (collection, relations) = symbolTable.getKeyValueByNotation(notation)
+        // crutch for inferences: add to rays if [notation] is segment, for example
+        for (point in intersectionValue) {
+            makeRelation(BinaryIn(PointNotation(point), notation), symbolTable, symbolTable.inferenceProcessor)
+        }
+//        if (collection is PointCollection<*>)
+//            collection.addPoints(intersectionValue, symbolTable)
+//        else
+//            (relations as CircleRelations).addPoints(symbolTable, *intersectionValue.toTypedArray())
     }
 }

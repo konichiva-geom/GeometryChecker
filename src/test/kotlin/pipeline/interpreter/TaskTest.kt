@@ -105,6 +105,35 @@ internal class TaskTest {
         )
     }
 
+    /**
+     * Задача о биссектрисах смежного угла
+     *
+     * На отрезке AC отмечена точка O. Проведен луч OB, при этом B не лежит на AC.
+     * Проведены биссектрисы OK и ON углов AOB и BOC соответственно.
+     *
+     * Докажите, что KON = 90.
+     */
+    @Test
+    fun testBisectorsOfAdjacentAngle() {
+        passTask("""
+        description:
+            distinct A; distinct B; distinct C;
+            distinct O
+            O in AC
+            B !in AC
+            bisector(new K, ∠AOB)
+            bisector(new N, ∠BOC)
+            E = KN intersects BO
+        prove:
+            ∠KON == 90
+        solution:
+            adjacent_angle(∠AOB, ∠BOC)
+            merge_angles_in_triangle(angle KOE, angle EON)
+            check(∠AOK + ∠KOB + ∠BON + ∠NOC == 180)
+            
+        """)
+    }
+
     @Test
     fun testUnnecessaryTheorem() {
         passTask("""

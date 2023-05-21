@@ -126,6 +126,7 @@ class BinaryEquals(left: Expr, right: Expr) : BinaryExpr(left, right) {
                     if (collectionLeft is PointCollection<*>) {
                         if (!isSame(collectionLeft, collectionRight))
                             collectionLeft.merge(collectionRight as PointCollection<*>, symbolTable)
+                        else return
                     } else {
                         // won't execute currently, but if something new is added will fail
                         if (collectionLeft !is IdentNotation)
