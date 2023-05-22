@@ -32,8 +32,21 @@ abstract class Notation : Expr, Comparable<Expr>, Renamable {
     abstract fun mergeMapping(mapper: IdentMapper, other: Notation)
     abstract fun createLinks(mapper: IdentMapper)
 
-    override fun equals(other: Any?): Boolean = toString() == other.toString()
-    override fun hashCode(): Int = toString().hashCode()
+//    override fun equals(other: Any?): Boolean = toString() == other.toString()
+//    override fun hashCode(): Int = toString().hashCode()
+
+    override fun hashCode(): Int {
+        return getPointsAndCircles().sorted().joinToString(separator = "").hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if(other == null)
+            return false
+        if (this::class != other::class)
+            return false
+        return getPointsAndCircles().sorted().joinToString(separator = "") ==
+                (other as Notation).getPointsAndCircles().sorted().joinToString(separator = "")
+    }
 
     override fun toString(): String = getPointsAndCircles().joinToString(separator = "")
 

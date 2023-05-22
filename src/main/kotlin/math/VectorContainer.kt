@@ -63,21 +63,26 @@ class VectorContainer<T> {
      * Substitute [nullified] index in all vectors
      */
     private fun simplifyVectorCollection(nullified: Int, substitution: Vector): Pair<Int, Int>? {
-        for (vector in vectors.values) {
-            val coeff = vector[multiSetOf(nullified)] ?: continue
-            vector.remove(multiSetOf(nullified))
-            val multiplied = substitution.copy().multiplyBy(coeff)
-            for ((key, element) in multiplied) {
-                vector.addOrCreate(key, element)
+        val listOfVectorCollections = listOf(vectors.values, notEqualVectors, biggerVectors, biggerOrEqualVectors)
+        for(collection in listOfVectorCollections) {
+            for (vector in collection) {
+                val coeff = vector[multiSetOf(nullified)] ?: continue
+                vector.remove(multiSetOf(nullified))
+                val multiplied = substitution.copy().multiplyBy(coeff)
+                for ((key, element) in multiplied) {
+                    vector.addOrCreate(key, element)
+                }
             }
         }
         // if nullified is not maxCurrentIndex, swap it with maxCurrentIndex
         val res = if (nullified != getCurrent()) getCurrent() to nullified else null
         if (nullified != getCurrent()) {
-            for (vector in vectors.values) {
-                if (vector[multiSetOf(getCurrent())] != null)
-                    vector[multiSetOf(nullified)] = vector[multiSetOf(getCurrent())]!!
-                vector.remove(multiSetOf(getCurrent()))
+            for(collection in listOfVectorCollections) {
+                for (vector in collection) {
+                    if (vector[multiSetOf(getCurrent())] != null)
+                        vector[multiSetOf(nullified)] = vector[multiSetOf(getCurrent())]!!
+                    vector.remove(multiSetOf(getCurrent()))
+                }
             }
         }
         removeLast()

@@ -10,7 +10,10 @@ import pipeline.symbol_table.SymbolTable
 class DivNotation(val numerator: MutableMap<Notation, Double>, val denominator: MutableMap<Notation, Double>) :
     Notation() {
     override fun getOrder() = Int.MAX_VALUE
-    override fun getPointsAndCircles(): MutableList<String> = TODO("Not yet implemented")
+    override fun getPointsAndCircles(): MutableList<String> =
+        (numerator.keys.map { it.getPointsAndCircles() }
+            .flatten() + denominator.keys.map { it.getPointsAndCircles() }.flatten()).toMutableList()
+
     override fun mergeMapping(mapper: IdentMapper, other: Notation) = TODO("Not yet implemented")
     override fun createLinks(mapper: IdentMapper) = TODO("Not yet implemented")
     override fun getRepr() = TODO("Not yet implemented")
@@ -32,5 +35,15 @@ class DivNotation(val numerator: MutableMap<Notation, Double>, val denominator: 
         if (denominatorString.toString() == "")
             return numeratorString.toString()
         return "$numeratorString/$denominatorString"
+    }
+
+    override fun hashCode(): Int {
+        return System.identityHashCode(this)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if(other == null || other !is DivNotation)
+            return false
+        return this === other
     }
 }

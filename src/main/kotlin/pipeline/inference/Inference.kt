@@ -56,7 +56,8 @@ open class Inference(
             }
 
             val mappedToSideExpressions = toSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
-            val removedNonValid = mappedToSideExpressions.filter {
+            val mappedFromSideExpressions = fromSideExpressions.map { it.createNewWithMappedPointsAndCircles(mapper) }
+            val checkValidity = { it: Expr ->
                 !it.traverseExpr(symbolTable) { expr, _ ->
                     if (expr !is Notation)
                         false
@@ -65,7 +66,24 @@ open class Inference(
                     }
                 }
             }
-            //mappedToSideExpressions.forEach { (it as Notation).checkValidityAfterRename() }
+            val removedNonValid = mappedToSideExpressions.filter(checkValidity)
+            val removedNonValidFromSide = mappedFromSideExpressions.filter(checkValidity)
+            if(removedNonValidFromSide.size != mappedFromSideExpressions.size) {
+                mapper.clear()
+                continue
+            }
+            var isCorrect = true
+            for(expr in removedNonValidFromSide) {
+                if(expr is Relation) {
+                    if(!expr.check(symbolTable)) {
+                        mapper.clear()
+                        isCorrect = false
+                        break
+                    }
+                }
+            }
+            if(!isCorrect)
+                continue
 
             mapper.clear()
             for (expr in removedNonValid) {

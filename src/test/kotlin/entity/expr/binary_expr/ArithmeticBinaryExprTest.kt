@@ -90,4 +90,19 @@ internal class ArithmeticBinaryExprTest {
             
         """)
     }
+
+    @Test
+    fun inferBiggerFromEquals() {
+        passTask("""
+        description:
+           new A; new B;
+            AB == 12
+        prove:
+            AB >= 12
+            AB > 11.5
+            AB < 12.5
+        solution:
+            
+        """)
+    }
 }

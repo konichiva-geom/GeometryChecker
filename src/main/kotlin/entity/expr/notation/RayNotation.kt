@@ -30,4 +30,17 @@ class RayNotation(p1: String, p2: String) : Point2Notation(p1, p2) {
         p1 = symbolTable.equalIdentRenamer.getIdentical(p1)
         p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
     }
+
+    override fun hashCode(): Int {
+        return (toString()).hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null)
+            return false
+        if (this::class != other::class)
+            return false
+        other as RayNotation
+        return toString() == other.toString()
+    }
 }

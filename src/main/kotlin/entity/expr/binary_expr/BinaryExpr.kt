@@ -9,4 +9,15 @@ abstract class BinaryExpr(val left: Expr, val right: Expr) : Expr, Relation {
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
+
+    override fun hashCode(): Int {
+        return left.hashCode() * 31 + right.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if(other == null || other::class != this::class)
+            return false
+        other as BinaryExpr
+        return left == other.left && right == other.right
+    }
 }

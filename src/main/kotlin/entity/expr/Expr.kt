@@ -79,6 +79,8 @@ class Invocation(val signature: Signature, val output: List<Expr>) : Expr {
     override fun compareTo(other: Expr): Int {
         TODO("Not yet implemented")
     }
+
+    override fun toString(): String = signature.toString()
 }
 
 class PrefixNot(private val expr: Expr) : Expr {

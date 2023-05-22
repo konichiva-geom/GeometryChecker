@@ -50,7 +50,7 @@ open class PointCollectionSymbolTable : PointSymbolTable() {
             is IdentNotation -> return notation to circles[notation]!!
             is TriangleNotation -> {
                 if (triangles[notation] == null)
-                    addTriangle(notation)
+                    addTriangle(notation, checkRelations = true)
                 return notation to triangles[notation]!!
             }
 

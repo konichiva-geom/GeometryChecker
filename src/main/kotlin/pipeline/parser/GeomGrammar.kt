@@ -284,9 +284,9 @@ object GeomGrammar : Grammar<Any>() {
         comma
     ) map { list -> list.map { if (it !is Expr) AnyExpr((it as Tuple2<Any, Notation>).t2) else it } }
 
-    private val inferenceStatement by inferenceArgs and (iffToken or inferToken) and inferenceArgs map { it ->
+    private val inferenceStatement by inferenceArgs and (iffToken or inferToken) and inferenceArgs map {
         if (it.t2.text == "=>") {
-            if (it.t3.any { it is AnyExpr })
+            if (it.t3.any { e -> e is AnyExpr })
                 throw PosError(
                     it.t2.toRange(),
                     "any expressions are not allowed at the right side of the pipeline.inference"

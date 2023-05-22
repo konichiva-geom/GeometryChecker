@@ -150,7 +150,7 @@ internal class BinarySameTest {
         failTask(
             """
         description:
-            new A; new B; new C; new D;
+            new ABC; new ABD
             ABC == ABD + 1
         prove:
             ABD == ABC

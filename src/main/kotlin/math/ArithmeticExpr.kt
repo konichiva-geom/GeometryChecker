@@ -3,7 +3,6 @@ package math
 import entity.Renamable
 import entity.expr.Expr
 import entity.expr.notation.Notation
-import error.SpoofError
 import pipeline.ArithmeticExpander.getArithmeticToString
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapperInterface
@@ -54,5 +53,15 @@ class ArithmeticExpr(val map: MutableMap<Notation, Double>) : Expr, Renamable {
 
     override fun toString(): String {
         return getArithmeticToString(map).toString()
+    }
+
+    override fun hashCode(): Int {
+        return map.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if(other == null || other !is ArithmeticExpr)
+            return false
+        return map == other.map
     }
 }

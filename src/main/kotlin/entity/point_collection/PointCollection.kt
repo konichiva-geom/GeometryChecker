@@ -50,52 +50,55 @@ abstract class PointCollection<T : Notation> : Renamable {
             if (pair.e1 == this)
                 listOfFoundPairs.add(pair)
 
-        assert(listOfFoundPairs.size in 1..2)
+        //assert(listOfFoundPairs.size in 1..2)
         if (listOfFoundPairs.size == 1)
             return
 
-        val (current, disposed) = if (listOfFoundPairs.first().e1 === this)
-            listOfFoundPairs.first() to listOfFoundPairs.last()
-        else listOfFoundPairs.last() to listOfFoundPairs.first()
+        val disposedList = listOfFoundPairs.filter { it.e1 !== this }.toMutableList()
+        val current = listOfFoundPairs.filter { it.e1 === this }.first()
 
-        disposed.e1.dispose(symbolTable)
-        val iter = list.iterator()
-        while (iter.hasNext()) {
-            val pair = iter.next()
-            if (pair.e1 === disposed.e1) {
-                iter.remove()
-                break
-            }
-        }
-
-        if (disposed.e1 is RayPointCollection) {
-            val raysThatNeedAngleChanges = mutableSetOf(this as RayPointCollection)
-            (disposed.e1 as RayPointCollection).angles.forEach {
-                if (it.leftArm === disposed.e1) {
-                    it.leftArm = this
-                    this.angles.add(it)
-                    raysThatNeedAngleChanges.add(it.rightArm)
-                }
-                if (it.rightArm === disposed.e1) {
-                    it.rightArm = this
-                    this.angles.add(it)
-                    raysThatNeedAngleChanges.add(it.leftArm)
+        var disposed: MutablePair<P, T>
+        do {
+            disposed = disposedList.removeLast()
+            disposed.e1.dispose(symbolTable)
+            val iter = list.iterator()
+            while (iter.hasNext()) {
+                val pair = iter.next()
+                if (pair.e1 === disposed.e1) {
+                    iter.remove()
+                    break
                 }
             }
-            if (symbolTable.angles.size != symbolTable.angles.map { it.e1 }.toSet().size) {
-                // TODO remove assertion, probably wrong
-                assert(abs(symbolTable.angles.size - symbolTable.angles.map { it.e1 }.toSet().size) == 1)
+
+            if (disposed.e1 is RayPointCollection) {
+                val raysThatNeedAngleChanges = mutableSetOf(this as RayPointCollection)
                 (disposed.e1 as RayPointCollection).angles.forEach {
-                    it.mergeEntitiesInList(symbolTable.angles, symbolTable)
+                    if (it.leftArm === disposed.e1) {
+                        it.leftArm = this
+                        this.angles.add(it)
+                        raysThatNeedAngleChanges.add(it.rightArm)
+                    }
+                    if (it.rightArm === disposed.e1) {
+                        it.rightArm = this
+                        this.angles.add(it)
+                        raysThatNeedAngleChanges.add(it.leftArm)
+                    }
                 }
+                if (symbolTable.angles.size != symbolTable.angles.map { it.e1 }.toSet().size) {
+                    // TODO remove assertion, probably wrong
+                    assert(abs(symbolTable.angles.size - symbolTable.angles.map { it.e1 }.toSet().size) == 1)
+                    (disposed.e1 as RayPointCollection).angles.forEach {
+                        it.mergeEntitiesInList(symbolTable.angles, symbolTable)
+                    }
+                }
+
+                for (ray in raysThatNeedAngleChanges)
+                    ray.removeUnexistingAngles(symbolTable)
             }
 
-            for (ray in raysThatNeedAngleChanges)
-                ray.removeUnexistingAngles(symbolTable)
-        }
-
-        current.e1.merge(disposed.e1, symbolTable)
-        current.e2.merge(null, symbolTable, disposed.e2)
+            current.e1.merge(disposed.e1, symbolTable)
+            current.e2.merge(null, symbolTable, disposed.e2)
+        } while (disposedList.isNotEmpty())
     }
 
     private fun removeAndMergeSpecificEntitiesInList(

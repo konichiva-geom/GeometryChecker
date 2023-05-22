@@ -5,17 +5,16 @@ th equal_triangles_1(AB == A1B1, BC == B1C1, ∠ABC == ∠A1B1C1):
     return ABC == A1B1C1
 
 /* Второй признак равенства треугольников */
-th equal_angles_2(AB == A1B1, ∠CAB == ∠C1A1B1, ∠CBA == ∠C1B1A1):
+th equal_triangles_2(AB == A1B1, ∠CAB == ∠C1A1B1, ∠CBA == ∠C1B1A1):
     checkPointsFormTriangle(A, B, C)
     checkPointsFormTriangle(A1, B1, C1)
     return ABC == A1B1C1
 
 th checkPointsFormTriangle(A, B, C):
-    check(A != B); check(A != C); check(B != C)
-    check(A !in line BC); check(B !in line AC); check(C !in line AB)
+    check(ABC)
 
 /* Третий признак равенства треугольников */
-th equal_angles_3(AB == A1B1, AC == A1C1, BC == B1C1):
+th equal_triangles_3(AB == A1B1, AC == A1C1, BC == B1C1):
     checkPointsFormTriangle(A, B, C)
     checkPointsFormTriangle(A1, B1, C1)
     return ABC == A1B1C1
@@ -27,6 +26,7 @@ th straight_angle(O, AB):
 
 /* Построение биссектрисы BD в угле ABC */
 th bisector(new D, ∠ABC): // makes a new point distinct from all currently placed
+    A !in line BD; C !in line BD
     return ∠ABD == ∠CBD, ∠ABD == ∠ABC / 2, D in AC
 
 /* Теорема о смежном угле */
@@ -49,6 +49,10 @@ th projection(new H, A, line BC): // projection H of A on BC
     check(A !in line BC)
     H in line BC
     return HA ⊥ BC, ∠BHA == 90, ∠CHA == 90
+
+th point_differs_if_not_in_line(line AB, M):
+    check(M !in line AB)
+    return A != M, B != M
 
 /* Построение середины отрезка */
 th mid_point(new M, AB):
@@ -120,3 +124,12 @@ th projections_intersect_in_one_point(ABC, M in AB, N in AC, K in BC, new O):
 th merge_angles_in_triangle(∠AOB, ∠BOC):
     check(B in AC)
     return ∠AOB + ∠BOC == ∠AOC
+
+/* Катет прямоугольного треугольника ABC, лежащий против угла 30 градусов, равен половине гипотенузы */
+th cathetus_opposing_angle_30_half_hypotenuse(ABC, AC, ∠ACB == 90):
+    check(∠ABC == 30)
+    return 2AC == AB
+
+/* Неравенство треугольника */
+th triangle_inequality(ABC):
+    return AB + BC > AC, AB + AC > BC, AC + BC > AB

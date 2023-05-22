@@ -78,7 +78,7 @@ open class PointSymbolTable : BaseSymbolTable() {
         triangles[triangleNotation] = TriangleRelations()
         equalIdentRenamer.addSubscribers(triangleNotation, *triangleNotation.getPointsAndCircles().toTypedArray())
 
-        if(!checkRelations)
+        if (!checkRelations)
             return
 
         val p1 = PointNotation(triangleNotation.p1)
@@ -100,9 +100,20 @@ open class PointSymbolTable : BaseSymbolTable() {
                 ArithmeticExpr(mutableMapOf(p2 to 1.0))
             ), this
         )
-        TheoremParser.check(BinaryNotIn(p1, Point2Notation(p2.p, p3.p)), this)
-        TheoremParser.check(BinaryNotIn(p2, Point2Notation(p1.p, p3.p)), this)
-        TheoremParser.check(BinaryNotIn(p3, Point2Notation(p2.p, p1.p)), this)
+        var hasAtLeastOne = false
+
+        listOf(
+            BinaryNotIn(p1, Point2Notation(p2.p, p3.p)),
+            BinaryNotIn(p2, Point2Notation(p1.p, p3.p)),
+            BinaryNotIn(p3, Point2Notation(p2.p, p1.p))
+        ).forEach {
+            if (it.check(this)) {
+                hasAtLeastOne = true
+                return@forEach
+            }
+        }
+        if (!hasAtLeastOne)
+            throw SpoofError("To create triangle at least one of the vertices should not be on line formed by other vertices")
     }
 
     /**

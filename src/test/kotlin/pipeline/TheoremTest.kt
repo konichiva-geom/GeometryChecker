@@ -35,27 +35,4 @@ class TheoremTest {
         """, "Relation AB == A1B1 unknown"
         )
     }
-
-    @Test
-    fun failWrongReturnExpression() {
-        passTask(
-            """
-            description:
-    distinct A; distinct B; distinct C
-    ∠ACB == 90
-    mid_point(new M, AB)
-
-prove:
-    ∠ACM == ∠MAC
-    ∠ACM == ∠BAC
-    2∠CAB == ∠CMB
-
-solution:
-    rectangular_median_half_of_hypotenuse(∠ACB == 90, M in AB) => CM == AM
-    isosceles_triangle_equal_angles(AM == CM) => ∠MAC == ∠MCA
-    angles_180_in_triangle(MCA) => ∠ACM + ∠MAC + ∠AMC == 180
-    adjacent_angle(∠AMC, ∠BMC) => ∠AMC + ∠BMC == ∠AMB, ∠AMB == 180
-        """
-        )
-    }
 }

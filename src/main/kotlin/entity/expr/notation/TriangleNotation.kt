@@ -33,4 +33,18 @@ class TriangleNotation(var p1: String, var p2: String, var p3: String) : Notatio
         p2 = symbolTable.equalIdentRenamer.getIdentical(p2)
         p3 = symbolTable.equalIdentRenamer.getIdentical(p3)
     }
+
+    override fun hashCode(): Int {
+        return (p2 + (listOf(p1, p3).sorted()).joinToString(separator = "")).hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null)
+            return false
+        if (this::class != other::class)
+            return false
+        other as TriangleNotation
+        return (p2 + (listOf(p1, p3).sorted()).joinToString(separator = "")) ==
+                (other.p2 + (listOf(other.p1, other.p3).sorted()).joinToString(separator = ""))
+    }
 }

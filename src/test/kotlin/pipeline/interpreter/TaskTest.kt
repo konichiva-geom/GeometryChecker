@@ -72,7 +72,7 @@ internal class TaskTest {
         passTask(
             """
         description:
-            distinct A; distinct B; distinct C
+            new ABC
             ∠ACB == 90
             mid_point(new M, AB)
         prove:
@@ -80,9 +80,10 @@ internal class TaskTest {
             ∠ACM == ∠BAC
             2∠CAB == ∠CMB
         solution:
-            rectangular_median_half_of_hypotenuse(∠ACB == 90, M in AB)
+            point_differs_if_not_in_line(line AM, C) => A != C, M != C
+            rectangular_median_half_of_hypotenuse(∠ACB == 90, M in AB) => MC == MA
             isosceles_triangle_equal_angles(AM == MC)
-            angles_180_in_triangle(AMC)
+            angles_180_in_triangle(AMC) => * // angle AMC + angle CMA + angle CAM == 180
             adjacent_angle(∠AMC, ∠BMC)
         """
         )
@@ -129,8 +130,30 @@ internal class TaskTest {
         solution:
             adjacent_angle(∠AOB, ∠BOC)
             merge_angles_in_triangle(angle KOE, angle EON)
-            check(∠AOK + ∠KOB + ∠BON + ∠NOC == 180)
-            
+        """)
+    }
+
+    /**
+     * Признак равнобедренного треугольника
+     *
+     * Докажите, что если два угла равны, то треугольник равнобедренный
+     */
+    @Test
+    fun isoscelesByAngles() {
+        passTask("""
+        description:
+            new ABC
+            ∠CAB == ∠ABC
+        prove:
+            AC == BC
+        solution:
+            bisector(new D, angle ACB)
+            point_differs_if_not_in_line(line AD, C)
+            angles_180_in_triangle(ADC)
+            angles_180_in_triangle(BDC)
+            point_differs_if_not_in_line(line CD, A)
+            point_differs_if_not_in_line(line CD, B)
+            equal_triangles_2(CD == CD, ∠ACD == ∠BCD, ∠ADC == ∠BDC)
         """)
     }
 

@@ -38,11 +38,11 @@ internal class ArithmeticTest {
 
     @Test
     fun testWithZeros() {
+//        val zeroAsTwoFractions = parseFirst("∠ABC == 2*(3∠ABE/5)-(6∠ABE/5)")
+//        assertEquals(zeroAsTwoFractions.toString(), "25∠ABC == 0")
+
         val manyZeros = parseFirst("∠ABC == (2-10/5)*∠RTY + 0*∠BSC + 0* ∠SDS")
         assertEquals(manyZeros.toString(), "5∠ABC == 0")
-
-        val zeroAsTwoFractions = parseFirst("∠ABC == 2*(3∠ABE/5)-(6∠ABE/5)")
-        assertEquals(zeroAsTwoFractions.toString(), "25∠ABC == 0")
 
         val zeroInNumerator = parseFirst("∠ABC == (1-1)*(3BC)/2")
         assertEquals(zeroInNumerator.toString(), "2∠ABC == 0")
@@ -85,7 +85,8 @@ internal class ArithmeticTest {
 
     @Test
     fun testArithmetic() {
-        passTask("""
+        passTask(
+            """
         description:
            new A; new B; new C; new D
            AB == 10
@@ -94,7 +95,8 @@ internal class ArithmeticTest {
             CD == 2.5
         solution:
             
-        """)
+        """
+        )
     }
 
     @Test
@@ -133,7 +135,8 @@ internal class ArithmeticTest {
 
     @Test
     fun testMultiset() {
-        passTask("""
+        passTask(
+            """
         description:
             new A; new B; new C;
             AB * AB + 2 * AB - 1 == 0
@@ -141,6 +144,7 @@ internal class ArithmeticTest {
             
         solution:
             
-        """)
+        """
+        )
     }
 }

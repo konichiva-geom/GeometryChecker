@@ -145,9 +145,9 @@ class TheoremParser : Parser() {
         if (callReturn.isEmpty())
             return defReturn.map { it.createNewWithMappedPointsAndCircles(signatureMapper) }
         val res = mutableListOf<Expr>()
-        val mappedDefReturn = defReturn.map { it.createNewWithMappedPointsAndCircles(signatureMapper).toString() }
+        val mappedDefReturn = defReturn.map { it.createNewWithMappedPointsAndCircles(signatureMapper) }
         for (expr in callReturn) {
-            if (mappedDefReturn.contains(expr.toString())) {
+            if (mappedDefReturn.any { it == expr }) {
                 res.add(expr)
             } else throw SpoofError("Expression $expr is not a return value of theorem")
         }
@@ -156,9 +156,13 @@ class TheoremParser : Parser() {
 
     fun check(expressions: List<Expr>, symbolTable: SymbolTable) {
         for (rel in expressions) {
-            if (rel !is Relation)
+            if (rel is Notation)
+                symbolTable.getKeyValueByNotation(rel)
+            else if (rel is Relation)
+                check(rel, symbolTable)
+            else
                 throw SpoofError("Cannot check %{expr}, because it is not a relation", "expr" to rel)
-            check(rel, symbolTable)
+
         }
     }
 
@@ -182,7 +186,7 @@ class TheoremParser : Parser() {
             when (expr) {
                 is Creation -> expr.create(symbolTable, inferenceProcessor)
                 is Relation -> check(expr, symbolTable)
-                is Notation -> {}
+                is Notation -> symbolTable.getKeyValueByNotation(expr)
                 else -> throw SpoofError("Expected relation or creation")
             }
         }
