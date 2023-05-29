@@ -1,6 +1,0 @@
-line AB || line CD <=> AB || CD // and for any combination of linear objects (such as segment, ray or line)
-line AB ⊥ line CD <=> AB ⊥ CD // same as above
-
-line AB ∩ CD => AB ∩ CD
-
-AB ∩ CD == E, AB ∩ CD == F, E != F => broken

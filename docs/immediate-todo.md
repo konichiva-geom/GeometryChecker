@@ -1,2 +1,0 @@
-1. add tests that would pass only for multiset in vector
-2. run with coverage and cover uncovered cases. Especially with puzzle logic like exceptions in ArithmeticBinaryExpr.BinaryEquals.make (like this: `throw SpoofError("Meaningless arithmetic expression. All non-constant values are zero")`)
