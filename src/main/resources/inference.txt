@@ -9,7 +9,7 @@ A in ray BC => A in line BC
 B !in line AC => B !in ray AC, B !in ray CA, B !in AC, A !in line BC, C !in line AB
 B !in ray AC => B !in AC, C !in ray AB // only these relations because of this position of points on a line: B-A-C
 
-line AB || line CD, any C, any D, C != A, C != B, D != A, D != B, line CD || line EF => line AB || line EF
+//line AB || line CD, any C, any D, C != A, C != B, D != A, D != B, line CD || line EF => line AB || line EF
 
 AB === CD => AB == CD
 ray AB === ray CD => ray AB == ray CD

@@ -97,7 +97,7 @@ object GrammarHelperMethods {
 
     private fun checkNoGreaterOrder(first: Notation, second: Notation) {
         if (first.getOrder() > second.getOrder())
-            throw SpoofError("`$first` is 'smaller' than `$second`")
+            throw SpoofError("`$first` is `smaller` than `$second`")
     }
 
     private fun checkNotNumber(notation: Notation, operator: String) {

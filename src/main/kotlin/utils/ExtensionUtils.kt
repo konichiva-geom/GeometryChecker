@@ -55,8 +55,8 @@ object ExtensionUtils {
 
     fun Token.toViewable(): String {
         return when (this) {
-            is LiteralToken -> "'${this.text}'"
-            is CharToken -> "'${this.text}'"
+            is LiteralToken -> "`${this.text}`"
+            is CharToken -> "${this.text}"
             else -> "${this.name!!}:Token"
         }
     }

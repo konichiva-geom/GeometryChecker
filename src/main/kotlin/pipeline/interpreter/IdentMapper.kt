@@ -21,7 +21,7 @@ interface IdentMapperInterface {
  * Previously was mapping one point uniquely to other, but two different points can be mapped to same one,
  * e.g. we use *equal_sided_triangles* for triangles with common points: ABC and BCD.
  */
-class IdentMapper: IdentMapperInterface {
+class IdentMapper : IdentMapperInterface {
     val mappings = mutableMapOf<String, MutableSet<String>>()
     private val links = mutableMapOf<String, MutableSet<String>>()
 
@@ -53,7 +53,7 @@ class IdentMapper: IdentMapperInterface {
             if (res.isEmpty())
                 throw SpoofError(
                     "Got empty intersection while resolving theorem" +
-                            ". %{letter} maps to nothing.\n\tMappings: %{mappings}",
+                            ". %{letter} maps to nothing. Mappings: %{mappings}",
                     "letter" to key, "mappings" to mappings
                 )
             mappings[key] = res.toMutableSet()
@@ -75,7 +75,11 @@ class IdentMapper: IdentMapperInterface {
 
     override fun createLinks(call: Expr, definition: Expr) {
         if (call::class != definition::class)
-            throw SpoofError("Expected ${definition::class}, got ${call::class}")
+            throw SpoofError(
+                "Expected ${definition::class.toString().split(".").last()}, got ${
+                    call::class.toString().split(".").last()
+                }"
+            )
         if (definition is Notation) {
             definition.createLinks(this)
         }
@@ -91,7 +95,11 @@ class IdentMapper: IdentMapperInterface {
      */
     override fun traverseExpr(call: Expr, definition: Expr) {
         if (call::class != definition::class)
-            throw SpoofError("Expected ${definition::class}, got ${call::class}")
+            throw SpoofError(
+                "Expected ${definition::class.toString().split(".").last()}, got ${
+                    call::class.toString().split(".").last()
+                }"
+            )
         if (call is Notation)
             (definition as Notation).mergeMapping(this, call)
 

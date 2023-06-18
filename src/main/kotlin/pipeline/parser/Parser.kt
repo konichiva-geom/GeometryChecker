@@ -54,7 +54,7 @@ open class Parser {
                 val remainderLength = token.input.length - token.offset
                 throw PosError(
                     IntRange(token.offset, token.input.length),
-                    "Couldn't parse input, starting with: %{text}",
+                    "Could not parse input, starting with: %{text}",
                     "text" to token.input.substring(token.offset - 1, token.offset - 1 + minOf(20, remainderLength))
                 )
             }
@@ -88,7 +88,7 @@ open class Parser {
 
                 is UnparsedRemainder -> throw PosError(
                     err.startsWith.toRange(),
-                    "Parse Error. Couldn't parse remainder"
+                    "Parse Error. Could not parse remainder"
                 )
 
                 else -> {

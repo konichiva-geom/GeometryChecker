@@ -6,7 +6,7 @@ import error.SpoofError
 import pipeline.interpreter.IdentMapper
 
 /**
- * Represents some structure of points (angle, line e.t.c) or te name of a circle
+ * Represents some structure of points (angle, line e.t.c) or the name of a circle
  * Order:
  * Num: 0
  * Point: 1

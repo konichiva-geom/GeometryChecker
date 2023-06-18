@@ -169,4 +169,42 @@ internal class TaskTest {
                 isosceles_triangle_equal_angles(AB == AC)
         """)
     }
+
+    @Test
+    fun test193() {
+        passTask("""
+description:
+    new ABC
+    ∠BAC == 40
+    ∠ABC == 70
+    distinct D
+    ∠CBD == ∠ABC
+    AD ∩ BC
+prove:
+    AC || BD
+solution:
+    angles_180_in_triangle(ABC)
+    cross_lying_angles(∠ACB == ∠CBD, ray AC, ray BD)""")
+    }
+
+    @Test
+    fun testParallelogramm() {
+        passTask("""
+description:
+    new ABC; new ACD
+    O = AC ∩ BD
+    A != O; O != D; C != O; O != B
+    AD == BC
+    DC == AB
+    line AD || line BC
+    line AB || line DC
+prove:
+    AO == OC
+    DO == OB
+solution:
+    cross_lying_angles_in_parallel(ray AD || ray BC)
+    cross_lying_angles_in_parallel(ray DA || ray CB)
+    equal_triangles_2(AD == BC, ∠DAO == ∠OCB, ∠ADO == ∠OBC)
+        """.trimIndent())
+    }
 }

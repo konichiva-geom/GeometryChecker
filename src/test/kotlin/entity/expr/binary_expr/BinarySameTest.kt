@@ -155,7 +155,7 @@ internal class BinarySameTest {
         prove:
             ABD == ABC
         solution:
-        """, "Triangle equations shouldn't contain any expressions besides triangles"
+        """, "Triangle equations should not contain any expressions besides triangles"
         )
     }
 }

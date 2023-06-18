@@ -39,7 +39,7 @@ internal fun checkTriangleEquation(left: ArithmeticExpr, right: ArithmeticExpr) 
         || left.map.keys.first() !is TriangleNotation
         || right.map.keys.first() !is TriangleNotation
     ) {
-        throw SpoofError("Triangle equations shouldn't contain any expressions besides triangles")
+        throw SpoofError("Triangle equations should not contain any expressions besides triangles")
     }
 }
 

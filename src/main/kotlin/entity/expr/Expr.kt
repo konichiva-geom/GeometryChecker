@@ -12,6 +12,9 @@ import pipeline.interpreter.Signature
 import pipeline.interpreter.TheoremParser
 import pipeline.symbol_table.SymbolTable
 
+/**
+ * Общий Интерфейс для выражений из AST
+ */
 interface Expr : Comparable<Expr> {
     fun getChildren(): List<Expr>
 

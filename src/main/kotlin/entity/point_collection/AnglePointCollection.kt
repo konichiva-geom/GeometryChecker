@@ -34,7 +34,7 @@ class AnglePointCollection(var leftArm: RayPointCollection, var rightArm: RayPoi
     }
 
     override fun addPoints(added: List<String>, symbolTable: SymbolTable) {
-        throw SystemFatalError("AnglePointCollection.addPoints() shouldn't be called")
+        throw SystemFatalError("AnglePointCollection.addPoints() should not be called")
     }
 
     override fun merge(other: PointCollection<*>, symbolTable: SymbolTable) {}

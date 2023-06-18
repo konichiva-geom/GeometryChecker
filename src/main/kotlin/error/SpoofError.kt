@@ -12,7 +12,7 @@ open class SpoofError(val msg: String, vararg val args: Pair<String, Any>) : Exc
     override val message: String
         get() = changeAllIndicesInOrder(msg, args.toList())
 
-    fun toJson(): String {
+    open fun toJson(): String {
         return """{"message": "$msg",
             "args": ${mapToJsonString(args.toList().associate { it.first to it.second.toString() })}}"""
     }

@@ -38,7 +38,7 @@ class BinaryAssignment(left: Notation, right: Expr) : BinaryExpr(left, right), C
         } else throw SpoofError("Assigning non-points is not yet implemented")
     }
 
-    override fun make(symbolTable: SymbolTable) = throw SystemFatalError("Shouldn't be called, use makeAssignment")
+    override fun make(symbolTable: SymbolTable) = throw SystemFatalError("Should not be called, use makeAssignment")
 
     fun makeAssignment(symbolTable: SymbolTable, inferenceProcessor: InferenceProcessor) {
         if (!(right as Relation).check(symbolTable))

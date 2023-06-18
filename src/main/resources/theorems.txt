@@ -133,3 +133,29 @@ th cathetus_opposing_angle_30_half_hypotenuse(ABC, AC, ∠ACB == 90):
 /* Неравенство треугольника */
 th triangle_inequality(ABC):
     return AB + BC > AC, AB + AC > BC, AC + BC > AB
+
+/* Если точка M лежит на отрезке AB, то AM + MB == AB */
+th segment_is_sum_of_its_internal(AB, M):
+check(M in AB)
+    return AM + MB == AB
+
+/* Отложить от точки A внутри отрезка AB отрезок AM равный CD */
+th make_equal_segment_inside_another(new M, A, AB, CD):
+    check(CD <= AB)
+    return M in AB, AM == CD
+
+/* Если соответственные углы равны, то прямые параллельны*/
+th corresponding_angles(∠EAB == ∠ACD, ray AB, ray CD):
+    check(AD ∩ BC)
+    check(A in EC)
+    return line AB || line CD
+
+/* Если накрест лежащие углы равны, то прямые параллельны*/
+th cross_lying_angles(∠ABC == ∠BCD, ray AB, ray CD):
+    check(AD ∩ BC)
+    return line AB || line CD
+
+/* Если прямые параллельны, то накрест лежащие углы равны*/
+th cross_lying_angles_in_parallel(ray AB || ray CD):
+    check(AD ∩ BC)
+    return ∠ABC == ∠BCD

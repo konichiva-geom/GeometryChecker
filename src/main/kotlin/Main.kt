@@ -1,5 +1,8 @@
 import pipeline.Pipeline
 
+/**
+ * Это чтобы что-то тестировать, пусть будет
+ */
 fun main() {
     val a = """description:
         new A

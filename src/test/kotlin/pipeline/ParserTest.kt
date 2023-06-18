@@ -115,7 +115,7 @@ th name(args):
     @Test
     fun failsInRelations() {
         failTask("AB in A", "is not applicable to points in this position")
-        failTask("line AB in AB", "is 'smaller' than")
+        failTask("line AB in AB", "is `smaller` than")
         failTask("omega in AB", "is not applicable to circle in this position")
         failTask(
             "arc AB of omega in line AB",

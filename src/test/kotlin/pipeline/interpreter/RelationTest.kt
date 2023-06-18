@@ -62,6 +62,19 @@ internal class RelationTest {
         """
         )
     }
+    @Test
+    fun parallelInfer() {
+        passTask("""
+        description:
+           new A; new B; new C; new D 
+            line AB || line CD
+        prove:
+            ray AB || ray CD
+            AB || CD
+        solution:
+            
+        """)
+    }
 
     @Test
     fun testAssignment() {
