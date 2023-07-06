@@ -33,3 +33,6 @@ line AB ⊥ line CD, any O, O == line AB ∩ line CD => ∠AOC == 90, ∠AOD == 
 //AB || CD <=> not AB ∩ CD, not AB ⊥ CD
 //AB ⊥ CD <=> not AB ∩ CD, not AB || CD
 //AB ∩ CD <=> not AB || CD, not AB ⊥ CD
+
+A !in line BC, any X, X in line BC => A != X
+A in line BC, any X, X !in line BC => A != X

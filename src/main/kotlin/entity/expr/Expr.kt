@@ -1,5 +1,6 @@
 package entity.expr
 
+import entity.expr.binary_expr.BinaryExpr
 import entity.expr.binary_expr.BinaryNotEquals
 import entity.expr.binary_expr.BinaryNotIn
 import entity.expr.notation.*
@@ -26,6 +27,16 @@ interface Expr : Comparable<Expr> {
             res.addAll(child.getAllChildren())
         }
         return res.toList()
+    }
+
+    fun getAllPoints(): Set<String> {
+        return getAllChildren().flatMap {
+            when(it) {
+                is ArithmeticExpr -> it.map.keys.flatMap { key -> key.getPointsAndCircles() }
+                is BinaryExpr -> it.left.getAllPoints() + it.right.getAllPoints()
+                else -> (it as Notation).getPointsAndCircles()
+            }
+        }.toSet()
     }
 
     fun getRepr(): StringBuilder

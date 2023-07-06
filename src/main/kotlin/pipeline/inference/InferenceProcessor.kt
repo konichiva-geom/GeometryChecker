@@ -1,6 +1,10 @@
 package pipeline.inference
 
 import entity.expr.Expr
+import entity.expr.binary_expr.BinaryExpr
+import entity.expr.notation.Notation
+import entity.expr.notation.PointNotation
+import math.ArithmeticExpr
 import pipeline.symbol_table.SymbolTable
 import pipeline.interpreter.IdentMapper
 
@@ -32,20 +36,24 @@ class InferenceProcessor {
         inferenceSets.clear()
         for (inference in list) {
             addInferenceFromRepr(inference.fromSideExpressions, inferenceSets, inference)
-            if (inference is DoubleSidedInference) {
-                addInferenceFromRepr(inference.toSideExpressions, doubleInferenceSets, Pair(inference, true))
-                addInferenceFromRepr(inference.fromSideExpressions, doubleInferenceSets, Pair(inference, false))
-            }
+//            if (inference is DoubleSidedInference) {
+//                addInferenceFromRepr(inference.toSideExpressions, doubleInferenceSets, Pair(inference, true))
+//                addInferenceFromRepr(inference.fromSideExpressions, doubleInferenceSets, Pair(inference, false))
+//            }
         }
     }
 
-    private fun <T> addInferenceFromRepr(
+    private fun <T : Inference> addInferenceFromRepr(
         expressions: List<Expr>,
         sets: MutableMap<String, MutableSet<T>>,
         added: T
     ) {
         for (expr in expressions) {
             val repr = expr.getRepr().toString()
+            val allPoints = expr.getAllPoints()
+            // don't add expr to map if inference has `any` with point from it
+            if (added.fromSideQuantifier.any { (it.notation as PointNotation).p in allPoints })
+                continue
             if (sets[repr] == null)
                 sets[repr] = mutableSetOf(added)
             else

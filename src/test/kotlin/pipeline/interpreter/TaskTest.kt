@@ -80,7 +80,7 @@ internal class TaskTest {
             ∠ACM == ∠BAC
             2∠CAB == ∠CMB
         solution:
-            point_differs_if_not_in_line(line AM, C) => A != C, M != C
+            // point_differs_if_not_in_line(line AM, C) => A != C, M != C
             rectangular_median_half_of_hypotenuse(∠ACB == 90, M in AB) => MC == MA
             isosceles_triangle_equal_angles(AM == MC)
             angles_180_in_triangle(AMC) => * // angle AMC + angle CMA + angle CAM == 180
@@ -148,11 +148,11 @@ internal class TaskTest {
             AC == BC
         solution:
             bisector(new D, angle ACB)
-            point_differs_if_not_in_line(line AD, C)
+            // point_differs_if_not_in_line(line AD, C)
             angles_180_in_triangle(ADC)
             angles_180_in_triangle(BDC)
-            point_differs_if_not_in_line(line CD, A)
-            point_differs_if_not_in_line(line CD, B)
+            // point_differs_if_not_in_line(line CD, A)
+            // point_differs_if_not_in_line(line CD, B)
             equal_triangles_2(CD == CD, ∠ACD == ∠BCD, ∠ADC == ∠BDC)
         """)
     }
