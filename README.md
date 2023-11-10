@@ -4,14 +4,14 @@ This project is a DSL. It is used for:
 2. solving geometry problems,
 3. automatically checking written solutions.
 
-# Архитектура
+# Architecture
 
-Этот проект - библиотека, которая собирается с помощью команды `gradle publishToMavenLocal`. В `build.gradle.kts` сервера есть ее импорт в dependencies-блоке.
+This is a library, which is built with `gradle publishToMavenLocal`. In `build.gradle.kts` of server-module there is an import in dependencies.
 
-## Ключевые термины
-* AST - абстрактное синтаксическое дерево. Структура, создаваемая парсером `GeomGrammar`.
+## Keywords
+* AST - abstract syntax tree. A structure created by the `GeomGrammar` parser.
 
-## Известные ошибки
+## Common mistakes
 
-Если что-то падает, и по стектрейсу непонятно что, стоит проверить следующее:
-1. theorems.txt, primes.txt и inference.txt (и любой новый файл, который парсится) все должны быть с `LF` Line separator'ом. Касается проекта сервера, в том числе.
+If some strange error happens check that:
+1. theorems.txt, primes.txt, inference.txt (and any new parsed file) has `LF` line separators. This should be checked for all used modules (server and site).
